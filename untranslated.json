@@ -14,7 +14,8 @@
     "credentails",
     "assistantList",
     "idCard",
-    "fileList"
+    "fileList",
+    "notaryService"
   ],
 
   "fr": [
@@ -32,6 +33,7 @@
     "credentails",
     "assistantList",
     "idCard",
-    "fileList"
+    "fileList",
+    "notaryService"
   ]
 }

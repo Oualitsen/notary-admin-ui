@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:html_editor_enhanced/html_editor.dart';
 import 'package:notary_admin/src/pages/assistant/add_assistant_page.dart';
 import 'package:notary_admin/src/pages/assistant/list_assistant_page.dart';
 import 'package:notary_admin/src/pages/customer/customer_list.dart';
 import 'package:notary_admin/src/pages/customer/list_customer_page.dart';
+import 'package:notary_admin/src/pages/file/html_editor.dart';
 import 'package:notary_admin/src/pages/file/load_file.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
@@ -26,7 +28,7 @@ class HomePageState extends BasicState<HomePage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Finally no errors"),
+        title: Text(lang.notaryService),
       ),
       drawer: createDrawer(context),
       body: Container(

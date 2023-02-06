@@ -72,6 +72,32 @@ class _TemplateDocumentService implements TemplateDocumentService {
     return value;
   }
 
+  @override
+  Future<TemplateDocument> updateHtmlData(
+    id,
+    newHtmlData,
+  ) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = newHtmlData;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<TemplateDocument>(Options(
+      method: 'PUT',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/admin/template/html/${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = TemplateDocument.fromJson(_result.data!);
+    return value;
+  }
+
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {
     if (T != dynamic &&
         !(requestOptions.responseType == ResponseType.bytes ||
