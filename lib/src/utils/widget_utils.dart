@@ -1,4 +1,6 @@
-
+import 'package:notary_admin/src/pages/assistant/list_assistant_page.dart';
+import 'package:notary_admin/src/pages/customer/customer_list.dart';
+import 'package:notary_admin/src/pages/file/load_file.dart';
 import 'package:notary_admin/src/pages/login_page.dart';
 import 'package:notary_admin/src/pages/profile_page.dart';
 import 'package:flutter/material.dart';
@@ -109,20 +111,34 @@ Widget createDrawer(BuildContext context) {
         onTap: () => {},
       ),
       DrawerMenuItem(
-        title: (lang.agents),
-        icon: Icons.people,
-        onTap: () => {},
-      ),
-      DrawerMenuItem(
         title: (lang.customers),
-        icon: Icons.people_alt_outlined,
-        onTap: () => {},
+        icon: Icons.people,
+        onTap: () => {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CustomerTable()),
+          )
+        },
       ),
       DrawerMenuItem(
-        title: (lang.agentTypes),
-        icon: Icons.list,
-        onTap: () =>
-           {},
+        title: (lang.assistantList),
+        icon: Icons.people_alt_outlined,
+        onTap: () => {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ListAssistantPage()),
+          )
+        },
+      ),
+      DrawerMenuItem(
+        title: (lang.fileList),
+        icon: Icons.person,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => LoadFilePage()),
+          );
+        },
       ),
       DrawerMenuItem(
         title: (lang.profile),

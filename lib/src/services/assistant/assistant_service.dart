@@ -12,4 +12,8 @@ abstract class AssistantService {
 
   @GET("/admin/assistant/by-username")
   Future<Assistant> getByUsername(@Body() String text);
+
+  @GET("/admin/assistant")
+  Future<List<Assistant>> getAssistants(
+      {required int pageIndex, required int pageSize});
 }

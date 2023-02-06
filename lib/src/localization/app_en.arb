@@ -254,5 +254,8 @@
   "addFileTitle": "Pick a file",
   "editFileName": "Edit file name",
   "newAssistant": "New assistant",
-  "credentails": "Credentails"
+  "credentails": "Credentails",
+  "assistantList": "Assistants",
+  "idCard": "Id Card",
+  "fileList": "Files"
 }

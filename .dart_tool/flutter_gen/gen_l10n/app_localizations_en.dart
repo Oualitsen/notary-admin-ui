@@ -705,4 +705,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get credentails => 'Credentails';
+
+  @override
+  String get assistantList => 'Assistants';
+
+  @override
+  String get idCard => 'Id Card';
+
+  @override
+  String get fileList => 'Files';
 }

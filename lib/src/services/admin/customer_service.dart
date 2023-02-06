@@ -12,7 +12,8 @@ abstract class CustomerService {
     @Query("size") int pageSize: 20,
     @Query("index") int pageIndex: 0,
   });
-
+  @GET("/admin/customers/count")
+  Future<int> getCustomersCount();
   @GET("/admin/customers/{id}")
   Future<Customer> getCustomer(@Path("id") String id);
 

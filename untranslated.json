@@ -11,7 +11,10 @@
     "addFileTitle",
     "editFileName",
     "newAssistant",
-    "credentails"
+    "credentails",
+    "assistantList",
+    "idCard",
+    "fileList"
   ],
 
   "fr": [
@@ -26,6 +29,9 @@
     "addFileTitle",
     "editFileName",
     "newAssistant",
-    "credentails"
+    "credentails",
+    "assistantList",
+    "idCard",
+    "fileList"
   ]
 }

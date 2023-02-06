@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:notary_admin/src/pages/assistant/add_assistant_page.dart';
+import 'package:notary_admin/src/pages/assistant/list_assistant_page.dart';
+import 'package:notary_admin/src/pages/customer/customer_list.dart';
 import 'package:notary_admin/src/pages/customer/list_customer_page.dart';
 import 'package:notary_admin/src/pages/file/load_file.dart';
+import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:rxdart/rxdart.dart';
@@ -25,6 +28,7 @@ class HomePageState extends BasicState<HomePage>
       appBar: AppBar(
         title: Text("Finally no errors"),
       ),
+      drawer: createDrawer(context),
       body: Container(
         alignment: Alignment.center,
         child: Column(children: [
@@ -33,7 +37,7 @@ class HomePageState extends BasicState<HomePage>
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => LoadFilePape(),
+                  builder: (context) => LoadFilePage(),
                 ),
               );
             },
@@ -53,11 +57,21 @@ class HomePageState extends BasicState<HomePage>
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => AddAssistantPage(),
+                  builder: (context) => ListAssistantPage(),
                 ),
               );
             },
-            child: Text("add assistant"),
+            child: Text(lang.assistantList),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => CustomerTable(),
+                ),
+              );
+            },
+            child: Text(lang.customerList),
           ),
         ]),
       ),

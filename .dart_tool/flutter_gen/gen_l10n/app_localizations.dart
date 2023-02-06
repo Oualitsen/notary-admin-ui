@@ -1486,6 +1486,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Credentails'**
   String get credentails;
+
+  /// No description provided for @assistantList.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistants'**
+  String get assistantList;
+
+  /// No description provided for @idCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Id Card'**
+  String get idCard;
+
+  /// No description provided for @fileList.
+  ///
+  /// In en, this message translates to:
+  /// **'Files'**
+  String get fileList;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

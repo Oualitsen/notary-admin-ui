@@ -9,14 +9,14 @@ import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/template_document.dart';
 import 'package:rxdart/src/subjects/subject.dart';
 
-class LoadFilePape extends StatefulWidget {
-  const LoadFilePape({super.key});
+class LoadFilePage extends StatefulWidget {
+  const LoadFilePage({super.key});
 
   @override
-  State<LoadFilePape> createState() => _LoadFilePapeState();
+  State<LoadFilePage> createState() => _LoadFilePageState();
 }
 
-class _LoadFilePapeState extends BasicState<LoadFilePape>
+class _LoadFilePageState extends BasicState<LoadFilePage>
     with WidgetUtilsMixin {
   final service = GetIt.instance.get<TemplateDocumentService>();
   final key = GlobalKey<InfiniteScrollListViewState<TemplateDocument>>();
