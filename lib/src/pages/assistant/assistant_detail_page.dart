@@ -195,15 +195,10 @@ class _AssistantDetailsPageState extends BasicState<AssistantDetailsPage>
       // Process data.
       var result =
           await service.ResetPasswordAssistant(assistant.id, newPwdCtr.text);
-      final snackBar = SnackBar(
-        backgroundColor: Color.fromARGB(183, 210, 214, 218),
-        padding: EdgeInsets.all(30),
-        content: const Text('password has been changed successfully'),
-      );
+      showSnackBar2(context, lang.passwordChanged);
 
       // Find the ScaffoldMessenger in the widget tree
       // and use it to show a SnackBar.
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
       Navigator.pop(context);
     }
   }
