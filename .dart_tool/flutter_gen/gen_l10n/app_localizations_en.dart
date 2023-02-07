@@ -201,11 +201,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String maxValue(Object value) {
+
     return 'Value must be lower than or equal $value';
   }
 
   @override
   String minValue(Object value) {
+
     return 'Value must be greater than or equal $value';
   }
 
@@ -238,6 +240,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String selectedCount(Object value) {
+
     return '$value selected';
   }
 

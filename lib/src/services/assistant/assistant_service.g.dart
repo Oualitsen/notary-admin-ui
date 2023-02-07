@@ -67,11 +67,14 @@ class _AssistantService implements AssistantService {
 
   @override
   Future<List<Assistant>> getAssistants({
-    required pageIndex,
-    required pageSize,
+    required index,
+    required size,
   }) async {
     const _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'index': index,
+      r'size': size,
+    };
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     final _result =
@@ -90,6 +93,32 @@ class _AssistantService implements AssistantService {
     var value = _result.data!
         .map((dynamic i) => Assistant.fromJson(i as Map<String, dynamic>))
         .toList();
+    return value;
+  }
+
+  @override
+  Future<Assistant> ResetPasswordAssistant(
+    id,
+    password,
+  ) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = password;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<Assistant>(Options(
+      method: 'PUT',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/admin/assistant/${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = Assistant.fromJson(_result.data!);
     return value;
   }
 

@@ -76,7 +76,7 @@ class _ListAssistantPageState extends BasicState<ListAssistantPage>
 
   Future<List<Assistant>> getData(int index) {
     if (index == 0)
-      return service.getAssistants(pageIndex: index, pageSize: 20);
+      return service.getAssistants(index: index, size: 20);
     else
       return Future.value([]);
   }

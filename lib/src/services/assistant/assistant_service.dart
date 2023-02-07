@@ -15,5 +15,9 @@ abstract class AssistantService {
 
   @GET("/admin/assistant")
   Future<List<Assistant>> getAssistants(
-      {required int pageIndex, required int pageSize});
+      {@Query("index") required int index, @Query("size") required int size});
+
+  @PUT("/admin/assistant/{id}")
+  Future<Assistant> ResetPasswordAssistant(
+      @Path("id") String id, @Body() String password);
 }
