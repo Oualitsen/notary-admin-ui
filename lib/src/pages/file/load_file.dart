@@ -40,21 +40,22 @@ class _LoadFilePageState extends BasicState<LoadFilePage>
       ),
       body: InfiniteScrollListView<TemplateDocument>(
         key: key,
-        //comparator: ((a, b) => a.creationDate - b.creationDate),
+        comparator: ((a, b) => b.creationDate - a.creationDate),
         elementBuilder: (BuildContext context, template, index, animation) {
           return ListTile(
             title: Text(template.name),
+            //subtitle: Text(template.creationDate.toString()),
             trailing: Wrap(
               children: [
                 IconButton(
                   icon: Icon(Icons.edit),
-                  onPressed: () async {
+                  onPressed: () {
                     templateNameCrtl.text = template.name;
-                    String? newName =
-                        await showTextInputDialog(context, template);
-                    if (newName != null && newName.isNotEmpty) {
-                      onSave(template, newName);
-                    }
+                    showTextInputDialog(context, template).then((value) {
+                      if (value != null && value.isNotEmpty) {
+                        onSave(template, value);
+                      }
+                    });
                   },
                 ),
                 IconButton(
@@ -129,6 +130,7 @@ class _LoadFilePageState extends BasicState<LoadFilePage>
 
       await showSnackBar2(context, lang.updatedSuccessfully);
       //   Navigator.of(context).pop(res);
+      key.currentState!.add(res);
     } catch (error, stacktrace) {
       print(stacktrace);
       showServerError(context, error: error);

@@ -8,17 +8,17 @@ import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_model/model/customer.dart';
 import 'package:rxdart/src/subjects/subject.dart';
 
-class CustomerTable extends StatefulWidget {
-  const CustomerTable({super.key});
+class CustomerTableWidget extends StatefulWidget {
+  const CustomerTableWidget({super.key});
 
   @override
-  State<CustomerTable> createState() => _CustomerTableState();
+  State<CustomerTableWidget> createState() => _CustomerTableWidgetState();
 }
 
-class _CustomerTableState extends BasicState<CustomerTable> {
+class _CustomerTableWidgetState extends BasicState<CustomerTableWidget> {
   final service = GetIt.instance.get<CustomerService>();
   bool initialized = false;
-  final columnSpacing = 80.0;
+  final columnSpacing = 65.0;
   List<DataColumn> columns = [];
   @override
   Widget build(BuildContext context) {
@@ -33,26 +33,12 @@ class _CustomerTableState extends BasicState<CustomerTable> {
       DataColumn(label: Text(lang.customerDetails.toUpperCase()))
     ];
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(lang.customerList),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => AddCustomerPage()),
-          );
-        },
-        child: Icon(Icons.add),
-      ),
-      body: LazyPaginatedDataTable<Customer>(
-          columnSpacing: columnSpacing,
-          getData: getData,
-          getTotal: getTotal,
-          columns: columns,
-          dataToRow: dataToRow),
-    );
+    return LazyPaginatedDataTable<Customer>(
+        columnSpacing: columnSpacing,
+        getData: getData,
+        getTotal: getTotal,
+        columns: columns,
+        dataToRow: dataToRow);
   }
 
   Future<List<Customer>> getData(PageInfo page) {
@@ -68,7 +54,7 @@ class _CustomerTableState extends BasicState<CustomerTable> {
     var cellList = [
       DataCell(Text(data.firstName)),
       DataCell(Text(data.lastName)),
-      DataCell(Text(data.gender.name)),
+      DataCell(Text(lang.genderName(data.gender))),
       DataCell(Text(lang.formatDate(data.dateOfBirth))),
       DataCell(Text(data.idCard.idCardId)),
       DataCell(Text(lang.formatDate(data.idCard.expiryDate))),

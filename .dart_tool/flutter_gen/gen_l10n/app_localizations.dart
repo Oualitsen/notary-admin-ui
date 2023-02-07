@@ -98,7 +98,7 @@ abstract class AppLocalizations {
   /// No description provided for @appName.
   ///
   /// In en, this message translates to:
-  /// **'CONTROLE'**
+  /// **'NOTARY'**
   String get appName;
 
   /// No description provided for @logout.

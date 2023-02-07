@@ -1,5 +1,6 @@
 import 'package:notary_admin/src/pages/assistant/list_assistant_page.dart';
-import 'package:notary_admin/src/pages/customer/customer_list.dart';
+import 'package:notary_admin/src/pages/customer/customer_table_widget.dart';
+import 'package:notary_admin/src/pages/customer/list_customer_page.dart';
 import 'package:notary_admin/src/pages/file/load_file.dart';
 import 'package:notary_admin/src/pages/login_page.dart';
 import 'package:notary_admin/src/pages/profile_page.dart';
@@ -116,7 +117,7 @@ Widget createDrawer(BuildContext context) {
         onTap: () => {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => CustomerTable()),
+            MaterialPageRoute(builder: (context) => ProfilePage()),
           )
         },
       ),
