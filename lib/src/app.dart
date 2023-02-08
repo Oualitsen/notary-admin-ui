@@ -67,8 +67,8 @@ class MyAppState extends State<MyApp> {
               settings: settings,
               builder: (context) {
                 switch (settings.name) {
-                  case FormConvertMap.home:
-                    return  FormConvertMap();
+                  case HomePage.home:
+                    return  HomePage();
 
                   case ProfilePage.routeName:
                     return const ProfilePage();
