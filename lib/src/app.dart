@@ -7,6 +7,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:notary_admin/src/pages/login_page.dart';
 import 'package:notary_admin/src/pages/not_found_page.dart';
+import 'package:notary_admin/src/widgets/form_convert_map.dart';
 import 'package:notary_admin/src/widgets/mixins/lang.dart';
 import 'settings/settings_controller.dart';
 import 'package:month_year_picker/month_year_picker.dart';
@@ -66,8 +67,8 @@ class MyAppState extends State<MyApp> {
               settings: settings,
               builder: (context) {
                 switch (settings.name) {
-                  case LoginPage.login:
-                    return const LoginPage();
+                  case FormConvertMap.home:
+                    return  FormConvertMap();
 
                   case ProfilePage.routeName:
                     return const ProfilePage();
