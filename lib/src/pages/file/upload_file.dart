@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:notary_admin/src/services/upload_service.dart';
+import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:rxdart/src/subjects/subject.dart';
@@ -25,55 +26,46 @@ class _UploadFilePageState extends BasicState<UploadFilePage>
     return Scaffold(
       appBar: AppBar(
         title: Text("upload a file"),
-      ),
-      body: Column(children: [
-        Container(
-          margin: EdgeInsets.all(10),
-          width: 250,
-          height: 35,
-          child: ElevatedButton(
+        actions: [
+          IconButton(
             onPressed: loadFiles,
-            child: Text(lang.addFileTitle),
+            icon: Icon(Icons.add),
           ),
-        ),
-        SizedBox(
-          height: 200,
-          child: Container(
-            alignment: Alignment.topLeft,
-            child: Card(
-              child: StreamBuilder<List<String>>(
-                  stream: pathFiles,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      var data = snapshot.data;
-                      return ListView(
-                        children: data!.map((e) {
-                          var name = e.split('/').last;
-                          return ListTile(
-                              leading:
-                                  CircleAvatar(child: Icon(Icons.file_copy)),
-                              title: Text("${name}"),
-                              trailing: IconButton(
-                                  icon: Icon(Icons.cancel),
-                                  onPressed: () {
-                                    var list = pathFiles.value;
-                                    list.remove(e);
-                                    pathFiles.add(list);
-                                  }));
-                        }).toList(),
-                      );
-                    } else {
-                      return SizedBox.shrink();
-                    }
-                  }),
-            ),
-          ),
-        ),
+        ],
+      ),
+      body: ListView(children: [
         ElevatedButton(
-          onPressed: save,
-          child: Text(lang.save),
+          onPressed: loadFiles,
+          child: Text(lang.addFileTitle),
         ),
+        StreamBuilder<List<String>>(
+            stream: pathFiles,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                var data = snapshot.data;
+                return Column(
+                  children: data!.map((e) {
+                    var name = e.split('/').last;
+                    return ListTile(
+                        leading: CircleAvatar(child: Icon(Icons.file_copy)),
+                        title: Text("${name}"),
+                        trailing: IconButton(
+                            icon: Icon(Icons.cancel),
+                            onPressed: () {
+                              var list = pathFiles.value;
+                              list.remove(e);
+                              pathFiles.add(list);
+                            }));
+                  }).toList(),
+                );
+              } else {
+                return SizedBox.shrink();
+              }
+            }),
       ]),
+      floatingActionButton: wrap(
+        getButtons(onSave: save),
+      ),
     );
   }
 

@@ -68,6 +68,7 @@ void initServices() {
   Dio dio = GetIt.instance.get();
 
   GetIt.instance.registerSingleton(LoginService(dio));
+  GetIt.instance.registerSingleton(ProfileService(dio));
   GetIt.instance.registerSingleton(UploadService(dio));
   GetIt.instance.registerSingleton(PhoneCodeService(dio));
   GetIt.instance.registerSingleton(CustomerService(dio));

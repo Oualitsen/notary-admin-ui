@@ -61,6 +61,16 @@ extension AppLocalizationsExt on AppLocalizations {
     return _dateTimeFormat.format(DateTime.fromMillisecondsSinceEpoch(date));
   }
 
+  String genderName(Gender gender) {
+    switch (gender) {
+      case Gender.MALE:
+        return genderMale;
+        break;
+      case Gender.FEMALE:
+        return genderFemale;
+    }
+  }
+
   String formatDay(int date) {
     return _dayFormat.format(DateTime.fromMillisecondsSinceEpoch(date));
   }

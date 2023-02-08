@@ -56,7 +56,7 @@ class _ProfileService implements ProfileService {
     )
             .compose(
               _dio.options,
-              '/admin/profile/reset_password',
+              '/admin/profile/reset-password',
               queryParameters: queryParameters,
               data: _data,
             )
