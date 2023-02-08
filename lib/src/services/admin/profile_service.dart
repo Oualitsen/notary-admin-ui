@@ -9,10 +9,10 @@ part 'profile_service.g.dart';
 abstract class ProfileService {
   factory ProfileService(Dio dio) = _ProfileService;
 
-  @GET("admin/profile")
+  @GET("/admin/profile")
   Future<Admin> getCurrentUser();
 
-  @PUT("/admin/profile/reset_password")
+  @PUT("/admin/profile/reset-password")
   Future<Admin> updateAdminPassword({@Body() required PasswordChange password});
 
   // @PUT("admin/profile")

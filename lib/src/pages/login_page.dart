@@ -93,6 +93,7 @@ class _LoginPageState extends BasicState<LoginPage> with WidgetUtilsMixin {
             username: userNameCtrl.text, password: passwordCtrl.text);
         progressSubject.add(true);
         try {
+          print("@@@@@@@@@@@@ ${object.username}");
           var result = await service.login(loginObject: object);
           await _tokenDbService.save(result.token);
           await _authMan.save(result.user);

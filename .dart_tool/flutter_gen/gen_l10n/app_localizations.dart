@@ -98,7 +98,7 @@ abstract class AppLocalizations {
   /// No description provided for @appName.
   ///
   /// In en, this message translates to:
-  /// **'CONTROLE'**
+  /// **'NOTARY'**
   String get appName;
 
   /// No description provided for @logout.
@@ -1504,6 +1504,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Files'**
   String get fileList;
+
+  /// No description provided for @notaryService.
+  ///
+  /// In en, this message translates to:
+  /// **'Notary Service'**
+  String get notaryService;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

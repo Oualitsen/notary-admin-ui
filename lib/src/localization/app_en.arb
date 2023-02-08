@@ -1,5 +1,5 @@
 {
-  "appName": "CONTROLE",
+  "appName": "NOTARY",
   "logout": "Logout",
   "confirm": "Confirm",
   "confirmLogout": "Are you sure you want to log out?",
@@ -257,5 +257,6 @@
   "credentails": "Credentails",
   "assistantList": "Assistants",
   "idCard": "Id Card",
-  "fileList": "Files"
+  "fileList": "Files",
+  "notaryService": "Notary Service"
 }

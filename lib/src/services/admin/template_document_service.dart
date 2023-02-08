@@ -17,4 +17,9 @@ abstract class TemplateDocumentService {
     @Path("id") String id,
     @Body() String name,
   );
+  @PUT("/admin/template/html/{id}")
+  Future<TemplateDocument> updateHtmlData(
+    @Path("id") String id,
+    @Body() String newHtmlData,
+  );
 }

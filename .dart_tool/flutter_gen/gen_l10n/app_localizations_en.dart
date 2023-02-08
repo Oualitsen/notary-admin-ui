@@ -5,7 +5,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appName => 'CONTROLE';
+  String get appName => 'NOTARY';
 
   @override
   String get logout => 'Logout';
@@ -714,4 +714,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fileList => 'Files';
+
+  @override
+  String get notaryService => 'Notary Service';
 }

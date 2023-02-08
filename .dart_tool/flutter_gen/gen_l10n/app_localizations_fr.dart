@@ -714,4 +714,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get fileList => 'Files';
+
+  @override
+  String get notaryService => 'Notary Service';
 }
