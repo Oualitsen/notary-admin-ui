@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_responsive_tools/device_screen_type.dart';
-import 'package:html_editor_enhanced/html_editor.dart';
-import 'package:notary_admin/src/pages/assistant/add_assistant_page.dart';
-import 'package:notary_admin/src/pages/assistant/list_assistant_page.dart';
 import 'package:notary_admin/src/pages/customer/customer_table_widget.dart';
-import 'package:notary_admin/src/pages/customer/list_customer_page.dart';
-import 'package:notary_admin/src/pages/file/html_editor.dart';
-import 'package:notary_admin/src/pages/file/load_file.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
