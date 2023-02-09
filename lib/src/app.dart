@@ -69,8 +69,7 @@ class MyAppState extends State<MyApp> {
               builder: (context) {
                 switch (settings.name) {
                   case HomePage.home:
-                    return HomePage(
-                     );
+                    return HomePage();
 
                   case ProfilePage.routeName:
                     return const ProfilePage();
