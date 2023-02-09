@@ -14,7 +14,7 @@ import 'package:rxdart/src/subjects/subject.dart';
 
 class FormConvertMap extends StatefulWidget {
   static const home = "/";
-  final listFormField;
+  final List listFormField;
   FormConvertMap({
     Key? key,
     required this.listFormField,
@@ -26,24 +26,15 @@ class FormConvertMap extends StatefulWidget {
 
 class _FormConvertMapState extends BasicState<FormConvertMap>
     with WidgetUtilsMixin {
-  //final _currentStepStream = BehaviorSubject.seeded(0);
-  //final service = GetIt.instance.get<AssistantService>();
-  //late Assistant assistant;
-  final lastNameCtrl = TextEditingController();
-  final firstNameCtrl = TextEditingController();
-  final dateOfBirthCtrl = TextEditingController();
-  late List listFormField;
-
-  Map map = Map<String, String>();
-
   final GlobalKey<FormState> _formKeyListNames = GlobalKey<FormState>();
-  final GlobalKey<FormState> _keylastName = GlobalKey<FormState>();
-  late List<TextEditingController> _controller =
-      List.generate(listFormField.length, (i) => TextEditingController());
+  List<TextEditingController> _controller = [];
+  late List listFormField;
 
   @override
   void initState() {
-    List<TextEditingController> _controller = [];
+    listFormField = widget.listFormField;
+    _controller =
+        List.generate(listFormField.length, (i) => TextEditingController());
 
     super.initState();
   }
@@ -64,6 +55,7 @@ class _FormConvertMapState extends BasicState<FormConvertMap>
               child: Column(
                 children: [
                   Container(
+                    alignment: Alignment.center,
                     width: 400,
                     height: 300,
                     child: ListView.builder(
@@ -82,10 +74,9 @@ class _FormConvertMapState extends BasicState<FormConvertMap>
                               controller: _controller[index],
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Please enter your text';
+                                  return lang.requiredField;
                                 }
-                                map[listFormField[index]] =
-                                    _controller[index].text;
+
                                 return null;
                               },
                             ),
@@ -100,7 +91,7 @@ class _FormConvertMapState extends BasicState<FormConvertMap>
                       onPressed: () async {
                         convertToMap();
                       },
-                      child: const Text('Submit'),
+                      child: Text(lang.submit),
                     ),
                   ),
                 ],
@@ -110,13 +101,11 @@ class _FormConvertMapState extends BasicState<FormConvertMap>
 
   convertToMap() {
     if (_formKeyListNames.currentState!.validate() || true) {
-      // Process data.
+      Map map = Map<String, String>();
+      for (int index = 0; index < listFormField.length; index++)
+        map[listFormField[index]] = _controller[index].text;
+      showSnackBar2(context, lang.ok);
       print(map);
-
-      showSnackBar2(context, "Convert succes");
-
-      // Find the ScaffoldMessenger in the widget tree
-      // and use it to show a SnackBar.
       return map;
     }
   }
