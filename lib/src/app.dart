@@ -1,3 +1,4 @@
+import 'package:notary_admin/src/pages/customer/form_and_view_html.dart';
 import 'package:notary_admin/src/pages/home/home_page.dart';
 import 'package:notary_admin/src/pages/profile_page.dart';
 import 'package:device_preview/device_preview.dart';
@@ -68,7 +69,8 @@ class MyAppState extends State<MyApp> {
               builder: (context) {
                 switch (settings.name) {
                   case HomePage.home:
-                    return  HomePage();
+                    return HomePage(
+                     );
 
                   case ProfilePage.routeName:
                     return const ProfilePage();
