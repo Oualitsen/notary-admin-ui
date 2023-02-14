@@ -65,7 +65,7 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
                       ),
                       Form(
                           key: _formKeyListNames,
-                          onChanged: convertToMap,
+                          onChanged: onDataChange,
                           child: Column(
                             children: [
                               Container(
@@ -92,7 +92,6 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
                                                 value.isEmpty) {
                                               return lang.requiredField;
                                             }
-
                                             return null;
                                           },
                                         ),
@@ -146,27 +145,21 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
     );
   }
 
-  convertToMap() {
-    if (_formKeyListNames.currentState!.validate() || true) {
-      Map map = Map<String, String>();
-      for (int index = 0; index < listFormField.length; index++)
-        map[listFormField[index]] = _controller[index].text;
-      var doc = parse(text);
-      map.forEach((key, value) {
-        doc.querySelectorAll('.$key').map((e) => e.text = value).toList();
-      });
-      text = doc.outerHtml;
-      _htmlDocument.add(text);
-
-      // showSnackBar2(context, lang.ok);
-    }
+  onDataChange() {
+    Map map = Map<String, String>();
+    for (int index = 0; index < listFormField.length; index++)
+      map[listFormField[index]] = _controller[index].text;
+    var doc = parse(text);
+    map.forEach((key, value) {
+      doc.querySelectorAll('.$key').map((e) => e.text = value).toList();
+    });
+    text = doc.outerHtml;
+    _htmlDocument.add(text);
   }
 
   @override
-  // TODO: implement notifiers
-  List<ChangeNotifier> get notifiers => throw UnimplementedError();
+  List<ChangeNotifier> get notifiers => [];
 
   @override
-  // TODO: implement subjects
-  List<Subject> get subjects => throw UnimplementedError();
+  List<Subject> get subjects => [];
 }
