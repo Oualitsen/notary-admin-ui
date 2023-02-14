@@ -18,102 +18,131 @@ class FormAndViewHtml extends StatefulWidget {
 
 class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
     with WidgetUtilsMixin {
+  WebViewXController? controllerWeb;
+
   final GlobalKey<FormState> _formKeyListNames = GlobalKey<FormState>();
   List<TextEditingController> _controller = [];
   late List listFormField;
-  late WebViewXController controllerWeb;
   late String text;
   final _htmlDocument = BehaviorSubject.seeded('');
-
-  var loadingPercentage = 0;
 
   @override
   void initState() {
     text = widget.text;
-
     listFormField = widget.listFormField;
     _controller =
         List.generate(listFormField.length, (i) => TextEditingController());
+    _htmlDocument.where((event) => controllerWeb != null).listen((value) {
+      controllerWeb!.loadContent(value, SourceType.html);
+    });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    var myTabs = [
-      Tab(
-        text: "Form  Convert",
-        height: 50,
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Form to html"),
+        actions: [],
       ),
-      Tab(
-        text: "View Html",
-        height: 50,
-      )
-    ];
-    return DefaultTabController(
-      length: myTabs.length,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text("Form to html"),
-          actions: [],
-          bottom: TabBar(tabs: myTabs),
-        ),
-        body: TabBarView(children: [
-          Container(
-              padding: EdgeInsets.all(30),
-              width: double.maxFinite,
-              height: 400,
-              child: Form(
-                  key: _formKeyListNames,
-                  onChanged: convertToMap,
+      body: Container(
+          padding: EdgeInsets.all(20),
+          width: double.maxFinite,
+          height: double.maxFinite,
+          child: Row(
+            children: [
+              Flexible(
+                flex: 1,
+                child: Container(
+                  padding: EdgeInsets.all(10),
                   child: Column(
                     children: [
                       Container(
-                        alignment: Alignment.center,
+                        height: 30,
                         width: double.maxFinite,
-                        height: 350,
-                        child: ListView.builder(
-                          itemCount: listFormField.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Column(
-                              children: [
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                TextFormField(
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    labelText: listFormField[index],
-                                  ),
-                                  controller: _controller[index],
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return lang.requiredField;
-                                    }
+                        decoration: BoxDecoration(color: Colors.blue),
+                        child: Center(child: Text("Data for Document")),
+                      ),
+                      Form(
+                          key: _formKeyListNames,
+                          onChanged: convertToMap,
+                          child: Column(
+                            children: [
+                              Container(
+                                alignment: Alignment.center,
+                                width: double.maxFinite,
+                                height: 450,
+                                child: ListView.builder(
+                                  itemCount: listFormField.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return Column(
+                                      children: [
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        TextFormField(
+                                          decoration: InputDecoration(
+                                            border: OutlineInputBorder(),
+                                            labelText: listFormField[index],
+                                          ),
+                                          controller: _controller[index],
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return lang.requiredField;
+                                            }
 
-                                    return null;
+                                            return null;
+                                          },
+                                        ),
+                                      ],
+                                    );
                                   },
                                 ),
-                              ],
-                            );
-                          },
-                        ),
+                              ),
+                            ],
+                          )),
+                    ],
+                  ),
+                ),
+              ),
+              Flexible(
+                flex: 1,
+                child: VerticalDivider(
+                  color: Colors.black,
+                  thickness: 1,
+                  width: 50,
+                  indent: 5,
+                  endIndent: 5,
+                ),
+              ),
+              Flexible(
+                flex: 4,
+                child: Container(
+                  padding: EdgeInsets.all(10),
+                  child: Column(
+                    children: [
+                      Container(
+                        height: 30,
+                        width: double.maxFinite,
+                        decoration: BoxDecoration(color: Colors.blue),
+                        child: Center(child: Text("Name For Document")),
+                      ),
+                      WebViewX(
+                        initialContent: text,
+                        initialSourceType: SourceType.html,
+                        onWebViewCreated: (controller) =>
+                            controllerWeb = controller,
+                        height: 450,
+                        width: double.maxFinite,
                       ),
                     ],
-                  ))),
-          StreamBuilder<String>(
-              stream: _htmlDocument,
-              initialData: text,
-              builder: (context, snapshot) {
-                return WebViewX(
-                  initialContent: text,
-                  initialSourceType: SourceType.html,
-                  onWebViewCreated: (controller) => controllerWeb = controller,
-                  height: 500,
-                  width: double.maxFinite,
-                );
-              }),
-        ]),
-      ),
+                  ),
+                ),
+              ),
+            ],
+          )),
     );
   }
 
