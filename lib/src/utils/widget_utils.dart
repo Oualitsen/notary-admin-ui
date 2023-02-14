@@ -119,7 +119,7 @@ Widget createDrawer(BuildContext context) {
         onTap: () => {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ProfilePage()),
+            MaterialPageRoute(builder: (context) => ListCustomerPage()),
           )
         },
       ),
@@ -213,6 +213,8 @@ Widget createDrawer(BuildContext context) {
    <p>Last Name :</p><p class="Last_Name"></p>
    <p>First Name :</p><p class="First_Name"></p>
   <p>Gender :</p> <p class="Gender"></p>
+   <p>Gender :</p> <p class="Gender"></p>
+    <p>Gender :</p> <p class="Gender"></p>
 
   </body>
 </html>''',

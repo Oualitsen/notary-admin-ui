@@ -153,7 +153,7 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
         map[listFormField[index]] = _controller[index].text;
       var doc = parse(text);
       map.forEach((key, value) {
-        doc.querySelector('.$key')?.text = value;
+        doc.querySelectorAll('.$key').map((e) => e.text = value).toList();
       });
       text = doc.outerHtml;
       _htmlDocument.add(text);
