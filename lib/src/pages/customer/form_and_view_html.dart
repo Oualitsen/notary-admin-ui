@@ -1,13 +1,7 @@
-import 'dart:convert';
-
+import 'package:html/parser.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:rxdart/src/subjects/subject.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webviewx/webviewx.dart';
-
 import '../../widgets/basic_state.dart';
 import '../../widgets/mixins/button_utils_mixin.dart';
 
@@ -29,12 +23,14 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
   late List listFormField;
   late WebViewXController controllerWeb;
   late String text;
+  final _htmlDocument = BehaviorSubject.seeded('');
 
   var loadingPercentage = 0;
 
   @override
   void initState() {
     text = widget.text;
+
     listFormField = widget.listFormField;
     _controller =
         List.generate(listFormField.length, (i) => TextEditingController());
@@ -68,6 +64,7 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
               height: 400,
               child: Form(
                   key: _formKeyListNames,
+                  onChanged: convertToMap,
                   child: Column(
                     children: [
                       Container(
@@ -101,28 +98,20 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
                           },
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            convertToMap();
-                          },
-                          child: Text(lang.submit),
-                        ),
-                      ),
                     ],
                   ))),
-          Stack(
-            children: [
-              WebViewX(
-                initialContent: text,
-                initialSourceType: SourceType.html,
-                onWebViewCreated: (controller) => controllerWeb = controller,
-                height: 500,
-                width: double.maxFinite,
-              ),
-            ],
-          ),
+          StreamBuilder<String>(
+              stream: _htmlDocument,
+              initialData: text,
+              builder: (context, snapshot) {
+                return WebViewX(
+                  initialContent: text,
+                  initialSourceType: SourceType.html,
+                  onWebViewCreated: (controller) => controllerWeb = controller,
+                  height: 500,
+                  width: double.maxFinite,
+                );
+              }),
         ]),
       ),
     );
@@ -131,14 +120,16 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
   convertToMap() {
     if (_formKeyListNames.currentState!.validate() || true) {
       Map map = Map<String, String>();
-      for (int index = 0; index < listFormField.length; index++) {
+      for (int index = 0; index < listFormField.length; index++)
         map[listFormField[index]] = _controller[index].text;
-        ;
-      }
+      var doc = parse(text);
+      map.forEach((key, value) {
+        doc.querySelector('.$key')?.text = value;
+      });
+      text = doc.outerHtml;
+      _htmlDocument.add(text);
 
-      showSnackBar2(context, lang.ok);
-      print(map);
-      return map;
+      // showSnackBar2(context, lang.ok);
     }
   }
 
