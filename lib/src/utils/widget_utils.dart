@@ -1,5 +1,7 @@
+import 'package:device_preview/device_preview.dart';
 import 'package:notary_admin/src/pages/assistant/list_assistant_page.dart';
 import 'package:notary_admin/src/pages/customer/customer_table_widget.dart';
+import 'package:notary_admin/src/pages/customer/form_and_view_html.dart';
 import 'package:notary_admin/src/pages/customer/list_customer_page.dart';
 import 'package:notary_admin/src/pages/file/load_file.dart';
 import 'package:notary_admin/src/pages/login_page.dart';
@@ -117,7 +119,7 @@ Widget createDrawer(BuildContext context) {
         onTap: () => {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ProfilePage()),
+            MaterialPageRoute(builder: (context) => ListCustomerPage()),
           )
         },
       ),
@@ -175,6 +177,49 @@ Widget createDrawer(BuildContext context) {
           }).listen((event) {
             //print("logged out");
           });
+        },
+      ),
+      DrawerMenuItem(
+        title: ("Html view"),
+        icon: Icons.people_alt_outlined,
+        onTap: () => {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => FormAndViewHtml(
+                      listFormField: [
+                        "Last_Name",
+                        "First_Name",
+                        "Gender",
+                      ],
+                      text: '''<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+
+    <title>Intitulé de ma page</title>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300|Sonsie+One" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Les trois lignes ci‑dessous sont un correctif pour que la sémantique
+          HTML5 fonctionne correctement avec les anciennes versions de
+          Internet Explorer-->
+    <!--[if lt IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+   <p>Last Name :</p><p class="Last_Name"></p>
+   <p>First Name :</p><p class="First_Name"></p>
+  <p>Gender :</p> <p class="Gender"></p>
+   <p>Gender :</p> <p class="Gender"></p>
+    <p>Gender :</p> <p class="Gender"></p>
+
+  </body>
+</html>''',
+                    )),
+          )
         },
       ),
     ],
