@@ -58,6 +58,7 @@ dependencies:
   syncfusion_flutter_calendar: ^20.3.57
   file_picker: ^5.2.5
   html_editor_enhanced: ^2.5.1
+  menu_button: ^1.4.2+1
 
 
 

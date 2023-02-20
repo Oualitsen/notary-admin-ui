@@ -1,4 +1,5 @@
 import 'package:notary_admin/src/utils/validation_utils.dart';
+import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/contact.dart';
@@ -22,45 +23,47 @@ class ContactsInputPage2State extends BasicState<ContactsInputPage2>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(lang.addContacts),
-      ),
-      body: Column(
-        children: [
-          AlertDialog(
-            title: Text(lang.newContact),
-            content: Form(
-              key: key,
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  TextFormField(
-                      autofocus: true,
-                      textInputAction: TextInputAction.next,
+    return WidgetUtils.wrapRoute(
+      (context, type) => Scaffold(
+        appBar: AppBar(
+          title: Text(lang.addContacts),
+        ),
+        body: Column(
+          children: [
+            AlertDialog(
+              title: Text(lang.newContact),
+              content: Form(
+                key: key,
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    TextFormField(
+                        autofocus: true,
+                        textInputAction: TextInputAction.next,
+                        validator: (text) {
+                          return ValidationUtils.requiredField(text, context);
+                        },
+                        controller: nameController,
+                        decoration: (getDecoration(
+                            lang.contactName, true, lang.contactNameEx))),
+                    const SizedBox(height: 16),
+                    TextFormField(
                       validator: (text) {
                         return ValidationUtils.requiredField(text, context);
                       },
-                      controller: nameController,
-                      decoration: (getDecoration(
-                          lang.contactName, true, lang.contactNameEx))),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    validator: (text) {
-                      return ValidationUtils.requiredField(text, context);
-                    },
-                    controller: valueController,
-                    decoration: (getDecoration(lang.contactValue, true)),
-                    onFieldSubmitted: (_) => save(),
-                  ),
-                ],
+                      controller: valueController,
+                      decoration: (getDecoration(lang.contactValue, true)),
+                      onFieldSubmitted: (_) => save(),
+                    ),
+                  ],
+                ),
               ),
+              actions: <Widget>[
+                getButtons(onSave: save),
+              ],
             ),
-            actions: <Widget>[
-              getButtons(onSave: save),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

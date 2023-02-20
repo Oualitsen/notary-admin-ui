@@ -258,5 +258,13 @@
   "assistantList": "Assistants",
   "idCard": "Id Card",
   "fileList": "Files",
-  "notaryService": "Notary Service"
+  "notaryService": "Notary Service",
+  "uploadFile": "Upload a file",
+  "editContent": "Edit Content",
+  "generatForm": "Generat form",
+  "empty": "Empty",
+  "addAssistant": "Add assistant",
+  "addFiles": "Add files",
+  "assistantDetails": "Details",
+  "menu":"Menu"
 }

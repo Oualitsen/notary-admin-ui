@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:notary_admin/src/pages/assistant/add_assistant_page.dart';
+import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/assistant.dart';
@@ -52,118 +53,120 @@ class _AssistantDetailsPageState extends BasicState<AssistantDetailsPage>
     ];
     return DefaultTabController(
       length: myTabs.length,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text("${assistant.firstName} ${assistant.lastName}"),
-          actions: [
-            TextButton.icon(
-              label: Text(
-                lang.edit.toUpperCase(),
-                style: TextStyle(color: Colors.white),
+      child: WidgetUtils.wrapRoute(
+        (context, type) => Scaffold(
+          appBar: AppBar(
+            title: Text("${assistant.firstName} ${assistant.lastName}"),
+            actions: [
+              TextButton.icon(
+                label: Text(
+                  lang.edit.toUpperCase(),
+                  style: TextStyle(color: Colors.white),
+                ),
+                icon: Icon(
+                  Icons.edit,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  push<Assistant>(context, AddAssistantPage())
+                      .listen((c) => setState(() => assistant = c));
+                },
               ),
-              icon: Icon(
-                Icons.edit,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                push<Assistant>(context, AddAssistantPage())
-                    .listen((c) => setState(() => assistant = c));
-              },
-            ),
-            TextButton.icon(
-              label: Text(
-                lang.resetPassword.toUpperCase(),
-                style: TextStyle(color: Colors.white),
-              ),
-              icon: Icon(
-                Icons.restore,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Container(
-                          alignment: Alignment.center,
-                          padding: EdgeInsets.all(10),
-                          width: 400,
-                          height: 50,
-                          color: Colors.blue,
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                assistant.lastName,
-                                style: TextStyle(
-                                    fontSize: 25, color: Colors.white),
-                              ),
-                              SizedBox(width: 30),
-                              Text(assistant.firstName,
+              TextButton.icon(
+                label: Text(
+                  lang.resetPassword.toUpperCase(),
+                  style: TextStyle(color: Colors.white),
+                ),
+                icon: Icon(
+                  Icons.restore,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Container(
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.all(10),
+                            width: 400,
+                            height: 50,
+                            color: Colors.blue,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  assistant.lastName,
                                   style: TextStyle(
-                                      fontSize: 25, color: Colors.white)),
-                            ],
+                                      fontSize: 25, color: Colors.white),
+                                ),
+                                SizedBox(width: 30),
+                                Text(assistant.firstName,
+                                    style: TextStyle(
+                                        fontSize: 25, color: Colors.white)),
+                              ],
+                            ),
                           ),
-                        ),
-                        content: Container(
-                          height: 200,
-                          width: 400,
-                          child: Column(
-                            children: [
-                              Text(lang.resetPassword.toUpperCase()),
-                              Column(children: [
-                                Form(
-                                  key: _formKeyNewPassword,
-                                  child: PasswordInput(
-                                    controller: newPwdCtr,
-                                    label: Text(lang.newPassword),
-                                    validator: (text) {
-                                      if (text?.isEmpty ?? true) {
-                                        return lang.requiredField;
-                                      }
-                                      return null;
-                                    },
+                          content: Container(
+                            height: 200,
+                            width: 400,
+                            child: Column(
+                              children: [
+                                Text(lang.resetPassword.toUpperCase()),
+                                Column(children: [
+                                  Form(
+                                    key: _formKeyNewPassword,
+                                    child: PasswordInput(
+                                      controller: newPwdCtr,
+                                      label: Text(lang.newPassword),
+                                      validator: (text) {
+                                        if (text?.isEmpty ?? true) {
+                                          return lang.requiredField;
+                                        }
+                                        return null;
+                                      },
+                                    ),
                                   ),
-                                ),
-                                SizedBox(height: 16),
-                                getButtons(
-                                  onSave: setPasswordAssistant,
-                                  saveLabel: lang.submit.toUpperCase(),
-                                  cancelLabel: lang.cancel.toUpperCase(),
-                                ),
-                              ]),
-                            ],
+                                  SizedBox(height: 16),
+                                  getButtons(
+                                    onSave: setPasswordAssistant,
+                                    saveLabel: lang.submit.toUpperCase(),
+                                    cancelLabel: lang.cancel.toUpperCase(),
+                                  ),
+                                ]),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    });
-              },
-            ),
-          ],
-          bottom: TabBar(tabs: myTabs),
-        ),
-        body: TabBarView(
-          children: [
-            Container(
-                padding: EdgeInsets.all(20),
-                margin: EdgeInsets.only(right: 30),
-                child: Column(
-                  children: [
-                    ListTile(
-                      title: Text(lang.lastName),
-                      subtitle: Text(assistant.lastName),
-                    ),
-                    ListTile(
-                      title: Text(lang.firstName),
-                      subtitle: Text(assistant.firstName),
-                    ),
-                    ListTile(
-                      title: Text(lang.gender),
-                      subtitle: Text(assistant.gender.name),
-                    ),
-                  ],
-                ))
-          ],
+                        );
+                      });
+                },
+              ),
+            ],
+            bottom: TabBar(tabs: myTabs),
+          ),
+          body: TabBarView(
+            children: [
+              Container(
+                  padding: EdgeInsets.all(20),
+                  margin: EdgeInsets.only(right: 30),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        title: Text(lang.lastName),
+                        subtitle: Text(assistant.lastName),
+                      ),
+                      ListTile(
+                        title: Text(lang.firstName),
+                        subtitle: Text(assistant.firstName),
+                      ),
+                      ListTile(
+                        title: Text(lang.gender),
+                        subtitle: Text(assistant.gender.name),
+                      ),
+                    ],
+                  ))
+            ],
+          ),
         ),
       ),
     );

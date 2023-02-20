@@ -22,4 +22,10 @@ abstract class TemplateDocumentService {
     @Path("id") String id,
     @Body() String newHtmlData,
   );
+
+  @GET("/admin/template/form/{id}")
+  Future<List<String>> formGenerating(@Path("id") String id);
+
+  @GET("/admin/template/replace/{id}")
+  Future<String> replacements(@Path("id") String id);
 }
