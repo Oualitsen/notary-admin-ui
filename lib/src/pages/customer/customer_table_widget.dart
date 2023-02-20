@@ -33,12 +33,19 @@ class _CustomerTableWidgetState extends BasicState<CustomerTableWidget> {
       DataColumn(label: Text(lang.customerDetails.toUpperCase()))
     ];
 
-    return LazyPaginatedDataTable<Customer>(
-        columnSpacing: columnSpacing,
-        getData: getData,
-        getTotal: getTotal,
-        columns: columns,
-        dataToRow: dataToRow);
+    return SingleChildScrollView
+  (
+    scrollDirection: Axis.vertical,
+      child: LazyPaginatedDataTable<Customer>(
+          columnSpacing: columnSpacing,
+          getData: getData,
+          getTotal: getTotal,
+          columns: columns,
+          dataToRow: dataToRow,
+           checkboxHorizontalMargin: 20,
+        sortAscending: true,
+        dataRowHeight: 40,),
+    );
   }
 
   Future<List<Customer>> getData(PageInfo page) {

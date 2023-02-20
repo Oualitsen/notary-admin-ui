@@ -258,5 +258,21 @@
   "assistantList": "Assistants",
   "idCard": "Id Card",
   "fileList": "Files",
-  "notaryService": "Notary Service"
+  "notaryService": "Notary Service",
+  "documentName" :"Document name",
+    "fileSpec":"Specification Folder",
+    "createdFileSpec":"Creation date",
+      "addFileSpec":"Add a Specification Folder",
+      "nameFileSpec":"Specification folder name",
+      "listDocumentsFileSpec":"List of documents",
+        "originalDocument":"Original document",
+          "requiredDocument":"Required Document",
+            "noDocument":"No documents yet"
+
+
+
+
+    
+
+
 }

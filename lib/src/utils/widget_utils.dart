@@ -18,6 +18,8 @@ import 'package:rapidoc_utils/widgets/menu_drawer.dart';
 import 'package:rapidoc_utils/widgets/route_guard_widget.dart';
 import 'package:rapidoc_utils/widgets/template_builder.dart';
 
+import '../pages/file/file_spec_List.dart';
+
 class WidgetUtils {
   static Widget wrapRoute(
       Widget Function(BuildContext context, DeviceScreenType type) route,
@@ -221,6 +223,12 @@ Widget createDrawer(BuildContext context) {
                     )),
           )
         },
+      ),
+      DrawerMenuItem(
+        title: (lang.fileSpec),
+        icon: Icons.file_download,
+        onTap: () => Navigator.push(
+            context, MaterialPageRoute(builder: ((context) => FileSpecList()))),
       ),
     ],
     header: DrawerHeader(

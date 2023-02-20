@@ -32,7 +32,7 @@ class _ProfileService implements ProfileService {
     )
             .compose(
               _dio.options,
-              'admin/profile',
+              '/admin/profile',
               queryParameters: queryParameters,
               data: _data,
             )
