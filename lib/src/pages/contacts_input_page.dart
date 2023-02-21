@@ -1,4 +1,5 @@
 import 'package:notary_admin/src/utils/validation_utils.dart';
+import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/contact.dart';
@@ -22,54 +23,56 @@ class ContactsInputPageState extends BasicState<ContactsInputPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(lang.addContacts),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: StreamBuilder<List<Contact>>(
-                stream: createdContacts,
-                initialData: createdContacts.value,
-                builder: (context, snapshot) {
-                  var data = snapshot.data ?? [];
-                  return ListView(
-                    children: data
-                        .map((e) => ListTile(
-                              title: Text(e.name),
-                              subtitle: Text(e.value),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.clear),
-                                onPressed: () => removeElement(e),
-                              ),
-                            ))
-                        .toList(),
-                  );
-                }),
-          ),
-          FloatingActionButton(
-            onPressed: () async {
-              var contact = await _showTextInputDialog(context);
-
-              if (contact != null) {
-                var contactList = createdContacts.value;
-                contactList.add(contact);
-                //notify listener
-                createdContacts.add(contactList);
-              }
-            },
-            child: const Icon(Icons.add),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: getButtons(
-              onSave: () {
-                Navigator.of(context).pop(createdContacts.value);
-              },
+    return WidgetUtils.wrapRoute(
+      (context, type) => Scaffold(
+        appBar: AppBar(
+          title: Text(lang.addContacts),
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: StreamBuilder<List<Contact>>(
+                  stream: createdContacts,
+                  initialData: createdContacts.value,
+                  builder: (context, snapshot) {
+                    var data = snapshot.data ?? [];
+                    return ListView(
+                      children: data
+                          .map((e) => ListTile(
+                                title: Text(e.name),
+                                subtitle: Text(e.value),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.clear),
+                                  onPressed: () => removeElement(e),
+                                ),
+                              ))
+                          .toList(),
+                    );
+                  }),
             ),
-          ),
-        ],
+            FloatingActionButton(
+              onPressed: () async {
+                var contact = await _showTextInputDialog(context);
+
+                if (contact != null) {
+                  var contactList = createdContacts.value;
+                  contactList.add(contact);
+                  //notify listener
+                  createdContacts.add(contactList);
+                }
+              },
+              child: const Icon(Icons.add),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: getButtons(
+                onSave: () {
+                  Navigator.of(context).pop(createdContacts.value);
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

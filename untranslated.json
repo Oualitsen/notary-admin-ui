@@ -15,7 +15,15 @@
     "assistantList",
     "idCard",
     "fileList",
-    "notaryService"
+    "notaryService",
+    "uploadFile",
+    "editContent",
+    "generatForm",
+    "empty",
+    "addAssistant",
+    "addFiles",
+    "assistantDetails",
+    "menu"
   ],
 
   "fr": [
@@ -34,6 +42,14 @@
     "assistantList",
     "idCard",
     "fileList",
-    "notaryService"
+    "notaryService",
+    "uploadFile",
+    "editContent",
+    "generatForm",
+    "empty",
+    "addAssistant",
+    "addFiles",
+    "assistantDetails",
+    "menu"
   ]
 }

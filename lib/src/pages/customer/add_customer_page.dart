@@ -4,6 +4,7 @@ import 'package:http_error_handler/error_handler.dart';
 import 'package:notary_admin/src/pages/customer/customer_general_form.dart';
 import 'package:notary_admin/src/pages/customer/id_card_widget.dart';
 import 'package:notary_admin/src/services/admin/customer_service.dart';
+import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/address_input_widget.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
@@ -34,82 +35,84 @@ class _AddCustomerPageState extends BasicState<AddCustomerPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(lang.newCustomer),
-      ),
-      body: StreamBuilder<int>(
-        stream: _currentStepStream,
-        initialData: _currentStepStream.value,
-        builder: (context, snapshot) {
-          int activeState = snapshot.data ?? 0;
-          return Stepper(
-            //type: getStepperType(type),
-            physics: ScrollPhysics(),
-            currentStep: activeState,
-            onStepTapped: (step) => tapped(step),
-            controlsBuilder: (context, _) {
-              return SizedBox.shrink();
-            },
-            steps: <Step>[
-              Step(
-                title: Text(lang.general.toUpperCase()),
-                content: Column(
-                  children: [
-                    CustomerGeneralForm(
-                      key: customerGeneralInfoKey,
-                      customer: widget.customer,
-                    ),
-                    SizedBox(height: 16),
-                    getButtons(
-                        onSave: continued,
-                        skipCancel: true,
-                        saveLabel: lang.next.toUpperCase()),
-                  ],
-                ),
-                isActive: activeState == 0,
-                state: getState(0),
-              ),
-              Step(
-                title: Text(lang.address.toUpperCase()),
-                content: Column(children: [
-                  AddressInputWidget(
-                    key: addressInputKey,
-                    customer: widget.customer,
+    return WidgetUtils.wrapRoute(
+      (context, type) => Scaffold(
+        appBar: AppBar(
+          title: Text(lang.newCustomer),
+        ),
+        body: StreamBuilder<int>(
+          stream: _currentStepStream,
+          initialData: _currentStepStream.value,
+          builder: (context, snapshot) {
+            int activeState = snapshot.data ?? 0;
+            return Stepper(
+              //type: getStepperType(type),
+              physics: ScrollPhysics(),
+              currentStep: activeState,
+              onStepTapped: (step) => tapped(step),
+              controlsBuilder: (context, _) {
+                return SizedBox.shrink();
+              },
+              steps: <Step>[
+                Step(
+                  title: Text(lang.general.toUpperCase()),
+                  content: Column(
+                    children: [
+                      CustomerGeneralForm(
+                        key: customerGeneralInfoKey,
+                        customer: widget.customer,
+                      ),
+                      SizedBox(height: 16),
+                      getButtons(
+                          onSave: continued,
+                          skipCancel: true,
+                          saveLabel: lang.next.toUpperCase()),
+                    ],
                   ),
-                  SizedBox(height: 16),
-                  getButtons(
-                      onSave: continued,
-                      saveLabel: lang.next.toUpperCase(),
-                      cancelLabel: lang.previous.toUpperCase(),
-                      onCancel: previous),
-                ]),
-                isActive: activeState == 1,
-                state: getState(1),
-              ),
-              Step(
-                title: Text(lang.idCardInfo.toUpperCase()),
-                content: Column(
-                  children: [
-                    IdCardWidget(
-                      key: idCardInputKey,
+                  isActive: activeState == 0,
+                  state: getState(0),
+                ),
+                Step(
+                  title: Text(lang.address.toUpperCase()),
+                  content: Column(children: [
+                    AddressInputWidget(
+                      key: addressInputKey,
                       customer: widget.customer,
                     ),
                     SizedBox(height: 16),
-                    SizedBox(height: 16),
                     getButtons(
                         onSave: continued,
-                        saveLabel: lang.submit.toUpperCase(),
+                        saveLabel: lang.next.toUpperCase(),
                         cancelLabel: lang.previous.toUpperCase(),
                         onCancel: previous),
-                  ],
+                  ]),
+                  isActive: activeState == 1,
+                  state: getState(1),
                 ),
-                isActive: activeState == 2,
-                state: getState(2),
-              ),
-            ],
-          );
-        },
+                Step(
+                  title: Text(lang.idCardInfo.toUpperCase()),
+                  content: Column(
+                    children: [
+                      IdCardWidget(
+                        key: idCardInputKey,
+                        customer: widget.customer,
+                      ),
+                      SizedBox(height: 16),
+                      SizedBox(height: 16),
+                      getButtons(
+                          onSave: continued,
+                          saveLabel: lang.submit.toUpperCase(),
+                          cancelLabel: lang.previous.toUpperCase(),
+                          onCancel: previous),
+                    ],
+                  ),
+                  isActive: activeState == 2,
+                  state: getState(2),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -183,8 +186,9 @@ class _AddCustomerPageState extends BasicState<AddCustomerPage>
             idCard: idCard!,
             address: address!,
           );
-          await service.saveCustomer(input);
+          var res = await service.saveCustomer(input);
           await showSnackBar2(context, lang.savedSuccessfully);
+          Navigator.of(context).pop(res);
         } else {
           CustomerInput input = CustomerInput(
             id: widget.customer!.id,
@@ -195,8 +199,9 @@ class _AddCustomerPageState extends BasicState<AddCustomerPage>
             idCard: idCard!,
             address: address!,
           );
-          await service.saveCustomer(input);
+          var res = await service.saveCustomer(input);
           await showSnackBar2(context, lang.updatedSuccessfully);
+          Navigator.of(context).pop(res);
         }
       } catch (error, stackTrace) {
         showServerError(context, error: error);

@@ -4,6 +4,7 @@ import 'package:http_error_handler/error_handler.dart';
 import 'package:notary_admin/src/pages/assistant/assistant_details_input.dart';
 import 'package:notary_admin/src/pages/assistant/assistant_credentials_input.dart';
 import 'package:notary_admin/src/services/assistant/assistant_service.dart';
+import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/assistant_input.dart';
@@ -28,62 +29,64 @@ class _AddAssistantPageState extends BasicState<AddAssistantPage>
   final service = GetIt.instance.get<AssistantService>();
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(lang.newAssistant),
-      ),
-      body: StreamBuilder<int>(
-        stream: _currentStepStream,
-        initialData: _currentStepStream.value,
-        builder: (context, snapshot) {
-          int activeState = snapshot.data ?? 0;
-          return Stepper(
-            //type: getStepperType(type),
-            physics: ScrollPhysics(),
-            currentStep: activeState,
-            onStepTapped: (step) => tapped(step),
-            controlsBuilder: (context, _) {
-              return SizedBox.shrink();
-            },
-            steps: <Step>[
-              Step(
-                title: Text(lang.general.toUpperCase()),
-                content: Column(
-                  children: [
-                    AssistantDetailsInput(
-                      key: assistantDetailsKey,
-                      //   assistant: widget.assistant,
+    return WidgetUtils.wrapRoute(
+      (context, type) => Scaffold(
+        appBar: AppBar(
+          title: Text(lang.newAssistant),
+        ),
+        body: StreamBuilder<int>(
+          stream: _currentStepStream,
+          initialData: _currentStepStream.value,
+          builder: (context, snapshot) {
+            int activeState = snapshot.data ?? 0;
+            return Stepper(
+              //type: getStepperType(type),
+              physics: ScrollPhysics(),
+              currentStep: activeState,
+              onStepTapped: (step) => tapped(step),
+              controlsBuilder: (context, _) {
+                return SizedBox.shrink();
+              },
+              steps: <Step>[
+                Step(
+                  title: Text(lang.general.toUpperCase()),
+                  content: Column(
+                    children: [
+                      AssistantDetailsInput(
+                        key: assistantDetailsKey,
+                        //   assistant: widget.assistant,
+                      ),
+                      SizedBox(height: 16),
+                      getButtons(
+                          onSave: continued,
+                          skipCancel: true,
+                          saveLabel: lang.next.toUpperCase()),
+                    ],
+                  ),
+                  isActive: activeState == 0,
+                  state: getState(0),
+                ),
+                Step(
+                  title: Text(lang.credentails.toUpperCase()),
+                  content: Column(children: [
+                    AssistantCredentailsInput(
+                      key: assistantCredentilasKey,
+                      //      assistant: widget.assistant,
                     ),
                     SizedBox(height: 16),
                     getButtons(
                         onSave: continued,
-                        skipCancel: true,
-                        saveLabel: lang.next.toUpperCase()),
-                  ],
+                        saveLabel: lang.submit.toUpperCase(),
+                        cancelLabel: lang.previous.toUpperCase(),
+                        onCancel: previous),
+                  ]),
+                  isActive: activeState == 1,
+                  state: getState(1),
                 ),
-                isActive: activeState == 0,
-                state: getState(0),
-              ),
-              Step(
-                title: Text(lang.credentails.toUpperCase()),
-                content: Column(children: [
-                  AssistantCredentailsInput(
-                    key: assistantCredentilasKey,
-                    //      assistant: widget.assistant,
-                  ),
-                  SizedBox(height: 16),
-                  getButtons(
-                      onSave: continued,
-                      saveLabel: lang.submit.toUpperCase(),
-                      cancelLabel: lang.previous.toUpperCase(),
-                      onCancel: previous),
-                ]),
-                isActive: activeState == 1,
-                state: getState(1),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -145,8 +148,9 @@ class _AddAssistantPageState extends BasicState<AddAssistantPage>
           password: assistantCredentials.password,
           roles: Set.of([Role.ASSISTANT]),
           gender: assistantDetails.gender);
-      await service.saveAssistant(input);
+      var res = await service.saveAssistant(input);
       await showSnackBar2(context, lang.updatedSuccessfully);
+      Navigator.of(context).pop(res);
     } catch (error, stackTrace) {
       showServerError(context, error: error);
       print(stackTrace);

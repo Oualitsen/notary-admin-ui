@@ -20,4 +20,10 @@ abstract class AssistantService {
   @PUT("/admin/assistant/{id}")
   Future<Assistant> ResetPasswordAssistant(
       @Path("id") String id, @Body() String password);
+
+  @GET("/admin/assistant/count")
+  Future<int> getAssistantsCount();
+
+  @DELETE("/admin/assistant")
+  Future<void> deleteAssistant(@Path("id") String id);
 }
