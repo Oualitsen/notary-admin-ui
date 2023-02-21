@@ -7,6 +7,7 @@ import 'package:notary_admin/src/services/admin/customer_service.dart';
 import 'package:notary_admin/src/services/admin/profile_service.dart';
 import 'package:notary_admin/src/services/admin/template_document_service.dart';
 import 'package:notary_admin/src/services/assistant/assistant_service.dart';
+import 'package:notary_admin/src/services/files/file_spec_service.dart';
 import 'package:notary_model/model/admin.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:notary_admin/src/db_services/token_db_service.dart';
@@ -68,6 +69,7 @@ void initServices() {
   Dio dio = GetIt.instance.get();
 
   GetIt.instance.registerSingleton(LoginService(dio));
+  GetIt.instance.registerSingleton(FileSpecService(dio));
   GetIt.instance.registerSingleton(ProfileService(dio));
   GetIt.instance.registerSingleton(UploadService(dio));
   GetIt.instance.registerSingleton(PhoneCodeService(dio));
