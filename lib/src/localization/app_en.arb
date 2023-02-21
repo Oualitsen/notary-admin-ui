@@ -266,5 +266,9 @@
   "addAssistant": "Add assistant",
   "addFiles": "Add files",
   "assistantDetails": "Details",
-  "menu":"Menu"
+  "menu": "Menu",
+  "dataForDocument": "Data for Document",
+  "formToHtml": "Form to html",
+  "nameForDocument": "Name For Document",
+  "print":"Print"
 }

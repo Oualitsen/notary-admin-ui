@@ -26,10 +26,16 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
   late List listFormField;
   late String text;
   final _htmlDocument = BehaviorSubject.seeded('');
-
+  var print = """
+   <script>
+      function display() {
+         window.print();
+      }
+   </script>
+""";
   @override
   void initState() {
-    text = widget.text;
+    text = print + widget.text;
     listFormField = widget.listFormField;
     _controller =
         List.generate(listFormField.length, (i) => TextEditingController());
@@ -44,106 +50,98 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
     return WidgetUtils.wrapRoute(
       (context, type) => Scaffold(
         appBar: AppBar(
-          title: Text("Form to html"),
-          actions: [],
+          title: Text(lang.formToHtml),
+          actions: [
+            IconButton(
+              onPressed: () {
+                controllerWeb?.callJsMethod("display", []);
+              },
+              icon: Icon(Icons.save),
+            )
+          ],
         ),
-        body: Container(
-            padding: EdgeInsets.all(20),
-            width: double.maxFinite,
-            height: double.maxFinite,
-            child: Row(
-              children: [
-                Flexible(
-                  flex: 1,
-                  child: Container(
-                    padding: EdgeInsets.all(10),
-                    child: Column(
-                      children: [
-                        Container(
-                          height: 30,
-                          width: double.maxFinite,
-                          decoration: BoxDecoration(color: Colors.blue),
-                          child: Center(child: Text("Data for Document")),
+        body: Row(
+          children: [
+            Container(
+              width: 300,
+              height: double.maxFinite,
+              padding: EdgeInsets.all(10),
+              child: Column(
+                children: [
+                  AppBar(
+                    backgroundColor: Theme.of(context).canvasColor,
+                    leading: SizedBox.shrink(),
+                    title: Tooltip(
+                        child: Text(
+                          lang.dataForDocument,
+                          style: TextStyle(color: Colors.black),
                         ),
-                        Form(
-                            key: _formKeyListNames,
-                            onChanged: onDataChange,
-                            child: Column(
-                              children: [
-                                Container(
-                                  alignment: Alignment.center,
-                                  width: double.maxFinite,
-                                  height: 450,
-                                  child: ListView.builder(
-                                    itemCount: listFormField.length,
-                                    itemBuilder:
-                                        (BuildContext context, int index) {
-                                      return Column(
-                                        children: [
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          TextFormField(
-                                            decoration: InputDecoration(
-                                              border: OutlineInputBorder(),
-                                              labelText: listFormField[index],
-                                            ),
-                                            controller: _controller[index],
-                                            validator: (value) {
-                                              if (value == null ||
-                                                  value.isEmpty) {
-                                                return lang.requiredField;
-                                              }
-                                              return null;
-                                            },
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ],
-                            )),
-                      ],
+                        message: lang.dataForDocument),
+                    elevation: 0,
+                  ),
+                  Form(
+                      key: _formKeyListNames,
+                      onChanged: onDataChange,
+                      child: Expanded(
+                        child: ListView.builder(
+                          itemCount: listFormField.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: TextFormField(
+                                decoration:
+                                    getDecoration(listFormField[index], false),
+                                controller: _controller[index],
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return lang.requiredField;
+                                  }
+                                  return null;
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                      )),
+                ],
+              ),
+            ),
+            VerticalDivider(
+              thickness: 1,
+              width: 5,
+              indent: 1,
+              endIndent: 1,
+            ),
+            Expanded(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10.0),
+                    child: AppBar(
+                      backgroundColor: Theme.of(context).canvasColor,
+                      leading: SizedBox.shrink(),
+                      title: Text(
+                        lang.nameForDocument,
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      elevation: 0,
                     ),
                   ),
-                ),
-                Flexible(
-                  flex: 1,
-                  child: VerticalDivider(
-                    color: Colors.black,
-                    thickness: 1,
-                    width: 50,
-                    indent: 5,
-                    endIndent: 5,
-                  ),
-                ),
-                Flexible(
-                  flex: 4,
-                  child: Container(
-                    padding: EdgeInsets.all(10),
-                    child: Column(
-                      children: [
-                        Container(
-                          height: 30,
-                          width: double.maxFinite,
-                          decoration: BoxDecoration(color: Colors.blue),
-                          child: Center(child: Text("Name For Document")),
-                        ),
-                        WebViewX(
-                          initialContent: text,
-                          initialSourceType: SourceType.html,
-                          onWebViewCreated: (controller) =>
-                              controllerWeb = controller,
-                          height: 450,
-                          width: double.maxFinite,
-                        ),
-                      ],
+                  Expanded(
+                    child: WebViewX(
+                      initialContent: text,
+                      initialSourceType: SourceType.html,
+                      onWebViewCreated: (controller) =>
+                          controllerWeb = controller,
+                      height: double.maxFinite,
+                      width: double.maxFinite,
                     ),
                   ),
-                ),
-              ],
-            )),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
