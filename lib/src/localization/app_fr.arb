@@ -251,5 +251,18 @@
   "confirmArchivePlanification": "Voulez-vous vraiment archiver cette planification?",
   "planificationCanceled": "Planification annulée avec succès",
   "planificationArchieved": "Planification archivée avec succès",
-  "resetPassword": "réinitialiser le mot de passe"
+  "resetPassword": "réinitialiser le mot de passe",
+  "documentName" :"Nome du document",
+  "fileSpec":"Dossier Spécification",
+  "createdFileSpec":"Date du création",
+  "addFileSpec":"Ajout du Dossier Spécification",
+  "nameFileSpec":"nom du dossier Spécification",
+  "listDocumentsFileSpec":"List des documents",
+    "originalDocument":"Document Original",
+
+  "requiredDocument":"Document requis",
+  "noDocument":"list documents est vides "
+
+  
+
 }

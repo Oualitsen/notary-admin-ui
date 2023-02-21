@@ -250,5 +250,19 @@
   "confirmArchivePlanification": "",
   "planificationCanceled": "تم إلغاء التخطيط بنجاح",
   "planificationArchieved": "",
-  "resetPassword": "إعادة تعيين كلمة المرور"
+  "resetPassword": "إعادة تعيين كلمة المرور",
+  "documentName" :"اسم الملف",
+  "fileSpec":"مجلد المواصفات",
+  "createdFileSpec":"تاريخ الإنشاء",
+    "addFileSpec":"إضافة مجلد المواصفات",
+    "nameFileSpec":"اسم مجلد المواصفات",
+      "listDocumentsFileSpec":"قائمة الملفات",
+        "originalDocument":"المستند الأصلي",
+          "requiredDocument":"ملفات مطلوبه",
+            "noDocument":"قائمة المستندات فارغة"
+
+
+
+
+
 }
