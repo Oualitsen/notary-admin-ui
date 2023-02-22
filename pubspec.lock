@@ -253,6 +253,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.0"
+  document_file_save_plus:
+    dependency: "direct main"
+    description:
+      name: document_file_save_plus
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.9"
   expandable:
     dependency: "direct main"
     description:
