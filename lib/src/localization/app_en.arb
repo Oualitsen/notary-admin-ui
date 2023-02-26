@@ -266,7 +266,6 @@
   "addAssistant": "Add assistant",
   "addFiles": "Add files",
   "assistantDetails": "Details",
-  "menu":"Menu",
   "addfolder":"Add Folder",
   "selectFileSpec":"select the folder model",
   "selectDocuments":"attach the documents of the client file ",
@@ -280,4 +279,9 @@
   "requiredDocument":"Required Document",
   "noDocument":"No documents yet",
   "filesNumber":"file code"
+  "menu": "Menu",
+  "dataForDocument": "Data for Document",
+  "formToHtml": "Form to html",
+  "nameForDocument": "Name For Document",
+  "print":"Print"
 }
