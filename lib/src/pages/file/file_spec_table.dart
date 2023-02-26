@@ -4,7 +4,7 @@ import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/pages/file/add_file_spec.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
-import 'package:notary_model/model/document_input.dart';
+import 'package:notary_model/model/document_spec_input.dart';
 import 'package:notary_model/model/files_spec.dart';
 import 'package:rxdart/rxdart.dart';
 import '../../widgets/mixins/button_utils_mixin.dart';
@@ -137,7 +137,7 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
       DataCell(
         TextButton(
           onPressed: () async {
-            Navigator.push<DocumentInput>(
+            Navigator.push<DocumentSpecInput>(
               context,
               MaterialPageRoute(
                   builder: (context) => AddFileSpec(

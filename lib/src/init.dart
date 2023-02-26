@@ -8,6 +8,7 @@ import 'package:notary_admin/src/services/admin/profile_service.dart';
 import 'package:notary_admin/src/services/admin/template_document_service.dart';
 import 'package:notary_admin/src/services/assistant/assistant_service.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
+import 'package:notary_admin/src/services/files/files_service.dart';
 import 'package:notary_model/model/admin.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:notary_admin/src/db_services/token_db_service.dart';
@@ -21,7 +22,9 @@ import 'package:universal_html/html.dart' as html;
 import 'package:cookie_jar/cookie_jar.dart';
 
 //const devUrlBase = "192.168.9.4:8080";
-const devUrlBase = "localhost:8080";
+//const devUrlBase = "localhost:8080";
+const devUrlBase = "192.168.1.21:8080";
+
 const emuUrlBase = "10.0.2.2:8080";
 const prodUrlBase = "ams.bms-data-collector.info";
 
@@ -76,6 +79,7 @@ void initServices() {
   GetIt.instance.registerSingleton(CustomerService(dio));
   GetIt.instance.registerSingleton(TemplateDocumentService(dio));
   GetIt.instance.registerSingleton(AssistantService(dio));
+  GetIt.instance.registerSingleton(FilesService(dio));
 
   GetIt.instance.registerSingleton(
     AuthManager<Admin>(
