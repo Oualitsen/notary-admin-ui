@@ -18,6 +18,7 @@ import 'package:rapidoc_utils/widgets/menu_drawer.dart';
 import 'package:rapidoc_utils/widgets/route_guard_widget.dart';
 import 'package:rapidoc_utils/widgets/template_builder.dart';
 
+import '../pages/customer/add_folder_customer.dart';
 import '../pages/file/file_spec_List.dart';
 
 class WidgetUtils {
@@ -181,13 +182,20 @@ Widget createDrawer(BuildContext context) {
           });
         },
       ),
-       DrawerMenuItem(
+      DrawerMenuItem(
         title: (lang.fileSpec),
         icon: Icons.file_download,
         onTap: () => Navigator.push(
             context, MaterialPageRoute(builder: ((context) => FileSpecList()))),
       ),
-
+      DrawerMenuItem(
+        title: lang.addfolder,
+        icon: Icons.folder,
+        onTap: () => {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => AddFolderCustomer()))
+        },
+      ),
     ],
     header: DrawerHeader(
       decoration: const BoxDecoration(),

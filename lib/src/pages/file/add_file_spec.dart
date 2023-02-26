@@ -7,8 +7,7 @@ import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:notary_admin/src/pages/file/file_spec_List.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
-import 'package:notary_model/model/document.dart';
-import 'package:notary_model/model/document_input.dart';
+import 'package:notary_model/model/document_spec_input.dart';
 import 'package:notary_model/model/files_spec.dart';
 import 'package:notary_model/model/files_spec_input.dart';
 import 'package:rxdart/rxdart.dart';
@@ -35,12 +34,12 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
   int currentStep = 0;
   final service = GetIt.instance.get<FileSpecService>();
   final _currentStepStream = BehaviorSubject.seeded(0);
-  final _listDocumentsStream = BehaviorSubject.seeded(<DocumentInput>[]);
+  final _listDocumentsStream = BehaviorSubject.seeded(<DocumentSpecInput>[]);
 
   final GlobalKey<FormState> _fileSpecNameKey = GlobalKey<FormState>();
   final GlobalKey<FormState> _fileSpecDocumentKey = GlobalKey<FormState>();
   final _nameFileSpecCtrl = TextEditingController();
-  List<DocumentInput> listDocumentsInput = [];
+  List<DocumentSpecInput> listDocumentsInput = [];
   late FilesSpec fileSpec;
 
   @override
@@ -50,7 +49,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
     if (fileSpec != null) {
       _nameFileSpecCtrl.text = fileSpec.name;
       listDocumentsInput = fileSpec.documents
-          .map((e) => DocumentInput(
+          .map((e) => DocumentSpecInput(
               id: e.id,
               name: e.name,
               optional: e.optional,
@@ -123,7 +122,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.push<DocumentInput>(
+                        Navigator.push<DocumentSpecInput>(
                           context,
                           MaterialPageRoute(
                               builder: (context) => AddDocument()),
@@ -138,7 +137,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                     ),
                   ],
                 ),
-                content: StreamBuilder<List<DocumentInput>>(
+                content: StreamBuilder<List<DocumentSpecInput>>(
                     stream: _listDocumentsStream,
                     initialData: listDocumentsInput,
                     builder: (context, snapshot) {

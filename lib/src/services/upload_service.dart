@@ -41,6 +41,7 @@ class UploadService {
     Map<String, String> otherFields = const {},
   }) async {
     FormData formData;
+
     if (locStorageKey == path) {
       var data = html.window.localStorage[UploadService.locStorageKey];
       formData = FormData.fromMap({"base64": data, ...otherFields});

@@ -252,17 +252,17 @@
   "planificationCanceled": "Planification annulée avec succès",
   "planificationArchieved": "Planification archivée avec succès",
   "resetPassword": "réinitialiser le mot de passe",
+  "addfolder":"Ajouter un dossier",
+  "selectFileSpec":"selectionner le model du dossier ",
+  "selectDocuments":"jointer les documents du dossier client ",
   "documentName" :"Nome du document",
   "fileSpec":"Dossier Spécification",
   "createdFileSpec":"Date du création",
   "addFileSpec":"Ajout du Dossier Spécification",
   "nameFileSpec":"nom du dossier Spécification",
   "listDocumentsFileSpec":"List des documents",
-    "originalDocument":"Document Original",
-
+  "originalDocument":"Document Original",
   "requiredDocument":"Document requis",
-  "noDocument":"list documents est vides "
-
-  
-
+  "noDocument":"list documents est vides ",
+  "filesNumber":"code du dossier"
 }
