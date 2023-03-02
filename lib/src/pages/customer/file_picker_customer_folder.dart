@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -7,12 +9,17 @@ import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/files.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:rxdart/src/subjects/subject.dart';
+import '../../services/files/files_service.dart';
 import '../../services/upload_service.dart';
+import 'list_files_customer.dart';
 
 class FilePickerCustomerFolder extends StatefulWidget {
   final Files files;
-  const FilePickerCustomerFolder({super.key, required this.files});
+
+  const FilePickerCustomerFolder({
+    super.key,
+    required this.files,
+  });
   @override
   State<FilePickerCustomerFolder> createState() =>
       _FilePickerCustomerFolderState();
@@ -21,17 +28,41 @@ class FilePickerCustomerFolder extends StatefulWidget {
 class _FilePickerCustomerFolderState
     extends BasicState<FilePickerCustomerFolder> with WidgetUtilsMixin {
   final serviceUploadDocument = GetIt.instance.get<UploadService>();
+  final serviceFiles = GetIt.instance.get<FilesService>();
 
   late Files files;
   final bool statusUpload = false;
   final pathDocumentsStream = BehaviorSubject.seeded(<PathsDocuments>[]);
+  final pathDocumentsUpdateStream = BehaviorSubject.seeded(<PathsDocuments>[]);
+  final allUploadedStream = BehaviorSubject.seeded(false);
   @override
   initState() {
     files = widget.files;
-    pathDocumentsStream.add(widget.files.specification.documents
-        .map((e) => PathsDocuments(
-            idDocument: e.id, pathDocument: null, selected: false))
-        .toList());
+    if (files.uploadedFiles.isEmpty) {
+      pathDocumentsStream.add(widget.files.specification.documents
+          .map((e) => PathsDocuments(
+              idDocument: e.id,
+              document: null,
+              selected: false,
+              nameDocument: null))
+          .toList());
+    } else {
+      pathDocumentsStream.add(widget.files.specification.documents
+          .map((e) => PathsDocuments(
+              idDocument: e.id,
+              document: null,
+              selected: true,
+              nameDocument: ''))
+          .toList());
+      pathDocumentsUpdateStream.add(widget.files.specification.documents
+          .map((e) => PathsDocuments(
+              idDocument: e.id,
+              document: null,
+              selected: false,
+              nameDocument: ''))
+          .toList());
+    }
+
     super.initState();
   }
 
@@ -52,190 +83,272 @@ class _FilePickerCustomerFolderState
                       padding: const EdgeInsets.all(40),
                       child: Text(lang.noDocument.toUpperCase()),
                     )
-                  : ListTile(
-                      title: Container(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Text("${lang.selectDocuments.toUpperCase()}"),
-                            SizedBox(
-                              width: 30,
-                            ),
-                            ElevatedButton(
-                              child: Text(lang.addFiles.toUpperCase()),
-                              onPressed: () async {
-                                var picked =
-                                    await FilePicker.platform.pickFiles();
-                                if (picked != null) {
-                                  var path = picked.files.first.path;
-                                  if (path != null) {
-                                    var list = pathDocumentsStream.value;
-                                    list.removeAt(index);
-                                    list.insert(
-                                        index,
-                                        addPathDocument(
-                                            files.specification.documents[index]
-                                                .id,
-                                            path,
-                                            true));
-                                    pathDocumentsStream.add(list);
-                                  } else {}
-                                }
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      subtitle: StreamBuilder<List<PathsDocuments>>(
-                          stream: pathDocumentsStream,
-                          initialData: pathDocumentsStream.value,
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData == false) {
-                              return SizedBox.shrink();
-                            }
-                            return Padding(
-                                padding: const EdgeInsets.all(15),
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.file_download),
-                                    SizedBox(width: 20),
-                                    Row(children: [
-                                      Text(
-                                        " ${files.specification.documents[index].name.toUpperCase()} : ",
-                                        style: TextStyle(
-                                            color:
-                                                Color.fromARGB(255, 0, 0, 0)),
-                                      ),
-                                      SizedBox(
-                                        width: 20,
-                                      ),
-                                      snapshot.data![index].selected == true
-                                          ? Icon(Icons.check)
-                                          : Icon(Icons.add),
-                                    ]),
-                                    SizedBox(width: 20),
-                                    StreamBuilder<double>(
-                                        stream: pathDocumentsStream
-                                            .value[index].progress,
-                                        builder: (context, snapshot) {
-                                          if (snapshot.hasError) {
-                                            return IconButton(
-                                                onPressed: () {
-                                                  //  upload(element).listen((event) {});
-                                                },
-                                                icon: Icon(
-                                                  Icons.refresh,
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .secondary,
-                                                ));
-                                          }
-                                          if (snapshot.hasData) {
-                                            return Text("${snapshot.data} %");
-                                          }
-                                          return SizedBox.shrink();
-                                        }),
-                                    SizedBox(width: 30),
-                                    IconButton(
+                  : StreamBuilder<List<PathsDocuments>>(
+                      stream: pathDocumentsStream,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData == false) {
+                          return SizedBox.shrink();
+                        }
+                        return ListTile(
+                          title: Row(
+                            children: [
+                              Icon(Icons.file_download),
+                              SizedBox(width: 20),
+                              Text(
+                                " ${files.specification.documents[index].name} ",
+                                style: TextStyle(
+                                    color: Color.fromARGB(255, 0, 0, 0)),
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              StreamBuilder<double>(
+                                  stream:
+                                      pathDocumentsStream.value[index].progress,
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasError) {
+                                      return IconButton(
+                                          onPressed: () {},
+                                          icon: Icon(
+                                            Icons.refresh,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .secondary,
+                                          ));
+                                    }
+                                    if (snapshot.hasData) {
+                                      return Text("-->${snapshot.data} %");
+                                    }
+                                    return SizedBox.shrink();
+                                  }),
+                            ],
+                          ),
+                          trailing: Container(
+                            width: 300,
+                            height: 200,
+                            child: Wrap(
+                              direction: Axis.vertical,
+                              alignment: WrapAlignment.spaceBetween,
+                              children: [
+                                pathDocumentsStream.value[index].selected ==
+                                            true &&
+                                        files.uploadedFiles.isEmpty
+                                    ? IconButton(
                                         onPressed: () {
                                           showDialog(
                                               context: context,
-                                              builder:
-                                                  (BuildContext) => AlertDialog(
-                                                        title:
-                                                            Text(lang.confirm),
-                                                        content: Text(
-                                                            lang.confirmDelete),
-                                                        actions: [
-                                                          TextButton(
-                                                              onPressed: () {
-                                                                Navigator.of(
-                                                                        context)
-                                                                    .pop(false);
-                                                              },
-                                                              child: Text(lang
-                                                                  .no
-                                                                  .toUpperCase())),
-                                                          TextButton(
-                                                              onPressed: () {
-                                                                var list =
-                                                                    pathDocumentsStream
-                                                                        .value;
-                                                                list.removeAt(
-                                                                    index);
-                                                                list.insert(
-                                                                    index,
-                                                                    addPathDocument(
-                                                                        files
-                                                                            .specification
-                                                                            .documents[index]
-                                                                            .id,
-                                                                        null,
-                                                                        false));
+                                              builder: (BuildContext) =>
+                                                  AlertDialog(
+                                                    title: Text(lang.confirm),
+                                                    content: Text(
+                                                        lang.confirmDelete),
+                                                    actions: [
+                                                      TextButton(
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop(false);
+                                                          },
+                                                          child: Text(lang.no
+                                                              .toUpperCase())),
+                                                      TextButton(
+                                                          onPressed: () {
+                                                            var list =
                                                                 pathDocumentsStream
-                                                                    .add(list);
-
-                                                                Navigator.of(
-                                                                        context)
-                                                                    .pop(true);
-                                                              },
-                                                              child: Text(lang
-                                                                  .confirm
-                                                                  .toUpperCase())),
-                                                        ],
-                                                      ));
+                                                                    .value;
+                                                            list.removeAt(
+                                                                index);
+                                                            list.insert(
+                                                                index,
+                                                                addPathDocument(
+                                                                    files
+                                                                        .specification
+                                                                        .documents[
+                                                                            index]
+                                                                        .id,
+                                                                    null,
+                                                                    false,
+                                                                    null));
+                                                            pathDocumentsStream
+                                                                .add(list);
+                                                            allUploaded(false);
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop(true);
+                                                          },
+                                                          child: Text(lang
+                                                              .confirm
+                                                              .toUpperCase())),
+                                                    ],
+                                                  ));
                                         },
-                                        icon: pathDocumentsStream
-                                                    .value[index].selected ==
-                                                true
-                                            ? Icon(Icons.delete)
-                                            : Icon(null)),
-                                  ],
-                                ));
-                          }),
-                      onTap: () async {
-                        var picked = await FilePicker.platform.pickFiles();
-                        if (picked != null) {
-                          var path = picked.files.first.path;
-                          if (path != null) {
-                            var list = pathDocumentsStream.value;
-                            list.removeAt(index);
-                            list.insert(
-                                index,
-                                addPathDocument(
-                                    files.specification.documents[index].id,
-                                    path,
-                                    true));
-                            pathDocumentsStream.add(list);
-                          } else {}
-                        }
-                      },
-                    );
+                                        icon: Icon(Icons.delete))
+                                    : SizedBox.shrink(),
+                                files.uploadedFiles.isEmpty
+                                    ? ElevatedButton(
+                                        child: Text(lang.addFiles),
+                                        onPressed: () async {
+                                          var picked = await FilePicker.platform
+                                              .pickFiles();
+
+                                          if (picked != null) {
+                                            final pickedBytes =
+                                                picked.files.first.bytes;
+                                            final namePickedFile =
+                                                picked.files.first.name;
+                                            final extensionPickedFile =
+                                                picked.files.first.extension;
+                                            if (pickedBytes != null) {
+                                              var list =
+                                                  pathDocumentsStream.value;
+                                              list.removeAt(index);
+                                              list.insert(
+                                                  index,
+                                                  addPathDocument(
+                                                      files.specification
+                                                          .documents[index].id,
+                                                      pickedBytes,
+                                                      true,
+                                                      namePickedFile));
+                                              pathDocumentsStream.add(list);
+                                              allUploaded(false);
+                                            } else {}
+                                          }
+                                        },
+                                      )
+                                    : ElevatedButton(
+                                        child: Text(lang.remplaceFile),
+                                        onPressed: () async {
+                                          var picked = await FilePicker.platform
+                                              .pickFiles();
+                                          if (picked != null) {
+                                            final pickedBytes =
+                                                picked.files.first.bytes;
+                                            final namePickedFile =
+                                                picked.files.first.name;
+                                            final extensionPickedFile =
+                                                picked.files.first.extension;
+                                            if (pickedBytes != null) {
+                                              var list =
+                                                  pathDocumentsUpdateStream
+                                                      .value;
+                                              if (pathDocumentsUpdateStream
+                                                  .value
+                                                  .asMap()
+                                                  .containsKey(index)) {
+                                                list.removeAt(index);
+                                                list.insert(
+                                                    index,
+                                                    addPathDocument(
+                                                        files
+                                                            .specification
+                                                            .documents[index]
+                                                            .id,
+                                                        pickedBytes,
+                                                        true,
+                                                        namePickedFile));
+                                              }
+                                              pathDocumentsUpdateStream
+                                                  .add(list);
+                                              pathDocumentsStream.add(list);
+                                              allUploaded(true);
+                                            }
+                                          }
+                                        },
+                                      ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                snapshot.data![index].selected == true
+                                    ? Text(pathDocumentsStream
+                                        .value[index].nameDocument
+                                        .toString())
+                                    : files.uploadedFiles.isEmpty
+                                        ? Text(lang.noUpload)
+                                        : SizedBox.shrink(),
+                              ],
+                            ),
+                          ),
+                        );
+                      });
             }),
-        bottomNavigationBar: getButtons(
-          onSave: save,
-          saveLabel: lang.submit.toUpperCase(),
-          skipCancel: true,
-        ),
+        bottomNavigationBar: StreamBuilder<bool>(
+            stream: allUploadedStream,
+            builder: (context, snapshot) {
+              if (snapshot.hasData == false) {
+                return SizedBox.shrink();
+              }
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(
+                  onPressed: snapshot.data! ? save : null,
+                  child: Text(lang.submit),
+                ),
+              );
+            }),
       ),
     );
   }
 
+  void allUploaded(bool update) {
+    if (update == false) {
+      for (var pathDoc in pathDocumentsStream.value) {
+        if (!pathDoc.selected) {
+          allUploadedStream.add(false);
+          return;
+        }
+      }
+      allUploadedStream.add(true);
+    } else {
+      allUploadedStream.add(true);
+    }
+  }
+
   save() async {
     try {
-      if (pathDocumentsStream.value.isNotEmpty) {
-        for (int index = 0; index < pathDocumentsStream.value.length; index++) {
-          await serviceUploadDocument.uploadFileDynamic(
-            "/admin/files/upload/${files.id}/${files.specification.id}/${pathDocumentsStream.value[index].idDocument}",
-            pathDocumentsStream.value[index].pathDocument!,
-            callBack: (percentage) {
-              pathDocumentsStream.value[index].progress.add(percentage);
-            },
-          );
+      if (files.uploadedFiles.isEmpty) {
+        if (pathDocumentsStream.value.isNotEmpty) {
+          for (var pathDoc in pathDocumentsStream.value) {
+            await serviceUploadDocument.upload(
+              "/admin/files/upload/${files.id}/${files.specification.id}/${pathDoc.idDocument}",
+              pathDoc.document!,
+              pathDoc.nameDocument!,
+              callBack: (percentage) {
+                pathDoc.progress.add(percentage);
+              },
+            );
+          }
+          await showSnackBar2(context, lang.savedSuccessfully);
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext) => ListFilesCustomer()));
+        } else {
+          await showSnackBar2(context, lang.noDocument);
         }
-        await showSnackBar2(context, lang.savedSuccessfully);
       } else {
-        await showSnackBar2(context, lang.noDocument);
+        if (pathDocumentsUpdateStream.value.isNotEmpty) {
+          for (var pathDoc in pathDocumentsUpdateStream.value) {
+            if (pathDoc.selected) {
+              await serviceUploadDocument.upload(
+                "/admin/files/upload/${files.id}/${files.specification.id}/${pathDoc.idDocument}",
+                pathDoc.document!,
+                pathDoc.nameDocument!,
+                callBack: (percentage) {
+                  pathDoc.progress.add(percentage);
+                },
+              );
+            }
+          }
+
+          await showSnackBar2(context, lang.savedSuccessfully);
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext) => ListFilesCustomer()));
+        } else {
+          await showSnackBar2(context, lang.noDocument);
+        }
       }
     } catch (error, stackTrace) {
       print(stackTrace);
@@ -246,12 +359,15 @@ class _FilePickerCustomerFolderState
     }
   }
 
-  PathsDocuments addPathDocument(
-      String idDocument, String? pathDocument, bool selected) {
+  PathsDocuments addPathDocument(String idDocument, Uint8List? document,
+      bool selected, String? nameDocument) {
     var result;
 
     result = PathsDocuments(
-        idDocument: idDocument, pathDocument: pathDocument, selected: selected);
+        idDocument: idDocument,
+        selected: selected,
+        document: document,
+        nameDocument: nameDocument);
 
     return result;
   }
@@ -267,13 +383,15 @@ class _FilePickerCustomerFolderState
 
 class PathsDocuments {
   final String idDocument;
-  final String? pathDocument;
+  final Uint8List? document;
+  final String? nameDocument;
   final bool selected;
   final BehaviorSubject<double> progress;
 
   PathsDocuments(
-      {required this.idDocument,
-      required this.pathDocument,
+      {this.nameDocument,
+      this.document,
+      required this.idDocument,
       this.selected = false})
       : progress = BehaviorSubject<double>();
 }

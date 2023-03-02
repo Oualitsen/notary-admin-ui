@@ -264,5 +264,12 @@
   "originalDocument":"Document Original",
   "requiredDocument":"Document requis",
   "noDocument":"list documents est vides ",
-  "filesNumber":"code du dossier"
+  "filesNumber":"code du dossier",
+  "filesNumber":"code du dossier",
+  "formToHtml":"",
+  "dataForDocument":"",
+  "nameForDocument":"",
+  "listFilesCustomer":"Listes des dossier clients",
+  "noUpload":"pas encore téléchargé",
+  "remplaceFile":"remplacer le fichier"
 }

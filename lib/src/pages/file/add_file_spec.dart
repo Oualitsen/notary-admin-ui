@@ -18,7 +18,6 @@ import '../document/add_document.dart';
 import '../document/document_table.dart';
 
 class AddFileSpec extends StatefulWidget {
-  static const home = "/";
   final FilesSpec? fileSpec;
 
   const AddFileSpec({
@@ -35,6 +34,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
   final service = GetIt.instance.get<FileSpecService>();
   final _currentStepStream = BehaviorSubject.seeded(0);
   final _listDocumentsStream = BehaviorSubject.seeded(<DocumentSpecInput>[]);
+  final listDocIsNotEmptyStream = BehaviorSubject.seeded(false);
 
   final GlobalKey<FormState> _fileSpecNameKey = GlobalKey<FormState>();
   final GlobalKey<FormState> _fileSpecDocumentKey = GlobalKey<FormState>();
@@ -211,22 +211,29 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
             name: _nameFileSpecCtrl.text,
             documentInputs: listDocumentsInput,
             id: null);
-
-        await service.saveFileSpec(input);
-        await showSnackBar2(context, lang.savedSuccessfully);
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => FileSpecList()));
+        if (listDocumentsInput.isNotEmpty) {
+          await service.saveFileSpec(input);
+          await showSnackBar2(context, lang.savedSuccessfully);
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => FileSpecList()));
+        } else {
+          await showSnackBar2(
+              context, " ${lang.listDocumentsFileSpec}   ${lang.empty}");
+        }
       } else {
         var update = FilesSpecInput(
             name: _nameFileSpecCtrl.text,
             documentInputs: listDocumentsInput,
             id: widget.fileSpec!.id);
-
-        await service.saveFileSpec(update);
-        await showSnackBar2(context, lang.updatedSuccessfully);
-        //Navigator.pop(context);
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => FileSpecList()));
+        if (listDocumentsInput.isNotEmpty) {
+          await service.saveFileSpec(update);
+          await showSnackBar2(context, lang.updatedSuccessfully);
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => FileSpecList()));
+        } else {
+          await showSnackBar2(
+              context, " ${lang.listDocumentsFileSpec}   ${lang.empty}");
+        }
       }
     } catch (error, stackTrace) {
       print(stackTrace);

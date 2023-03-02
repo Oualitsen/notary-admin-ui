@@ -263,5 +263,12 @@
   "originalDocument":"المستند الأصلي",
   "requiredDocument":"ملفات مطلوبه",
   "noDocument":"قائمة المستندات فارغة",
-  "filesNumber":"كود الملف"
+  "filesNumber":"كود الملف",
+  "formToHtml":"",
+  "dataForDocument":"",
+  "nameForDocument":"",
+  "listFilesCustomer":"قائمة ملفات العميل",
+  "noUpload":"لم يتم الرفع بعد",
+  "remplaceFile":"استبدل الملف"
+
 }
