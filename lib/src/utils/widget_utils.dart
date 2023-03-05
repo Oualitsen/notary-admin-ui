@@ -21,6 +21,7 @@ import 'package:rapidoc_utils/widgets/route_guard_widget.dart';
 import 'package:rapidoc_utils/widgets/template_builder.dart';
 
 import '../pages/customer/add_folder_customer.dart';
+import '../pages/customer/list_files_customer.dart';
 import '../pages/file/file_spec_List.dart';
 
 class WidgetUtils {
@@ -201,6 +202,11 @@ Widget createDrawer(BuildContext context) {
               MaterialPageRoute(builder: (context) => AddFolderCustomer()))
         },
       ),
+      DrawerMenuItem(
+          title: lang.listFilesCustomer,
+          icon: Icons.file_present_rounded,
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (context) => ListFilesCustomer()))),
     ],
     header: DrawerHeader(
       decoration: const BoxDecoration(),

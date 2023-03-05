@@ -23,9 +23,7 @@ import 'package:universal_html/html.dart' as html;
 import 'package:cookie_jar/cookie_jar.dart';
 
 //const devUrlBase = "192.168.9.4:8080";
-//const devUrlBase = "localhost:8080";
-const devUrlBase = "192.168.1.21:8080";
-
+const devUrlBase = "localhost:8080";
 const emuUrlBase = "10.0.2.2:8080";
 const prodUrlBase = "ams.bms-data-collector.info";
 

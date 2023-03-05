@@ -30,6 +30,7 @@
     "print",
     "multipleSelection",
     "singleSelection"
+
   ],
 
   "fr": [
@@ -56,6 +57,7 @@
     "addAssistant",
     "addFiles",
     "assistantDetails",
+
     "menu",
     "dataForDocument",
     "formToHtml",
@@ -63,5 +65,6 @@
     "print",
     "multipleSelection",
     "singleSelection"
+
   ]
 }

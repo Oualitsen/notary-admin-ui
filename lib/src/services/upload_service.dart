@@ -14,24 +14,33 @@ class UploadService {
     return response.data as String;
   }
 
-  Future<String> upload(String uri, Uint8List data,
-      {Function(double percentage)? callBack}) async {
-    Map map = {};
-    map.putIfAbsent("data", () => data);
-
+  Future<String> upload(
+    String uri,
+    Uint8List data,
+    String nameData, {
+    Function(double percentage)? callBack,
+    Map<String, String> otherFields = const {},
+  }) async {
+    FormData formData = FormData.fromMap({
+      "data": await MultipartFile.fromBytes(
+        data,
+        filename: nameData,
+        
+      )
+    });
     var response = await dio.post(
       uri,
-      data: map,
-      onSendProgress: (int received, int total) {
+      data: formData,
+      onSendProgress: (received, total) {
         if (total != -1) {
-          double progress = received.toDouble() / total.toDouble();
+          double progress = received / total * 100;
           if (callBack != null) {
             callBack(progress);
           }
         }
       },
     );
-    return response.data as String;
+    return response.data.toString();
   }
 
   Future<dynamic> uploadFileDynamic(

@@ -16,7 +16,9 @@ import '../../widgets/mixins/button_utils_mixin.dart';
 
 class DocumentsTable extends StatefulWidget {
   final List<DocumentSpecInput> listDocument;
-  const DocumentsTable({super.key, required this.listDocument});
+  final Function(List<DocumentSpecInput> listDoc) onChanged;
+  const DocumentsTable(
+      {super.key, required this.listDocument, required this.onChanged});
 
   @override
   State<DocumentsTable> createState() => _DocumentsTableState();
@@ -32,6 +34,7 @@ class _DocumentsTableState extends BasicState<DocumentsTable>
   @override
   void initState() {
     listDocument = widget.listDocument;
+    _listDocumentsStream.add(listDocument);
     super.initState();
   }
 
@@ -43,9 +46,12 @@ class _DocumentsTableState extends BasicState<DocumentsTable>
       alignment: Alignment.topLeft,
       child: StreamBuilder<List<DocumentSpecInput>>(
           stream: _listDocumentsStream,
-          initialData: listDocument,
+          initialData: _listDocumentsStream.value,
           builder: (context, snapshot) {
-            return listDocument.length == 0
+            if (snapshot.hasData == false) {
+              return SizedBox.shrink();
+            }
+            return snapshot.data!.isEmpty
                 ? ListTile(
                     title: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -54,7 +60,7 @@ class _DocumentsTableState extends BasicState<DocumentsTable>
                     ],
                   ))
                 : ListView.builder(
-                    itemCount: listDocument.length,
+                    itemCount: snapshot.data!.length,
                     itemBuilder: (context, int index) {
                       return ListTile(
                         title: Row(
@@ -65,77 +71,67 @@ class _DocumentsTableState extends BasicState<DocumentsTable>
                               color: Color.fromARGB(158, 3, 18, 27),
                             ),
                             SizedBox(
-                              width: 20,
+                              width: 10,
                             ),
-                            Text(
-                                "${lang.documentName.toUpperCase()}:${listDocument[index].name}"),
+                            Text("${snapshot.data![index].name}"),
                             SizedBox(
-                              width: 20,
+                              width: 10,
                             ),
 
+                            Text(snapshot.data![index].optional == true
+                                ? "${lang.originalDocument} : ${lang.yes}"
+                                : "${lang.originalDocument} : ${lang.no}"),
                             SizedBox(
-                              width: 20,
+                              width: 10,
                             ),
-                            Text(listDocument[index].optional == true
-                                ? "${lang.originalDocument.toUpperCase()}:${lang.yes}"
-                                : "${lang.originalDocument.toUpperCase()}:${lang.no}"),
-                            SizedBox(
-                              width: 20,
-                            ),
-                            Text(listDocument[index].original == true
-                                ? "${lang.requiredDocument.toUpperCase()}:${lang.yes}"
-                                : "${lang.requiredDocument.toUpperCase()}:${lang.no}"),
+                            Text(snapshot.data![index].original == true
+                                ? "${lang.requiredDocument} : ${lang.yes}"
+                                : "${lang.requiredDocument} : ${lang.no}"),
 //a voir avec l'expiration des documents
                             // Text(
                             //   lang.expiryDate +
                             //       " : " +
                             //       lang.formatDate(listDocument[index].expiryDate),
                             // ),
-                            Container(
-                              padding: EdgeInsets.all(20),
-                              alignment: Alignment.topRight,
-                              child: Row(
-                                children: [
-                                  IconButton(
-                                    onPressed: () {
-                                      showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) =>
-                                            AlertDialog(
-                                          title: Text(lang.confirm),
-                                          content: Text(lang.confirmDelete),
-                                          actions: <Widget>[
-                                            TextButton(
-                                              child:
-                                                  Text(lang.no.toUpperCase()),
-                                              onPressed: () =>
-                                                  Navigator.of(context)
-                                                      .pop(false),
-                                            ),
-                                            TextButton(
-                                                child: Text(
-                                                    lang.yes.toUpperCase()),
-                                                onPressed: () {
-                                                  listDocument.remove(
-                                                      listDocument[index]);
-                                                  _listDocumentsStream
-                                                      .add(listDocument);
-                                                  Navigator.of(context)
-                                                      .pop(true);
-                                                })
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                    icon: Icon(
-                                      Icons.delete,
-                                      color: Color.fromARGB(255, 61, 84, 218),
-                                    ),
+                          ],
+                        ),
+                        trailing: IconButton(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) => AlertDialog(
+                                title: Text(lang.confirm),
+                                content: Text(lang.confirmDelete),
+                                actions: <Widget>[
+                                  TextButton(
+                                    child: Text(lang.no.toUpperCase()),
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(false),
                                   ),
+                                  TextButton(
+                                      child: Text(lang.yes.toUpperCase()),
+                                      onPressed: () async {
+                                        var list = snapshot.data!;
+                                        list.removeAt(index);
+                                        //          .remove(snapshot.data![index]);
+                                        _listDocumentsStream.add(list);
+                                        print(list.length);
+                                        if (list.isEmpty) {
+                                          await showSnackBar2(
+                                              context, lang.noDocument);
+                                        }
+                                        widget.onChanged(
+                                            _listDocumentsStream.value);
+
+                                        Navigator.of(context).pop(true);
+                                      })
                                 ],
                               ),
-                            ),
-                          ],
+                            );
+                          },
+                          icon: Icon(
+                            Icons.delete,
+                          ),
                         ),
                       );
                     },
