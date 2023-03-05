@@ -33,11 +33,8 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
   int currentStep = 0;
   final service = GetIt.instance.get<FileSpecService>();
   final _currentStepStream = BehaviorSubject.seeded(0);
-  final _listDocumentsStream = BehaviorSubject.seeded(<DocumentSpecInput>[]);
-  final listDocIsNotEmptyStream = BehaviorSubject.seeded(false);
-
+  final _listDocumentsInputStream = BehaviorSubject.seeded(<DocumentSpecInput>[]);
   final GlobalKey<FormState> _fileSpecNameKey = GlobalKey<FormState>();
-  final GlobalKey<FormState> _fileSpecDocumentKey = GlobalKey<FormState>();
   final _nameFileSpecCtrl = TextEditingController();
   List<DocumentSpecInput> listDocumentsInput = [];
   late FilesSpec fileSpec;
@@ -55,7 +52,9 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
               optional: e.optional,
               original: e.original))
           .toList();
+      _listDocumentsInputStream.add(listDocumentsInput);
     }
+
     super.initState();
   }
 
@@ -128,8 +127,9 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                               builder: (context) => AddDocument()),
                         ).then((value) {
                           if (value != null) {
-                            listDocumentsInput.add(value);
-                            _listDocumentsStream.add(listDocumentsInput);
+                            var list = _listDocumentsInputStream.value;
+                            list.add(value);
+                            _listDocumentsInputStream.add(list);
                           }
                         });
                       },
@@ -138,21 +138,37 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                   ],
                 ),
                 content: StreamBuilder<List<DocumentSpecInput>>(
-                    stream: _listDocumentsStream,
-                    initialData: listDocumentsInput,
+                    stream: _listDocumentsInputStream,
+                    initialData: _listDocumentsInputStream.value,
                     builder: (context, snapshot) {
+                      if (snapshot.hasData == false) {
+                        return SizedBox.shrink();
+                      }
                       return Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           DocumentsTable(
-                            listDocument: listDocumentsInput,
+                            listDocument: snapshot.data!,
+                            onChanged: (List<DocumentSpecInput> listDoc) {
+                              _listDocumentsInputStream.add(listDoc);
+                            },
                           ),
                           SizedBox(height: 16),
-                          getButtons(
-                              onSave: continued,
-                              cancelLabel: lang.previous.toUpperCase(),
-                              saveLabel: lang.submit.toUpperCase(),
-                              onCancel: previous),
+                          ButtonBar(
+                            alignment: MainAxisAlignment.end,
+                            children: [
+                              TextButton(
+                                  onPressed: previous,
+                                  child: Text(lang.previous)),
+                              SizedBox(
+                                width: 20,
+                              ),
+                              ElevatedButton(
+                                  onPressed:
+                                      snapshot.data!.isNotEmpty ? save : null,
+                                  child: Text(lang.submit)),
+                            ],
+                          ),
                         ],
                       );
                     }),
@@ -184,6 +200,9 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
         {
           if (_fileSpecNameKey.currentState?.validate() ?? false) {
             _currentStepStream.add(_currentStepStream.value + 1);
+            if (_listDocumentsInputStream.value.isEmpty) {
+              await showSnackBar2(context, lang.noDocument);
+            }
           }
         }
         break;
@@ -209,9 +228,9 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
       if (widget.fileSpec == null) {
         var input = FilesSpecInput(
             name: _nameFileSpecCtrl.text,
-            documentInputs: listDocumentsInput,
+            documentInputs: _listDocumentsInputStream.value,
             id: null);
-        if (listDocumentsInput.isNotEmpty) {
+        if (_listDocumentsInputStream.value.isNotEmpty) {
           await service.saveFileSpec(input);
           await showSnackBar2(context, lang.savedSuccessfully);
           Navigator.push(
@@ -223,9 +242,9 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
       } else {
         var update = FilesSpecInput(
             name: _nameFileSpecCtrl.text,
-            documentInputs: listDocumentsInput,
+            documentInputs: _listDocumentsInputStream.value,
             id: widget.fileSpec!.id);
-        if (listDocumentsInput.isNotEmpty) {
+        if (_listDocumentsInputStream.value.isNotEmpty) {
           await service.saveFileSpec(update);
           await showSnackBar2(context, lang.updatedSuccessfully);
           Navigator.push(

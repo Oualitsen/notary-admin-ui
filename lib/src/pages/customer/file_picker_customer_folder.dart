@@ -44,7 +44,7 @@ class _FilePickerCustomerFolderState
               idDocument: e.id,
               document: null,
               selected: false,
-              nameDocument: null))
+              namePickedDocument: null))
           .toList());
     } else {
       pathDocumentsStream.add(widget.files.specification.documents
@@ -52,6 +52,7 @@ class _FilePickerCustomerFolderState
               idDocument: e.id,
               document: null,
               selected: true,
+              namePickedDocument: '',
               nameDocument: ''))
           .toList());
       pathDocumentsUpdateStream.add(widget.files.specification.documents
@@ -59,6 +60,7 @@ class _FilePickerCustomerFolderState
               idDocument: e.id,
               document: null,
               selected: false,
+              namePickedDocument: '',
               nameDocument: ''))
           .toList());
     }
@@ -90,18 +92,27 @@ class _FilePickerCustomerFolderState
                           return SizedBox.shrink();
                         }
                         return ListTile(
-                          title: Row(
+                          leading: Icon(Icons.file_download),
+                          title: Text(
+                            " ${files.specification.documents[index].name} ",
+                            style:
+                                TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+                            maxLines: 50,
+                          ),
+                          subtitle: Row(
                             children: [
-                              Icon(Icons.file_download),
-                              SizedBox(width: 20),
-                              Text(
-                                " ${files.specification.documents[index].name} ",
-                                style: TextStyle(
-                                    color: Color.fromARGB(255, 0, 0, 0)),
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
+                              snapshot.data![index].selected == true
+                                  ? Flexible(
+                                      child: Text(
+                                        pathDocumentsStream
+                                            .value[index].namePickedDocument
+                                            .toString(),
+                                        softWrap: true,
+                                      ),
+                                    )
+                                  : files.uploadedFiles.isEmpty
+                                      ? Text(lang.noUpload)
+                                      : SizedBox.shrink(),
                               StreamBuilder<double>(
                                   stream:
                                       pathDocumentsStream.value[index].progress,
@@ -117,90 +128,127 @@ class _FilePickerCustomerFolderState
                                           ));
                                     }
                                     if (snapshot.hasData) {
-                                      return Text("-->${snapshot.data} %");
+                                      return Text(
+                                        "   ...${snapshot.data} %",
+                                        style: TextStyle(
+                                          color: Color.fromARGB(255, 0, 0, 0),
+                                        ),
+                                      );
                                     }
                                     return SizedBox.shrink();
                                   }),
                             ],
                           ),
-                          trailing: Container(
-                            width: 300,
-                            height: 200,
-                            child: Wrap(
-                              direction: Axis.vertical,
-                              alignment: WrapAlignment.spaceBetween,
-                              children: [
-                                pathDocumentsStream.value[index].selected ==
-                                            true &&
-                                        files.uploadedFiles.isEmpty
-                                    ? IconButton(
-                                        onPressed: () {
-                                          showDialog(
-                                              context: context,
-                                              builder: (BuildContext) =>
-                                                  AlertDialog(
-                                                    title: Text(lang.confirm),
-                                                    content: Text(
-                                                        lang.confirmDelete),
-                                                    actions: [
-                                                      TextButton(
-                                                          onPressed: () {
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop(false);
-                                                          },
-                                                          child: Text(lang.no
-                                                              .toUpperCase())),
-                                                      TextButton(
-                                                          onPressed: () {
-                                                            var list =
-                                                                pathDocumentsStream
-                                                                    .value;
-                                                            list.removeAt(
-                                                                index);
-                                                            list.insert(
-                                                                index,
-                                                                addPathDocument(
-                                                                    files
-                                                                        .specification
-                                                                        .documents[
-                                                                            index]
-                                                                        .id,
-                                                                    null,
-                                                                    false,
-                                                                    null));
-                                                            pathDocumentsStream
-                                                                .add(list);
-                                                            allUploaded(false);
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop(true);
-                                                          },
-                                                          child: Text(lang
-                                                              .confirm
-                                                              .toUpperCase())),
-                                                    ],
-                                                  ));
-                                        },
-                                        icon: Icon(Icons.delete))
-                                    : SizedBox.shrink(),
-                                files.uploadedFiles.isEmpty
-                                    ? ElevatedButton(
-                                        child: Text(lang.addFiles),
-                                        onPressed: () async {
-                                          var picked = await FilePicker.platform
-                                              .pickFiles();
+                          trailing: Wrap(
+                            direction: Axis.horizontal,
+                            alignment: WrapAlignment.end,
+                            spacing: 10,
+                            children: [
+                              pathDocumentsStream.value[index].selected ==
+                                          true &&
+                                      files.uploadedFiles.isEmpty
+                                  ? OutlinedButton(
+                                      onPressed: () {
+                                        showDialog(
+                                            context: context,
+                                            builder: (BuildContext) =>
+                                                AlertDialog(
+                                                  title: Text(lang.confirm),
+                                                  content:
+                                                      Text(lang.confirmDelete),
+                                                  actions: [
+                                                    TextButton(
+                                                        onPressed: () {
+                                                          Navigator.of(context)
+                                                              .pop(false);
+                                                        },
+                                                        child: Text(lang.no
+                                                            .toUpperCase())),
+                                                    TextButton(
+                                                        onPressed: () {
+                                                          var list =
+                                                              pathDocumentsStream
+                                                                  .value;
+                                                          list.removeAt(index);
+                                                          list.insert(
+                                                              index,
+                                                              addPathDocument(
+                                                                  files
+                                                                      .specification
+                                                                      .documents[
+                                                                          index]
+                                                                      .id,
+                                                                  null,
+                                                                  false,
+                                                                  '',
+                                                                  ''));
+                                                          pathDocumentsStream
+                                                              .add(list);
+                                                          allUploaded(false);
+                                                          Navigator.of(context)
+                                                              .pop(true);
+                                                        },
+                                                        child: Text(lang.confirm
+                                                            .toUpperCase())),
+                                                  ],
+                                                ));
+                                      },
+                                      child: Icon(Icons.delete))
+                                  : SizedBox.shrink(),
+                              files.uploadedFiles.isEmpty
+                                  ? ElevatedButton(
+                                      child: Text(lang.addFiles),
+                                      onPressed: () async {
+                                        var picked = await FilePicker.platform
+                                            .pickFiles();
 
-                                          if (picked != null) {
-                                            final pickedBytes =
-                                                picked.files.first.bytes;
-                                            final namePickedFile =
-                                                picked.files.first.name;
-                                            final extensionPickedFile =
-                                                picked.files.first.extension;
-                                            if (pickedBytes != null) {
-                                              var list =
-                                                  pathDocumentsStream.value;
+                                        if (picked != null) {
+                                          final pickedBytes =
+                                              picked.files.first.bytes;
+                                          final namePickedFile =
+                                              picked.files.first.name;
+                                          final extensionPickedFile =
+                                              picked.files.first.extension;
+                                          if (pickedBytes != null) {
+                                            var list =
+                                                pathDocumentsStream.value;
+                                            list.removeAt(index);
+                                            list.insert(
+                                                index,
+                                                addPathDocument(
+                                                    files.specification
+                                                        .documents[index].id,
+                                                    pickedBytes,
+                                                    true,
+                                                    namePickedFile,
+                                                    files
+                                                        .specification
+                                                        .documents[index]
+                                                        .name));
+                                            pathDocumentsStream.add(list);
+                                            allUploaded(false);
+                                          } else {}
+                                        }
+                                      },
+                                    )
+                                  : ElevatedButton(
+                                      child: Text(lang.remplaceFile),
+                                      onPressed: () async {
+                                        var picked = await FilePicker.platform
+                                            .pickFiles();
+                                        if (picked != null) {
+                                          final pickedBytes =
+                                              picked.files.first.bytes;
+                                          final namePickedFile =
+                                              picked.files.first.name;
+                                          final extensionPickedFile =
+                                              picked.files.first.extension;
+                                          if (pickedBytes != null) {
+                                            var list =
+                                                pathDocumentsUpdateStream.value;
+                                            if (pathDocumentsUpdateStream.value
+                                                .asMap()
+                                                .containsKey(index)) {
                                               list.removeAt(index);
                                               list.insert(
                                                   index,
@@ -209,65 +257,20 @@ class _FilePickerCustomerFolderState
                                                           .documents[index].id,
                                                       pickedBytes,
                                                       true,
-                                                      namePickedFile));
-                                              pathDocumentsStream.add(list);
-                                              allUploaded(false);
-                                            } else {}
-                                          }
-                                        },
-                                      )
-                                    : ElevatedButton(
-                                        child: Text(lang.remplaceFile),
-                                        onPressed: () async {
-                                          var picked = await FilePicker.platform
-                                              .pickFiles();
-                                          if (picked != null) {
-                                            final pickedBytes =
-                                                picked.files.first.bytes;
-                                            final namePickedFile =
-                                                picked.files.first.name;
-                                            final extensionPickedFile =
-                                                picked.files.first.extension;
-                                            if (pickedBytes != null) {
-                                              var list =
-                                                  pathDocumentsUpdateStream
-                                                      .value;
-                                              if (pathDocumentsUpdateStream
-                                                  .value
-                                                  .asMap()
-                                                  .containsKey(index)) {
-                                                list.removeAt(index);
-                                                list.insert(
-                                                    index,
-                                                    addPathDocument(
-                                                        files
-                                                            .specification
-                                                            .documents[index]
-                                                            .id,
-                                                        pickedBytes,
-                                                        true,
-                                                        namePickedFile));
-                                              }
-                                              pathDocumentsUpdateStream
-                                                  .add(list);
-                                              pathDocumentsStream.add(list);
-                                              allUploaded(true);
+                                                      namePickedFile,
+                                                      files
+                                                          .specification
+                                                          .documents[index]
+                                                          .name));
                                             }
+                                            pathDocumentsUpdateStream.add(list);
+                                            pathDocumentsStream.add(list);
+                                            allUploaded(true);
                                           }
-                                        },
-                                      ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                snapshot.data![index].selected == true
-                                    ? Text(pathDocumentsStream
-                                        .value[index].nameDocument
-                                        .toString())
-                                    : files.uploadedFiles.isEmpty
-                                        ? Text(lang.noUpload)
-                                        : SizedBox.shrink(),
-                              ],
-                            ),
+                                        }
+                                      },
+                                    ),
+                            ],
                           ),
                         );
                       });
@@ -278,12 +281,13 @@ class _FilePickerCustomerFolderState
               if (snapshot.hasData == false) {
                 return SizedBox.shrink();
               }
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(
-                  onPressed: snapshot.data! ? save : null,
-                  child: Text(lang.submit),
-                ),
+              return ButtonBar(
+                alignment: MainAxisAlignment.end,
+                children: [
+                  ElevatedButton(
+                      onPressed: snapshot.data! ? save : null,
+                      child: Text(lang.submit)),
+                ],
               );
             }),
       ),
@@ -360,13 +364,14 @@ class _FilePickerCustomerFolderState
   }
 
   PathsDocuments addPathDocument(String idDocument, Uint8List? document,
-      bool selected, String? nameDocument) {
+      bool selected, String namePickedDocument, String nameDocument) {
     var result;
 
     result = PathsDocuments(
         idDocument: idDocument,
         selected: selected,
         document: document,
+        namePickedDocument: namePickedDocument,
         nameDocument: nameDocument);
 
     return result;
@@ -384,12 +389,14 @@ class _FilePickerCustomerFolderState
 class PathsDocuments {
   final String idDocument;
   final Uint8List? document;
+  final String? namePickedDocument;
   final String? nameDocument;
   final bool selected;
   final BehaviorSubject<double> progress;
 
   PathsDocuments(
-      {this.nameDocument,
+      {this.namePickedDocument,
+      this.nameDocument,
       this.document,
       required this.idDocument,
       this.selected = false})

@@ -19,7 +19,6 @@ class FileSpecTable extends StatefulWidget {
 class _FileSpecTableState extends BasicState<FileSpecTable>
     with WidgetUtilsMixin {
   final service = GetIt.instance.get<FileSpecService>();
-  final _dataStream = BehaviorSubject.seeded(<FilesSpec>[]);
   final columnSpacing = 65.0;
   bool initialized = false;
   List<DataColumn> columns = [];
@@ -105,8 +104,7 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
                                   SizedBox(
                                     width: 10,
                                   ),
-                                  Text(
-                                      " ${data.documents[index].name}"),
+                                  Text(" ${data.documents[index].name}"),
                                   SizedBox(
                                     width: 10,
                                   ),

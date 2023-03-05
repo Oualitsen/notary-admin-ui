@@ -122,7 +122,6 @@ class _AddDocumentState extends BasicState<AddDocument> with WidgetUtilsMixin {
                                     value: _isOriginalDocumentCtrl,
                                     onChanged: (value) {
                                       if (value != null) {
-                                        print(value);
                                         _isOriginalDocumentCtrl = value;
                                         _isOriginalDocumentStream.add(value);
                                       }
@@ -253,6 +252,7 @@ class _AddDocumentState extends BasicState<AddDocument> with WidgetUtilsMixin {
         break;
       case 2:
         {
+           
           save();
         }
         break;
