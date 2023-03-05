@@ -71,6 +71,16 @@ extension AppLocalizationsExt on AppLocalizations {
     }
   }
 
+  String selectionType(Gender gender) {
+    switch (gender) {
+      case Gender.MALE:
+        return genderMale;
+        break;
+      case Gender.FEMALE:
+        return genderFemale;
+    }
+  }
+
   String formatDay(int date) {
     return _dayFormat.format(DateTime.fromMillisecondsSinceEpoch(date));
   }

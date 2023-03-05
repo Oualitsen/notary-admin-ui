@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:get_it/get_it.dart';
 import 'package:notary_admin/src/services/admin/customer_service.dart';
+import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
 import 'package:notary_admin/src/services/admin/profile_service.dart';
 import 'package:notary_admin/src/services/admin/template_document_service.dart';
 import 'package:notary_admin/src/services/assistant/assistant_service.dart';
@@ -80,6 +81,7 @@ void initServices() {
   GetIt.instance.registerSingleton(TemplateDocumentService(dio));
   GetIt.instance.registerSingleton(AssistantService(dio));
   GetIt.instance.registerSingleton(FilesService(dio));
+  GetIt.instance.registerSingleton(PrintedDocService(dio));
 
   GetIt.instance.registerSingleton(
     AuthManager<Admin>(

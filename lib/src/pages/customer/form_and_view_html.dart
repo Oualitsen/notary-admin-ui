@@ -1,6 +1,10 @@
+import 'package:get_it/get_it.dart';
 import 'package:html/parser.dart';
 import 'package:flutter/material.dart';
+import 'package:http_error_handler/error_handler.dart';
+import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
+import 'package:notary_model/model/printed_doc_input.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:webviewx/webviewx.dart';
 import '../../widgets/basic_state.dart';
@@ -20,22 +24,23 @@ class FormAndViewHtml extends StatefulWidget {
 class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
     with WidgetUtilsMixin {
   WebViewXController? controllerWeb;
-
+  final printedDocService = GetIt.instance.get<PrintedDocService>();
   final GlobalKey<FormState> _formKeyListNames = GlobalKey<FormState>();
   List<TextEditingController> _controller = [];
   late List listFormField;
   late String text;
   final _htmlDocument = BehaviorSubject.seeded('');
-  var print = """
+  var toPrint = """
    <script>
       function display() {
          window.print();
       }
    </script>
 """;
+
   @override
   void initState() {
-    text = print + widget.text;
+    text = toPrint + widget.text;
     listFormField = widget.listFormField;
     _controller =
         List.generate(listFormField.length, (i) => TextEditingController());
@@ -52,11 +57,21 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
         appBar: AppBar(
           title: Text(lang.formToHtml),
           actions: [
-            IconButton(
-              onPressed: () {
-                controllerWeb?.callJsMethod("display", []);
-              },
-              icon: Icon(Icons.save),
+            Tooltip(
+              message: lang.print,
+              child: IconButton(
+                onPressed: () {
+                  controllerWeb?.callJsMethod("display", []);
+                },
+                icon: Icon(Icons.print),
+              ),
+            ),
+            Tooltip(
+              message: lang.save,
+              child: IconButton(
+                onPressed: saveCopy,
+                icon: Icon(Icons.save),
+              ),
             )
           ],
         ),
@@ -80,29 +95,34 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
                     elevation: 0,
                   ),
                   Form(
-                      key: _formKeyListNames,
-                      onChanged: onDataChange,
-                      child: Expanded(
-                        child: ListView.builder(
-                          itemCount: listFormField.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
-                              child: TextFormField(
-                                decoration:
-                                    getDecoration(listFormField[index], false),
-                                controller: _controller[index],
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return lang.requiredField;
-                                  }
-                                  return null;
-                                },
-                              ),
-                            );
-                          },
-                        ),
-                      )),
+                    key: _formKeyListNames,
+                    onChanged: onDataChange,
+                    child: Expanded(
+                      child: ListView.builder(
+                        itemCount: listFormField.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: TextFormField(
+                              decoration:
+                                  getDecoration(listFormField[index], false),
+                              controller: _controller[index],
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return lang.requiredField;
+                                }
+                                return null;
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: saveCopy,
+                    child: Text(lang.save),
+                  ),
                 ],
               ),
             ),
@@ -163,4 +183,21 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
 
   @override
   List<Subject> get subjects => [];
+
+  void saveCopy() async {
+    if (_formKeyListNames.currentState?.validate() ?? false) {
+      try {
+        var input = PrintedDocInput(
+            id: null,
+            filesId: "filesId",
+            htmlData: _htmlDocument.value,
+            name: "name");
+        await printedDocService.create(input);
+        await showSnackBar2(context, lang.savedSuccessfully);
+      } catch (error, stacktrace) {
+        print(stacktrace);
+        showServerError(context, error: error);
+      }
+    }
+  }
 }

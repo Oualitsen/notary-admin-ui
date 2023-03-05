@@ -1,5 +1,6 @@
 import 'package:device_preview/device_preview.dart';
 import 'package:notary_admin/src/pages/assistant/list_assistant_page.dart';
+import 'package:notary_admin/src/pages/customer/customer_selection_page.dart';
 import 'package:notary_admin/src/pages/customer/customer_table_widget.dart';
 import 'package:notary_admin/src/pages/customer/form_and_view_html.dart';
 import 'package:notary_admin/src/pages/customer/list_customer_page.dart';
@@ -13,6 +14,7 @@ import 'package:notary_admin/src/db_services/token_db_service.dart';
 import 'package:notary_admin/src/utils/injector.dart';
 import 'package:notary_admin/src/widgets/mixins/lang.dart';
 import 'package:notary_model/model/admin.dart';
+import 'package:notary_model/model/selection_type.dart';
 import 'package:rapidoc_utils/widgets/image_utils.dart';
 import 'package:rapidoc_utils/widgets/menu_drawer.dart';
 import 'package:rapidoc_utils/widgets/route_guard_widget.dart';
@@ -122,7 +124,10 @@ Widget createDrawer(BuildContext context) {
         onTap: () => {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ListCustomerPage()),
+            MaterialPageRoute(
+                builder: (context) => CustomerSelection(
+                      selectionType: SelectionType.SINGLE,
+                    )),
           )
         },
       ),

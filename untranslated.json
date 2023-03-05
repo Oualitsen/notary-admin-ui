@@ -27,7 +27,9 @@
     "dataForDocument",
     "formToHtml",
     "nameForDocument",
-    "print"
+    "print",
+    "multipleSelection",
+    "singleSelection"
   ],
 
   "fr": [
@@ -58,6 +60,8 @@
     "dataForDocument",
     "formToHtml",
     "nameForDocument",
-    "print"
+    "print",
+    "multipleSelection",
+    "singleSelection"
   ]
 }
