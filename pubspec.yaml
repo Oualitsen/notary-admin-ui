@@ -71,6 +71,7 @@ dev_dependencies:
   retrofit: ^3.0.1
   retrofit_generator: ^4.0.1
   webviewx: ^0.2.1
+  byte_util: ^0.3.0
 
   #flutter_lints: ^1.0.4
 

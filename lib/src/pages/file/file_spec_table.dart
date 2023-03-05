@@ -19,8 +19,7 @@ class FileSpecTable extends StatefulWidget {
 class _FileSpecTableState extends BasicState<FileSpecTable>
     with WidgetUtilsMixin {
   final service = GetIt.instance.get<FileSpecService>();
-  final _dataStream = BehaviorSubject.seeded(<FilesSpec>[]);
-  final columnSpacing = 200.0;
+  final columnSpacing = 65.0;
   bool initialized = false;
   List<DataColumn> columns = [];
   final tableKey = GlobalKey<LazyPaginatedDataTableState>();
@@ -28,7 +27,6 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
   Widget build(BuildContext context) {
     columns = [
       DataColumn(label: Text(lang.createdFileSpec)),
-      //  DataColumn(label: Text("Id")),
       DataColumn(label: Text(lang.fileSpec)),
       DataColumn(label: Text(lang.list)),
       DataColumn(label: Text(lang.edit)),
@@ -104,27 +102,26 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
                                     color: Color.fromARGB(158, 3, 18, 27),
                                   ),
                                   SizedBox(
-                                    width: 20,
+                                    width: 10,
+                                  ),
+                                  Text(" ${data.documents[index].name}"),
+                                  SizedBox(
+                                    width: 10,
                                   ),
                                   Text(
-                                      "${lang.documentName.toUpperCase()}:${data.documents[index].name}"),
+                                      "${lang.createdFileSpec} : ${data.documents[index].creationDate.toString()}"),
                                   SizedBox(
-                                    width: 20,
-                                  ),
-                                  Text(
-                                      "${lang.createdFileSpec.toUpperCase()}:${data.documents[index].creationDate.toString()}"),
-                                  SizedBox(
-                                    width: 20,
+                                    width: 10,
                                   ),
                                   Text(data.documents[index].optional == true
-                                      ? "${lang.originalDocument.toUpperCase()}:${lang.yes}"
-                                      : "${lang.originalDocument.toUpperCase()} :${lang.no}"),
+                                      ? "${lang.originalDocument} : ${lang.yes}"
+                                      : "${lang.originalDocument} : ${lang.no}"),
                                   SizedBox(
-                                    width: 20,
+                                    width: 10,
                                   ),
                                   Text(data.documents[index].original == true
-                                      ? "${lang.requiredDocument.toUpperCase()} :${lang.yes}"
-                                      : "${lang.requiredDocument.toUpperCase()} :${lang.no}"),
+                                      ? "${lang.requiredDocument} : ${lang.yes}"
+                                      : "${lang.requiredDocument} : ${lang.no}"),
                                 ],
                               ),
                             );

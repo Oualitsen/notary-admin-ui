@@ -266,6 +266,7 @@
   "addAssistant": "Add assistant",
   "addFiles": "Add files",
   "assistantDetails": "Details",
+  "menu":"Menu",
   "addfolder":"Add Folder",
   "selectFileSpec":"select the folder model",
   "selectDocuments":"attach the documents of the client file ",
@@ -278,10 +279,14 @@
   "originalDocument":"Original document",
   "requiredDocument":"Required Document",
   "noDocument":"No documents yet",
-  "filesNumber":"file code"
-  "menu": "Menu",
-  "dataForDocument": "Data for Document",
-  "formToHtml": "Form to html",
-  "nameForDocument": "Name For Document",
-  "print":"Print"
+  "filesNumber":"file code",
+  "formToHtml":"",
+  "dataForDocument":"",
+  "nameForDocument":"",
+  "listFilesCustomer":"Listes des dossier clients",
+  "noUpload":"not uploaded yet",
+  "remplaceFile":"replace file"
+
+
+  
 }
