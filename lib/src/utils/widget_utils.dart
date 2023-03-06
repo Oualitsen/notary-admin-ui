@@ -127,7 +127,7 @@ Widget createDrawer(BuildContext context) {
             context,
             MaterialPageRoute(
                 builder: (context) => CustomerSelection(
-                      selectionType: SelectionType.SINGLE,
+                      selectionType: SelectionType.MULTIPLE,
                     )),
           )
         },
