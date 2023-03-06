@@ -285,8 +285,10 @@
   "nameForDocument":"",
   "listFilesCustomer":"Listes des dossier clients",
   "noUpload":"not uploaded yet",
-  "remplaceFile":"replace file"
-"nameForDocument": "Name For Document",
+  "remplaceFile":"replace file",
+  "nameForDocument": "Name For Document",
   "print": "Print",
+ 
+
 
 }
