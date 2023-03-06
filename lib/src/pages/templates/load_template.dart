@@ -1,11 +1,12 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
-import 'package:notary_admin/src/pages/customer/form_and_view_html.dart';
-import 'package:notary_admin/src/pages/file/html_editor.dart';
-import 'package:notary_admin/src/pages/file/upload_file.dart';
+import 'package:notary_admin/src/pages/templates/form_and_view_html.dart';
+import 'package:notary_admin/src/pages/templates/html_editor_template.dart';
+import 'package:notary_admin/src/pages/templates/upload_template.dart';
 import 'package:notary_admin/src/services/admin/template_document_service.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
@@ -14,14 +15,14 @@ import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/template_document.dart';
 import 'package:rxdart/subjects.dart';
 
-class LoadFilePage extends StatefulWidget {
-  const LoadFilePage({super.key});
+class LoadTemplatePage extends StatefulWidget {
+  const LoadTemplatePage({super.key});
 
   @override
-  State<LoadFilePage> createState() => _LoadFilePageState();
+  State<LoadTemplatePage> createState() => _LoadTemplatePageState();
 }
 
-class _LoadFilePageState extends BasicState<LoadFilePage>
+class _LoadTemplatePageState extends BasicState<LoadTemplatePage>
     with WidgetUtilsMixin {
   final service = GetIt.instance.get<TemplateDocumentService>();
   final key = GlobalKey<InfiniteScrollListViewState<TemplateDocument>>();
@@ -45,7 +46,7 @@ class _LoadFilePageState extends BasicState<LoadFilePage>
     init();
     return WidgetUtils.wrapRoute(
       (context, type) => Scaffold(
-        appBar: AppBar(title: Text("All the files")),
+        appBar: AppBar(title: Text(lang.fileList)),
         floatingActionButton: ElevatedButton(
           onPressed: loadFiles,
           child: Text(lang.addFiles),
@@ -149,10 +150,9 @@ class _LoadFilePageState extends BasicState<LoadFilePage>
         Navigator.push<TemplateDocument?>(
           context,
           MaterialPageRoute(
-            builder: (context) => HtmlEditorExample(template: template),
+            builder: (context) => HtmlEditorTemplate(template: template),
           ),
         ).then((value) => key.currentState?.reload());
-        ;
       }
       if (value == items[2]) {
         var finalList = [];
@@ -180,22 +180,27 @@ class _LoadFilePageState extends BasicState<LoadFilePage>
   Future loadFiles() async {
     List<String> extensions = ["docx"];
     try {
-      var platformFiles = await FilePicker.platform.pickFiles(
+      var pickedFile = await FilePicker.platform.pickFiles(
           type: FileType.custom,
           allowMultiple: false,
           allowedExtensions: extensions);
-      if (platformFiles != null) {
-        var path = platformFiles.files.first.path;
-        if (path != null) {
-          Navigator.of(context)
-              .push(
-                MaterialPageRoute(
-                    builder: (context) => UploadFilePage(
-                          firstPath: path,
-                        )),
-              )
-              .then((value) => key.currentState?.reload());
+      if (pickedFile != null) {
+        var path = null;
+        if (!kIsWeb) {
+          path = pickedFile.files.first.path;
         }
+        var data = UploadData(
+            data: pickedFile.files.first.bytes,
+            name: pickedFile.files.first.name,
+            path: path);
+        Navigator.of(context)
+            .push(
+              MaterialPageRoute(
+                  builder: (context) => UploadTemplatePage(
+                        firstPath: data,
+                      )),
+            )
+            .then((value) => key.currentState?.reload());
       }
     } catch (e) {
       print("[ERROR]${e.toString}");

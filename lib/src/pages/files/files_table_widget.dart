@@ -3,7 +3,7 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:get_it/get_it.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
-import 'package:notary_admin/src/pages/customer/add_folder_customer.dart';
+import 'package:notary_admin/src/pages/files/add_folder_customer.dart';
 import 'package:notary_admin/src/services/files/files_service.dart';
 import 'package:notary_model/model/files.dart';
 import 'package:rxdart/src/subjects/subject.dart';

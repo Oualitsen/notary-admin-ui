@@ -139,6 +139,58 @@ class _PrintedDocService implements PrintedDocService {
     return null;
   }
 
+  @override
+  Future<PrintedDoc> updateName(
+    id,
+    name,
+  ) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = name;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<PrintedDoc>(Options(
+      method: 'PUT',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/admin/printed/${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = PrintedDoc.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<PrintedDoc> updateHtmlData(
+    id,
+    newHtmlData,
+  ) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = newHtmlData;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<PrintedDoc>(Options(
+      method: 'PUT',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/admin/printed/html/${id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = PrintedDoc.fromJson(_result.data!);
+    return value;
+  }
+
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {
     if (T != dynamic &&
         !(requestOptions.responseType == ResponseType.bytes ||

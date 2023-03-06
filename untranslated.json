@@ -24,13 +24,11 @@
     "addFiles",
     "assistantDetails",
     "menu",
-    "dataForDocument",
-    "formToHtml",
-    "nameForDocument",
     "print",
-    "multipleSelection",
-    "singleSelection"
-
+    "savedTemplates",
+    "templates",
+    "addPrintedDoc",
+    "fileName"
   ],
 
   "fr": [
@@ -57,14 +55,11 @@
     "addAssistant",
     "addFiles",
     "assistantDetails",
-
     "menu",
-    "dataForDocument",
-    "formToHtml",
-    "nameForDocument",
     "print",
-    "multipleSelection",
-    "singleSelection"
-
+    "savedTemplates",
+    "templates",
+    "addPrintedDoc",
+    "fileName"
   ]
 }

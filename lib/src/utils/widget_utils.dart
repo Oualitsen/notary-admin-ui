@@ -1,16 +1,14 @@
-import 'package:device_preview/device_preview.dart';
 import 'package:notary_admin/src/pages/assistant/list_assistant_page.dart';
 import 'package:notary_admin/src/pages/customer/customer_selection_page.dart';
-import 'package:notary_admin/src/pages/customer/customer_table_widget.dart';
-import 'package:notary_admin/src/pages/customer/form_and_view_html.dart';
-import 'package:notary_admin/src/pages/customer/list_customer_page.dart';
-import 'package:notary_admin/src/pages/file/load_file.dart';
+import 'package:notary_admin/src/pages/files/list_files_customer.dart';
 import 'package:notary_admin/src/pages/login_page.dart';
+import 'package:notary_admin/src/pages/printed_docs/printed_docs_page.dart';
 import 'package:notary_admin/src/pages/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_responsive_tools/device_screen_type.dart';
 import 'package:get_it/get_it.dart';
 import 'package:notary_admin/src/db_services/token_db_service.dart';
+import 'package:notary_admin/src/pages/templates/load_template.dart';
 import 'package:notary_admin/src/utils/injector.dart';
 import 'package:notary_admin/src/widgets/mixins/lang.dart';
 import 'package:notary_model/model/admin.dart';
@@ -20,9 +18,8 @@ import 'package:rapidoc_utils/widgets/menu_drawer.dart';
 import 'package:rapidoc_utils/widgets/route_guard_widget.dart';
 import 'package:rapidoc_utils/widgets/template_builder.dart';
 
-import '../pages/customer/add_folder_customer.dart';
-import '../pages/customer/list_files_customer.dart';
-import '../pages/file/file_spec_List.dart';
+import '../pages/files/add_folder_customer.dart';
+import '../pages/file-spec/file_spec_List.dart';
 
 class WidgetUtils {
   static Widget wrapRoute(
@@ -143,12 +140,12 @@ Widget createDrawer(BuildContext context) {
         },
       ),
       DrawerMenuItem(
-        title: (lang.fileList),
-        icon: Icons.person,
+        title: (lang.templates),
+        icon: Icons.folder_copy_outlined,
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => LoadFilePage()),
+            MaterialPageRoute(builder: (context) => LoadTemplatePage()),
           );
         },
       ),
@@ -203,10 +200,17 @@ Widget createDrawer(BuildContext context) {
         },
       ),
       DrawerMenuItem(
-          title: lang.listFilesCustomer,
-          icon: Icons.file_present_rounded,
-          onTap: () => Navigator.push(context,
-              MaterialPageRoute(builder: (context) => ListFilesCustomer()))),
+        title: lang.listFilesCustomer,
+        icon: Icons.file_present_rounded,
+        onTap: () => Navigator.push(context,
+            MaterialPageRoute(builder: (context) => ListFilesCustomer())),
+      ),
+      DrawerMenuItem(
+        title: lang.savedTemplates,
+        icon: Icons.file_copy_sharp,
+        onTap: () => Navigator.push(context,
+            MaterialPageRoute(builder: (context) => PrintedDocumentsPage())),
+      ),
     ],
     header: DrawerHeader(
       decoration: const BoxDecoration(),

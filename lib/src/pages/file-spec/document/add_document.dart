@@ -12,8 +12,8 @@ import 'package:notary_model/model/files_spec_input.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:rxdart/src/subjects/subject.dart';
 
-import '../../utils/validation_utils.dart';
-import '../../widgets/mixins/button_utils_mixin.dart';
+import '../../../utils/validation_utils.dart';
+import '../../../widgets/mixins/button_utils_mixin.dart';
 import '../document/add_document.dart';
 
 class AddDocument extends StatefulWidget {

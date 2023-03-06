@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
@@ -40,28 +41,40 @@ class _FilePickerCustomerFolderState
     files = widget.files;
     if (files.uploadedFiles.isEmpty) {
       pathDocumentsStream.add(widget.files.specification.documents
-          .map((e) => PathsDocuments(
+          .map(
+            (e) => PathsDocuments(
               idDocument: e.id,
               document: null,
               selected: false,
-              namePickedDocument: null))
+              namePickedDocument: null,
+              path: null,
+            ),
+          )
           .toList());
     } else {
       pathDocumentsStream.add(widget.files.specification.documents
-          .map((e) => PathsDocuments(
+          .map(
+            (e) => PathsDocuments(
               idDocument: e.id,
               document: null,
               selected: true,
               namePickedDocument: '',
-              nameDocument: ''))
+              nameDocument: '',
+              path: null,
+            ),
+          )
           .toList());
       pathDocumentsUpdateStream.add(widget.files.specification.documents
-          .map((e) => PathsDocuments(
+          .map(
+            (e) => PathsDocuments(
               idDocument: e.id,
               document: null,
               selected: false,
               namePickedDocument: '',
-              nameDocument: ''))
+              nameDocument: '',
+              path: null,
+            ),
+          )
           .toList());
     }
 
@@ -173,15 +186,17 @@ class _FilePickerCustomerFolderState
                                                           list.insert(
                                                               index,
                                                               addPathDocument(
-                                                                  files
-                                                                      .specification
-                                                                      .documents[
-                                                                          index]
-                                                                      .id,
-                                                                  null,
-                                                                  false,
-                                                                  '',
-                                                                  ''));
+                                                                files
+                                                                    .specification
+                                                                    .documents[
+                                                                        index]
+                                                                    .id,
+                                                                null,
+                                                                false,
+                                                                '',
+                                                                '',
+                                                                null,
+                                                              ));
                                                           pathDocumentsStream
                                                               .add(list);
                                                           allUploaded(false);
@@ -203,28 +218,35 @@ class _FilePickerCustomerFolderState
                                             .pickFiles();
 
                                         if (picked != null) {
+                                          var pickedPath = null;
+                                          if (!kIsWeb) {
+                                            pickedPath =
+                                                picked.files.first.path;
+                                          }
                                           final pickedBytes =
                                               picked.files.first.bytes;
+
                                           final namePickedFile =
                                               picked.files.first.name;
                                           final extensionPickedFile =
                                               picked.files.first.extension;
-                                          if (pickedBytes != null) {
+                                          if (pickedBytes != null ||
+                                              pickedPath != null) {
                                             var list =
                                                 pathDocumentsStream.value;
                                             list.removeAt(index);
                                             list.insert(
                                                 index,
                                                 addPathDocument(
-                                                    files.specification
-                                                        .documents[index].id,
-                                                    pickedBytes,
-                                                    true,
-                                                    namePickedFile,
-                                                    files
-                                                        .specification
-                                                        .documents[index]
-                                                        .name));
+                                                  files.specification
+                                                      .documents[index].id,
+                                                  pickedBytes,
+                                                  true,
+                                                  namePickedFile,
+                                                  files.specification
+                                                      .documents[index].name,
+                                                  pickedPath,
+                                                ));
                                             pathDocumentsStream.add(list);
                                             allUploaded(false);
                                           } else {}
@@ -237,13 +259,19 @@ class _FilePickerCustomerFolderState
                                         var picked = await FilePicker.platform
                                             .pickFiles();
                                         if (picked != null) {
+                                          var pickedPath = null;
+                                          if (!kIsWeb) {
+                                            pickedPath =
+                                                picked.files.first.path;
+                                          }
                                           final pickedBytes =
                                               picked.files.first.bytes;
                                           final namePickedFile =
                                               picked.files.first.name;
                                           final extensionPickedFile =
                                               picked.files.first.extension;
-                                          if (pickedBytes != null) {
+                                          if (pickedBytes != null ||
+                                              pickedPath != null) {
                                             var list =
                                                 pathDocumentsUpdateStream.value;
                                             if (pathDocumentsUpdateStream.value
@@ -251,17 +279,18 @@ class _FilePickerCustomerFolderState
                                                 .containsKey(index)) {
                                               list.removeAt(index);
                                               list.insert(
-                                                  index,
-                                                  addPathDocument(
-                                                      files.specification
-                                                          .documents[index].id,
-                                                      pickedBytes,
-                                                      true,
-                                                      namePickedFile,
-                                                      files
-                                                          .specification
-                                                          .documents[index]
-                                                          .name));
+                                                index,
+                                                addPathDocument(
+                                                  files.specification
+                                                      .documents[index].id,
+                                                  pickedBytes,
+                                                  true,
+                                                  namePickedFile,
+                                                  files.specification
+                                                      .documents[index].name,
+                                                  pickedPath,
+                                                ),
+                                              );
                                             }
                                             pathDocumentsUpdateStream.add(list);
                                             pathDocumentsStream.add(list);
@@ -309,18 +338,47 @@ class _FilePickerCustomerFolderState
   }
 
   save() async {
+    if (kIsWeb) {
+      await webSave();
+    } else {
+      await devSave();
+    }
+  }
+
+  PathsDocuments addPathDocument(
+      String idDocument,
+      Uint8List? document,
+      bool selected,
+      String namePickedDocument,
+      String nameDocument,
+      String? path) {
+    var result;
+    result = PathsDocuments(
+      idDocument: idDocument,
+      selected: selected,
+      document: document,
+      namePickedDocument: namePickedDocument,
+      nameDocument: nameDocument,
+      path: path,
+    );
+
+    return result;
+  }
+
+  @override
+  List<ChangeNotifier> get notifiers => [];
+
+  @override
+  List<Subject> get subjects => [];
+
+  webSave() async {
     try {
       if (files.uploadedFiles.isEmpty) {
         if (pathDocumentsStream.value.isNotEmpty) {
           for (var pathDoc in pathDocumentsStream.value) {
-            await serviceUploadDocument.upload(
-              "/admin/files/upload/${files.id}/${files.specification.id}/${pathDoc.idDocument}",
-              pathDoc.document!,
-              pathDoc.nameDocument!,
-              callBack: (percentage) {
-                pathDoc.progress.add(percentage);
-              },
-            );
+            if (pathDoc.document != null) {
+              await _uploadWeb(pathDoc);
+            }
           }
           await showSnackBar2(context, lang.savedSuccessfully);
           Navigator.push(
@@ -333,15 +391,8 @@ class _FilePickerCustomerFolderState
       } else {
         if (pathDocumentsUpdateStream.value.isNotEmpty) {
           for (var pathDoc in pathDocumentsUpdateStream.value) {
-            if (pathDoc.selected) {
-              await serviceUploadDocument.upload(
-                "/admin/files/upload/${files.id}/${files.specification.id}/${pathDoc.idDocument}",
-                pathDoc.document!,
-                pathDoc.nameDocument!,
-                callBack: (percentage) {
-                  pathDoc.progress.add(percentage);
-                },
-              );
+            if (pathDoc.selected && pathDoc.document != null) {
+              await _uploadWeb(pathDoc);
             }
           }
 
@@ -363,27 +414,68 @@ class _FilePickerCustomerFolderState
     }
   }
 
-  PathsDocuments addPathDocument(String idDocument, Uint8List? document,
-      bool selected, String namePickedDocument, String nameDocument) {
-    var result;
-
-    result = PathsDocuments(
-        idDocument: idDocument,
-        selected: selected,
-        document: document,
-        namePickedDocument: namePickedDocument,
-        nameDocument: nameDocument);
-
-    return result;
+  devSave() async {
+    try {
+      if (files.uploadedFiles.isEmpty) {
+        if (pathDocumentsStream.value.isNotEmpty) {
+          for (var pathDoc in pathDocumentsStream.value) {
+            if (pathDoc.path != null) {
+              await _uploadDev(pathDoc);
+            }
+          }
+          await showSnackBar2(context, lang.savedSuccessfully);
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext) => ListFilesCustomer()));
+        } else {
+          await showSnackBar2(context, lang.noDocument);
+        }
+      } else {
+        if (pathDocumentsUpdateStream.value.isNotEmpty) {
+          for (var pathDoc in pathDocumentsUpdateStream.value) {
+            if (pathDoc.selected && pathDoc.path != null) {
+              await _uploadWeb(pathDoc);
+            }
+          }
+          await showSnackBar2(context, lang.savedSuccessfully);
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext) => ListFilesCustomer()));
+        } else {
+          await showSnackBar2(context, lang.noDocument);
+        }
+      }
+    } catch (error, stackTrace) {
+      print(stackTrace);
+      showServerError(context, error: error);
+      throw error;
+    } finally {
+      progressSubject.add(false);
+    }
   }
 
-  @override
-  // TODO: implement notifiers
-  List<ChangeNotifier> get notifiers => [];
+  _uploadWeb(PathsDocuments pathDoc) async {
+    await serviceUploadDocument.upload(
+      "/admin/files/upload/${files.id}/${files.specification.id}/${pathDoc.idDocument}",
+      pathDoc.document!,
+      pathDoc.nameDocument!,
+      callBack: (percentage) {
+        pathDoc.progress.add(percentage);
+      },
+    );
+  }
 
-  @override
-  // TODO: implement subjects
-  List<Subject> get subjects => [];
+  _uploadDev(PathsDocuments pathDoc) async {
+    await serviceUploadDocument.uploadFileDynamic(
+      "/admin/files/upload/${files.id}/${files.specification.id}/${pathDoc.idDocument}",
+      pathDoc.path!,
+      callBack: (percentage) {
+        pathDoc.progress.add(percentage);
+      },
+    );
+  }
 }
 
 class PathsDocuments {
@@ -392,6 +484,7 @@ class PathsDocuments {
   final String? namePickedDocument;
   final String? nameDocument;
   final bool selected;
+  final String? path;
   final BehaviorSubject<double> progress;
 
   PathsDocuments(
@@ -399,6 +492,7 @@ class PathsDocuments {
       this.nameDocument,
       this.document,
       required this.idDocument,
-      this.selected = false})
+      this.selected = false,
+      required this.path})
       : progress = BehaviorSubject<double>();
 }

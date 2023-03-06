@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
-import 'package:notary_admin/src/pages/customer/file_picker_customer_folder.dart';
+import 'package:notary_admin/src/pages/files/file_picker_customer_folder.dart';
 import 'package:notary_admin/src/services/admin/customer_service.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_model/model/customer.dart';
