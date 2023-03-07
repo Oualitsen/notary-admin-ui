@@ -286,5 +286,8 @@
   "noUpload": "not uploaded yet",
   "remplaceFile": "replace file",
   "nameForDocument": "Name For Document",
-  "print": "Print"
+  "print": "Print",
+  "fileName": "File Name",
+  "templates": "Templates",
+  "savedTemplates": "Saved templates"
 }
