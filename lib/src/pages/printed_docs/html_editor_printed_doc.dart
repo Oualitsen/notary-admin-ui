@@ -2,26 +2,28 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:html_editor_enhanced/html_editor.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:http_error_handler/error_handler.dart';
+import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
 import 'package:notary_admin/src/services/admin/template_document_service.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
+import 'package:notary_model/model/printed_doc.dart';
+import 'package:notary_model/model/printed_doc_input.dart';
 import 'package:notary_model/model/template_document.dart';
 import 'package:rxdart/src/subjects/subject.dart';
 
-class HtmlEditorExample extends StatefulWidget {
-  HtmlEditorExample({Key? key, required this.template}) : super(key: key);
+class HtmlEditorPrintedDoc extends StatefulWidget {
+  HtmlEditorPrintedDoc({Key? key, required this.template}) : super(key: key);
 
-  TemplateDocument template;
+  PrintedDoc template;
   @override
-  _HtmlEditorExampleState createState() => _HtmlEditorExampleState();
+  _HtmlEditorPrintedDocState createState() => _HtmlEditorPrintedDocState();
 }
 
-class _HtmlEditorExampleState extends BasicState<HtmlEditorExample>
+class _HtmlEditorPrintedDocState extends BasicState<HtmlEditorPrintedDoc>
     with WidgetUtilsMixin {
   String result = '';
-  final service = GetIt.instance.get<TemplateDocumentService>();
+  final service = GetIt.instance.get<PrintedDocService>();
   final HtmlEditorController controller = HtmlEditorController();
   @override
   Widget build(BuildContext context) {
@@ -48,13 +50,6 @@ class _HtmlEditorExampleState extends BasicState<HtmlEditorExample>
                 })
           ],
         ),
-        // floatingActionButton: FloatingActionButton(
-        //   onPressed: () {
-        //     controller.toggleCodeView();
-        //   },
-        //   child: Text(r'<\>',
-        //       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-        // ),
         body: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -91,7 +86,13 @@ class _HtmlEditorExampleState extends BasicState<HtmlEditorExample>
         newHtmlData =
             '<text removed due to base-64 data, displaying the text could cause the app to crash>';
       }
-      var res = await service.updateHtmlData(widget.template.id, newHtmlData);
+      var input = PrintedDocInput(
+        id: widget.template.id,
+        filesId: widget.template.filesId,
+        htmlData: newHtmlData,
+        name: widget.template.name,
+      );
+      var res = await service.create(input);
       await showSnackBar2(context, lang.updatedSuccessfully);
       Navigator.of(context).pop(res);
     } catch (error) {

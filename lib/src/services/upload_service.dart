@@ -25,7 +25,6 @@ class UploadService {
       "data": await MultipartFile.fromBytes(
         data,
         filename: nameData,
-        
       )
     });
     var response = await dio.post(

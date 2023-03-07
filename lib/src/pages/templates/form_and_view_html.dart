@@ -3,6 +3,7 @@ import 'package:html/parser.dart';
 import 'package:flutter/material.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
+import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_model/model/printed_doc_input.dart';
 import 'package:rxdart/rxdart.dart';
@@ -29,7 +30,10 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
   List<TextEditingController> _controller = [];
   late List listFormField;
   late String text;
+  final fileNameKey = GlobalKey<FormState>();
+  final templateNameCrtl = TextEditingController();
   final _htmlDocument = BehaviorSubject.seeded('');
+  final webStream = BehaviorSubject.seeded(false);
   var toPrint = """
    <script>
       function display() {
@@ -69,7 +73,10 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
             Tooltip(
               message: lang.save,
               child: IconButton(
-                onPressed: saveCopy,
+                onPressed: (() {
+                  webStream.add(true);
+                  saveCopy();
+                }),
                 icon: Icon(Icons.save),
               ),
             )
@@ -120,7 +127,10 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
                     ),
                   ),
                   ElevatedButton(
-                    onPressed: saveCopy,
+                    onPressed: (() {
+                      webStream.add(true);
+                      saveCopy();
+                    }),
                     child: Text(lang.save),
                   ),
                 ],
@@ -147,16 +157,37 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
                       elevation: 0,
                     ),
                   ),
-                  Expanded(
-                    child: WebViewX(
-                      initialContent: text,
-                      initialSourceType: SourceType.html,
-                      onWebViewCreated: (controller) =>
-                          controllerWeb = controller,
-                      height: double.maxFinite,
-                      width: double.maxFinite,
-                    ),
-                  ),
+                  StreamBuilder<bool>(
+                      stream: webStream,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData == false) {
+                          return SizedBox.shrink();
+                        }
+                        print("${snapshot.data}");
+                        return snapshot.data!
+                            ? Expanded(
+                                child: InkWell(
+                                    child: WebViewX(
+                                  ignoreAllGestures: true,
+                                  initialContent: text,
+                                  initialSourceType: SourceType.html,
+                                  onWebViewCreated: (controller) =>
+                                      controllerWeb = controller,
+                                  height: double.maxFinite,
+                                  width: double.maxFinite,
+                                )),
+                              )
+                            : Expanded(
+                                child: WebViewX(
+                                ignoreAllGestures: snapshot.data!,
+                                initialContent: text,
+                                initialSourceType: SourceType.html,
+                                onWebViewCreated: (controller) =>
+                                    controllerWeb = controller,
+                                height: double.maxFinite,
+                                width: double.maxFinite,
+                              ));
+                      }),
                 ],
               ),
             ),
@@ -187,17 +218,52 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
   void saveCopy() async {
     if (_formKeyListNames.currentState?.validate() ?? false) {
       try {
-        var input = PrintedDocInput(
-            id: null,
-            filesId: "filesId",
-            htmlData: _htmlDocument.value,
-            name: "name");
-        await printedDocService.create(input);
-        await showSnackBar2(context, lang.savedSuccessfully);
+        var name = await getName();
+        webStream.add(false);
+        if (name != null) {
+          var input = PrintedDocInput(
+              id: null,
+              filesId: "filesId",
+              htmlData: _htmlDocument.value,
+              name: name);
+          await printedDocService.create(input);
+          await showSnackBar2(context, lang.savedSuccessfully);
+        }
       } catch (error, stacktrace) {
         print(stacktrace);
         showServerError(context, error: error);
       }
     }
+  }
+
+  Future<String?> getName() async {
+    return showDialog<String>(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text(lang.fileName),
+            content: Form(
+              key: fileNameKey,
+              child: TextFormField(
+                controller: templateNameCrtl,
+                autofocus: true,
+                textInputAction: TextInputAction.next,
+                validator: (text) {
+                  return ValidationUtils.requiredField(text, context);
+                },
+              ),
+            ),
+            actions: <Widget>[
+              getButtons(
+                onSave: () {
+                  if (fileNameKey.currentState?.validate() ?? false) {
+                    Navigator.of(context).pop(templateNameCrtl.text);
+                    templateNameCrtl.clear();
+                  }
+                },
+              )
+            ],
+          );
+        });
   }
 }

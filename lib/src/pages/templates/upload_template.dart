@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
@@ -8,26 +11,26 @@ import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:rxdart/rxdart.dart';
 
-class UploadFilePage extends StatefulWidget {
-  final String? firstPath;
-  const UploadFilePage({super.key, this.firstPath});
+class UploadTemplatePage extends StatefulWidget {
+  final UploadData? firstPath;
+  const UploadTemplatePage({super.key, this.firstPath});
 
   @override
-  State<UploadFilePage> createState() => _UploadFilePageState();
+  State<UploadTemplatePage> createState() => _UploadTemplatePageState();
 }
 
-class _UploadFilePageState extends BasicState<UploadFilePage>
+class _UploadTemplatePageState extends BasicState<UploadTemplatePage>
     with WidgetUtilsMixin {
   final UploadService uploadService = new UploadService(GetIt.instance.get());
-  final pathFiles = BehaviorSubject.seeded(<_UploadData>[]);
-  final key = GlobalKey<InfiniteScrollListViewState<_UploadData>>();
+  final uploadDataStream = BehaviorSubject.seeded(<UploadData>[]);
+  final key = GlobalKey<InfiniteScrollListViewState<UploadData>>();
   @override
   void initState() {
     if (widget.firstPath != null) {
-      pathFiles.add([_UploadData(widget.firstPath!)]);
+      uploadDataStream.add([widget.firstPath!]);
     }
 
-    pathFiles
+    uploadDataStream
         .where((event) => key.currentState != null)
         .map((event) => key.currentState!)
         .listen((event) {
@@ -43,13 +46,12 @@ class _UploadFilePageState extends BasicState<UploadFilePage>
         appBar: AppBar(
           title: Text(lang.uploadFile),
         ),
-        body: InfiniteScrollListView<_UploadData>(
+        body: InfiniteScrollListView<UploadData>(
           key: key,
           elementBuilder: (context, element, index, animation) {
-            var name = element.path.split('/').last;
             return ListTile(
               leading: CircleAvatar(child: Icon(Icons.file_copy)),
-              title: Text("${name}"),
+              title: Text("${element.name}"),
               trailing: Wrap(
                 children: [
                   StreamBuilder<double>(
@@ -72,7 +74,7 @@ class _UploadFilePageState extends BasicState<UploadFilePage>
                             icon: Icon(Icons.cancel),
                             onPressed: () {
                               _delete(element);
-                              if (pathFiles.value.isEmpty) {
+                              if (uploadDataStream.value.isEmpty) {
                                 Navigator.of(context).pop();
                               }
                             });
@@ -83,7 +85,7 @@ class _UploadFilePageState extends BasicState<UploadFilePage>
           },
           pageLoader: (index) {
             if (index == 0) {
-              return Future.value(pathFiles.value);
+              return Future.value(uploadDataStream.value);
             }
             return Future.value([]);
           },
@@ -114,17 +116,22 @@ class _UploadFilePageState extends BasicState<UploadFilePage>
   Future loadFiles() async {
     List<String> extensions = ["docx"];
     try {
-      var platformFiles = await FilePicker.platform.pickFiles(
+      var pickedFile = await FilePicker.platform.pickFiles(
           type: FileType.custom,
           allowMultiple: false,
           allowedExtensions: extensions);
-      if (platformFiles != null) {
-        var path = platformFiles.files.first.path;
-        if (path != null) {
-          var list = pathFiles.value;
-          list.add(_UploadData(path));
-          pathFiles.add(list);
+      if (pickedFile != null) {
+        var path = null;
+        if (!kIsWeb) {
+          path = pickedFile.files.first.path;
         }
+        var data = UploadData(
+            data: pickedFile.files.first.bytes,
+            name: pickedFile.files.first.name,
+            path: path);
+        var list = uploadDataStream.value;
+        list.add(data);
+        uploadDataStream.add(list);
       }
     } catch (e) {
       print("[ERROR]${e.toString}");
@@ -132,7 +139,7 @@ class _UploadFilePageState extends BasicState<UploadFilePage>
   }
 
   void save() async {
-    Rx.combineLatest(pathFiles.value.map((ud) => upload(ud)).toList(),
+    Rx.combineLatest(uploadDataStream.value.map((ud) => upload(ud)).toList(),
         (values) => values).doOnListen(() {
       progressSubject.add(true);
     }).doOnDone(() {
@@ -143,29 +150,54 @@ class _UploadFilePageState extends BasicState<UploadFilePage>
     });
   }
 
-  Stream<dynamic> upload(_UploadData path) {
-    return uploadService
-        .uploadFileDynamic(
-          "/admin/template/upload",
-          path.path,
-          callBack: (percentage) {
-            path.progress.add(percentage);
-          },
-        )
-        .asStream()
-        .doOnData((event) {
-          _delete(path);
-        })
-        .doOnError((p0, p1) {
-          path.progress.addError(p0);
-        });
+  Stream<dynamic> upload(UploadData data) {
+    var uri = "/admin/template/upload";
+    if (kIsWeb && data.data != null) {
+      return uploadService
+          .upload(
+            uri,
+            data.data!,
+            data.name,
+            callBack: (percentage) {
+              data.progress.add(percentage);
+            },
+          )
+          .asStream()
+          .doOnData((event) {
+            _delete(data);
+          })
+          .doOnError(
+            (p0, p1) {
+              data.progress.addError(p0);
+            },
+          );
+    } else if (!kIsWeb && data.path != null) {
+      return uploadService
+          .uploadFileDynamic(
+            uri,
+            data.path!,
+            callBack: (percentage) {
+              data.progress.add(percentage);
+            },
+          )
+          .asStream()
+          .doOnData((event) {
+            _delete(data);
+          })
+          .doOnError(
+            (p0, p1) {
+              data.progress.addError(p0);
+            },
+          );
+    }
+    return Stream.empty();
   }
 
-  void _delete(_UploadData data) {
-    var list = pathFiles.value;
+  void _delete(UploadData data) {
+    var list = uploadDataStream.value;
     list.remove(data);
 
-    pathFiles.add(list);
+    uploadDataStream.add(list);
   }
 
   @override
@@ -175,9 +207,11 @@ class _UploadFilePageState extends BasicState<UploadFilePage>
   List<Subject> get subjects => [];
 }
 
-class _UploadData {
-  final String path;
+class UploadData {
   final BehaviorSubject<double> progress;
-
-  _UploadData(this.path) : progress = BehaviorSubject<double>();
+  final Uint8List? data;
+  final String name;
+  final String? path;
+  UploadData({required this.data, required this.name, required this.path})
+      : progress = BehaviorSubject<double>();
 }

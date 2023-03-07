@@ -4,7 +4,7 @@ import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
-import 'package:notary_admin/src/pages/file/file_spec_List.dart';
+import 'package:notary_admin/src/pages/file-spec/file_spec_List.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_model/model/document_spec_input.dart';
@@ -14,8 +14,8 @@ import 'package:rxdart/rxdart.dart';
 import 'package:rxdart/src/subjects/subject.dart';
 
 import '../../widgets/mixins/button_utils_mixin.dart';
-import '../document/add_document.dart';
-import '../document/document_table.dart';
+import 'document/add_document.dart';
+import 'document/document_table.dart';
 
 class AddFileSpec extends StatefulWidget {
   final FilesSpec? fileSpec;

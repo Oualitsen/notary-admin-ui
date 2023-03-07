@@ -22,4 +22,15 @@ abstract class PrintedDocService {
 
   @DELETE("/admin/printed/{id}")
   Future<void> delete(@Path("id") String id);
+  
+  @PUT("/admin/printed/{id}")
+  Future<PrintedDoc> updateName(
+    @Path("id") String id,
+    @Body() String name,
+  );
+  @PUT("/admin/printed/html/{id}")
+  Future<PrintedDoc> updateHtmlData(
+    @Path("id") String id,
+    @Body() String newHtmlData,
+  );
 }

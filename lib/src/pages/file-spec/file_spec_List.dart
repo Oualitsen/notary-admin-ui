@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:notary_admin/src/pages/file/add_file_spec.dart';
+import 'package:notary_admin/src/pages/file-spec/add_file_spec.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:rxdart/src/subjects/subject.dart';

@@ -24,7 +24,11 @@
     "addFiles",
     "assistantDetails",
     "menu",
-    "print"
+    "savedTemplates",
+    "templates",
+    "addPrintedDoc",
+    "fileName"
+
   ],
 
   "fr": [
@@ -52,6 +56,10 @@
     "addFiles",
     "assistantDetails",
     "menu",
-    "print"
+    "print",
+    "savedTemplates",
+    "templates",
+    "addPrintedDoc",
+    "fileName"
   ]
 }
