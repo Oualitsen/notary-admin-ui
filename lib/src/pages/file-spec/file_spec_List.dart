@@ -18,8 +18,6 @@ class FileSpecList extends StatefulWidget {
 
 class _FileSpecListState extends BasicState<FileSpecList>
     with WidgetUtilsMixin {
-  final service = GetIt.instance.get<FileSpecService>();
-
   @override
   Widget build(BuildContext context) {
     return WidgetUtils.wrapRoute((context, type) => Scaffold(

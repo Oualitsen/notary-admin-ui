@@ -15,8 +15,12 @@ class FormAndViewHtml extends StatefulWidget {
   static const home = "/";
   final List listFormField;
   final String text;
+  final String? idPrintDocument;
   const FormAndViewHtml(
-      {super.key, required this.listFormField, required this.text});
+      {super.key,
+      required this.listFormField,
+      required this.text,
+      this.idPrintDocument});
 
   @override
   State<FormAndViewHtml> createState() => _FormAndViewHtmlState();
@@ -41,9 +45,9 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
       }
    </script>
 """;
-
   @override
   void initState() {
+    var idPrintDocument = widget.idPrintDocument;
     text = toPrint + widget.text;
     listFormField = widget.listFormField;
     _controller =
@@ -74,7 +78,6 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
               message: lang.save,
               child: IconButton(
                 onPressed: (() {
-                  webStream.add(true);
                   saveCopy();
                 }),
                 icon: Icon(Icons.save),
@@ -128,7 +131,6 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
                   ),
                   ElevatedButton(
                     onPressed: (() {
-                      webStream.add(true);
                       saveCopy();
                     }),
                     child: Text(lang.save),
@@ -145,25 +147,12 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
             Expanded(
               child: Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10.0),
-                    child: AppBar(
-                      backgroundColor: Theme.of(context).canvasColor,
-                      leading: SizedBox.shrink(),
-                      title: Text(
-                        lang.nameForDocument,
-                        style: TextStyle(color: Colors.black),
-                      ),
-                      elevation: 0,
-                    ),
-                  ),
                   StreamBuilder<bool>(
                       stream: webStream,
                       builder: (context, snapshot) {
                         if (snapshot.hasData == false) {
                           return SizedBox.shrink();
                         }
-                        print("${snapshot.data}");
                         return snapshot.data!
                             ? Expanded(
                                 child: InkWell(
@@ -218,16 +207,18 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
   void saveCopy() async {
     if (_formKeyListNames.currentState?.validate() ?? false) {
       try {
+        webStream.add(true);
         var name = await getName();
         webStream.add(false);
+        if (widget.idPrintDocument != null) {
+          await printedDocService.delete(widget.idPrintDocument!);
+        }
         if (name != null) {
           var input = PrintedDocInput(
-              id: null,
-              filesId: "filesId",
-              htmlData: _htmlDocument.value,
-              name: name);
-          await printedDocService.create(input);
+              id: null, htmlData: _htmlDocument.value, name: name);
+          var res = await printedDocService.create(input);
           await showSnackBar2(context, lang.savedSuccessfully);
+          Navigator.of(context).pop(res);
         }
       } catch (error, stacktrace) {
         print(stacktrace);

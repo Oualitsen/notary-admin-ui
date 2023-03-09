@@ -1,3 +1,4 @@
+import 'package:http_error_handler/error_handler.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
@@ -52,13 +53,18 @@ class ContactsInputPageState extends BasicState<ContactsInputPage>
             ),
             FloatingActionButton(
               onPressed: () async {
-                var contact = await _showTextInputDialog(context);
+                try {
+                  var contact = await _showTextInputDialog(context);
 
-                if (contact != null) {
-                  var contactList = createdContacts.value;
-                  contactList.add(contact);
-                  //notify listener
-                  createdContacts.add(contactList);
+                  if (contact != null) {
+                    var contactList = createdContacts.value;
+                    contactList.add(contact);
+                    //notify listener
+                    createdContacts.add(contactList);
+                  }
+                } catch (error, stacktrace) {
+                  showServerError(context, error: error);
+                  print(stacktrace);
                 }
               },
               child: const Icon(Icons.add),

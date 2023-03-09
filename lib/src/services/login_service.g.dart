@@ -19,14 +19,14 @@ class _LoginService implements LoginService {
   String? baseUrl;
 
   @override
-  Future<AuthResult<Admin>> login({required loginObject}) async {
+  Future<AuthResult<BasicUser>> login({required loginObject}) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(loginObject.toJson());
-    final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<AuthResult<Admin>>(Options(
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<AuthResult<BasicUser>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
@@ -38,21 +38,21 @@ class _LoginService implements LoginService {
               data: _data,
             )
             .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
-    final value = AuthResult<Admin>.fromJson(
+    final value = AuthResult<BasicUser>.fromJson(
       _result.data!,
-      (json) => Admin.fromJson(json as Map<String, dynamic>),
+      (json) => BasicUser.fromJson(json as Map<String, dynamic>),
     );
     return value;
   }
 
   @override
-  Future<AuthResult<Admin>> testLogin(id) async {
+  Future<AuthResult<BasicUser>> testLogin(id) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
-    final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<AuthResult<Admin>>(Options(
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<AuthResult<BasicUser>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
@@ -64,22 +64,22 @@ class _LoginService implements LoginService {
               data: _data,
             )
             .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
-    final value = AuthResult<Admin>.fromJson(
+    final value = AuthResult<BasicUser>.fromJson(
       _result.data!,
-      (json) => Admin.fromJson(json as Map<String, dynamic>),
+      (json) => BasicUser.fromJson(json as Map<String, dynamic>),
     );
     return value;
   }
 
   @override
-  Future<AuthResult<Admin>> recoverPassword(passwordChange) async {
+  Future<AuthResult<BasicUser>> recoverPassword(passwordChange) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(passwordChange.toJson());
-    final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<AuthResult<Admin>>(Options(
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<AuthResult<BasicUser>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
@@ -91,9 +91,9 @@ class _LoginService implements LoginService {
               data: _data,
             )
             .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
-    final value = AuthResult<Admin>.fromJson(
+    final value = AuthResult<BasicUser>.fromJson(
       _result.data!,
-      (json) => Admin.fromJson(json as Map<String, dynamic>),
+      (json) => BasicUser.fromJson(json as Map<String, dynamic>),
     );
     return value;
   }

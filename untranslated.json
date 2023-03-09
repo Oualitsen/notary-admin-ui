@@ -27,7 +27,11 @@
     "print",
     "fileName",
     "templates",
-    "savedTemplates"
+    "savedTemplates",
+    "noAccessRightError",
+    "selectTemplate",
+    "noCreatedDocumentprint",
+    "deletedSuccessfully"
   ],
 
   "fr": [
@@ -58,6 +62,10 @@
     "print",
     "fileName",
     "templates",
-    "savedTemplates"
+    "savedTemplates",
+    "noAccessRightError",
+    "selectTemplate",
+    "noCreatedDocumentprint",
+    "deletedSuccessfully"
   ]
 }

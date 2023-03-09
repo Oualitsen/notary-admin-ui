@@ -2,6 +2,7 @@ import 'package:notary_admin/src/services/admin/profile_service.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_admin/src/widgets/password_input.dart';
 import 'package:notary_model/model/admin.dart';
+import 'package:notary_model/model/basic_user.dart';
 import 'package:notary_model/model/password_change.dart';
 
 import 'package:flutter/material.dart';
@@ -41,7 +42,7 @@ class _ProfilePageState extends BasicState<ProfilePage>
   @override
   Widget build(BuildContext context) {
     return WidgetUtils.wrapRoute(
-      (context, type) => StreamBuilder<Admin?>(
+      (context, type) => StreamBuilder<BasicUser?>(
           stream: authMan.userSubject,
           initialData: authMan.userSubject.valueOrNull,
           builder: (context, snapshot) {
@@ -261,9 +262,10 @@ class _ProfilePageState extends BasicState<ProfilePage>
         await service.updateAdminPassword(password: passwords);
         Navigator.of(context).pop();
         await showSnackBar2(context, lang.savedSuccessfully);
-      } catch (error) {
-        showServerError(context, error: error);
-      } finally {
+       } catch (error, stacktrace) {
+                  showServerError(context, error: error);
+                  print(stacktrace);
+                } finally {
         newPasswordController.clear();
         oldPasswordController.clear();
         progressSubject.add(false);

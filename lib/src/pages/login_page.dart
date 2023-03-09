@@ -9,6 +9,9 @@ import 'package:notary_admin/src/utils/injector.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/password_input.dart';
+import 'package:notary_model/model/admin.dart';
+import 'package:notary_model/model/auth_result.dart';
+import 'package:notary_model/model/basic_user.dart';
 import 'package:notary_model/model/login_object.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:rxdart/rxdart.dart';
@@ -76,7 +79,6 @@ class _LoginPageState extends BasicState<LoginPage> with WidgetUtilsMixin {
                   child: Text(lang.login.toUpperCase()),
                 ),
               ),
-              const SizedBox(height: 10),
             ],
           ),
         ),
@@ -95,11 +97,14 @@ class _LoginPageState extends BasicState<LoginPage> with WidgetUtilsMixin {
         try {
           print("@@@@@@@@@@@@ ${object.username}");
           var result = await service.login(loginObject: object);
+          print("@@@@@@@@@@@@ ${result.user.userType}");
           await _tokenDbService.save(result.token);
+
           await _authMan.save(result.user);
-        } catch (error) {
-          showServerError(context, error: error);
-        } finally {
+        }   catch (error, stacktrace) {
+                  showServerError(context, error: error);
+                  print(stacktrace);
+                } finally {
           progressSubject.add(false);
         }
       }

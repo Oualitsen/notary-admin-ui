@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:notary_admin/src/services/upload_service.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
@@ -151,44 +152,49 @@ class _UploadTemplatePageState extends BasicState<UploadTemplatePage>
   }
 
   Stream<dynamic> upload(UploadData data) {
-    var uri = "/admin/template/upload";
-    if (kIsWeb && data.data != null) {
-      return uploadService
-          .upload(
-            uri,
-            data.data!,
-            data.name,
-            callBack: (percentage) {
-              data.progress.add(percentage);
-            },
-          )
-          .asStream()
-          .doOnData((event) {
-            _delete(data);
-          })
-          .doOnError(
-            (p0, p1) {
-              data.progress.addError(p0);
-            },
-          );
-    } else if (!kIsWeb && data.path != null) {
-      return uploadService
-          .uploadFileDynamic(
-            uri,
-            data.path!,
-            callBack: (percentage) {
-              data.progress.add(percentage);
-            },
-          )
-          .asStream()
-          .doOnData((event) {
-            _delete(data);
-          })
-          .doOnError(
-            (p0, p1) {
-              data.progress.addError(p0);
-            },
-          );
+    try {
+      var uri = "/admin/template/upload";
+      if (kIsWeb && data.data != null) {
+        return uploadService
+            .upload(
+              uri,
+              data.data!,
+              data.name,
+              callBack: (percentage) {
+                data.progress.add(percentage);
+              },
+            )
+            .asStream()
+            .doOnData((event) {
+              _delete(data);
+            })
+            .doOnError(
+              (p0, p1) {
+                data.progress.addError(p0);
+              },
+            );
+      } else if (!kIsWeb && data.path != null) {
+        return uploadService
+            .uploadFileDynamic(
+              uri,
+              data.path!,
+              callBack: (percentage) {
+                data.progress.add(percentage);
+              },
+            )
+            .asStream()
+            .doOnData((event) {
+              _delete(data);
+            })
+            .doOnError(
+              (p0, p1) {
+                data.progress.addError(p0);
+              },
+            );
+      }
+    } catch (error, stacktrace) {
+      print(stacktrace);
+      showServerError(context, error: error);
     }
     return Stream.empty();
   }

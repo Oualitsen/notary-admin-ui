@@ -4,12 +4,10 @@ import 'package:get_it/get_it.dart';
 import 'package:html_editor_enhanced/html_editor.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
-import 'package:notary_admin/src/services/admin/template_document_service.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/printed_doc.dart';
 import 'package:notary_model/model/printed_doc_input.dart';
-import 'package:notary_model/model/template_document.dart';
 import 'package:rxdart/src/subjects/subject.dart';
 
 class HtmlEditorPrintedDoc extends StatefulWidget {
@@ -88,14 +86,14 @@ class _HtmlEditorPrintedDocState extends BasicState<HtmlEditorPrintedDoc>
       }
       var input = PrintedDocInput(
         id: widget.template.id,
-        filesId: widget.template.filesId,
         htmlData: newHtmlData,
         name: widget.template.name,
       );
       var res = await service.create(input);
       await showSnackBar2(context, lang.updatedSuccessfully);
       Navigator.of(context).pop(res);
-    } catch (error) {
+    } catch (error, stackTrace) {
+      print(stackTrace);
       showServerError(context, error: error);
     } finally {
       progressSubject.add(false);
