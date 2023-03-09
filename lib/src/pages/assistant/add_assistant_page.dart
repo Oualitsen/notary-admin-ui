@@ -116,6 +116,7 @@ class _AddAssistantPageState extends BasicState<AddAssistantPage>
         break;
       case 1:
         {
+          try{
           var credentials =
               await assistantCredentilasKey.currentState!.readCredentails();
 
@@ -125,6 +126,10 @@ class _AddAssistantPageState extends BasicState<AddAssistantPage>
           } else {
             print("@@@@@@@@@@@@@ error");
           }
+ } catch (error, stacktrace) {
+                  showServerError(context, error: error);
+                  print(stacktrace);
+                }
         }
         break;
     }

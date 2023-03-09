@@ -1,5 +1,5 @@
 import 'package:notary_admin/src/pages/assistant/list_assistant_page.dart';
-import 'package:notary_admin/src/pages/customer/customer_selection_page.dart';
+import 'package:notary_admin/src/pages/customer/list_customer_page.dart';
 import 'package:notary_admin/src/pages/files/list_files_customer.dart';
 import 'package:notary_admin/src/pages/login_page.dart';
 import 'package:notary_admin/src/pages/printed_docs/printed_docs_page.dart';
@@ -11,8 +11,7 @@ import 'package:notary_admin/src/db_services/token_db_service.dart';
 import 'package:notary_admin/src/pages/templates/load_template.dart';
 import 'package:notary_admin/src/utils/injector.dart';
 import 'package:notary_admin/src/widgets/mixins/lang.dart';
-import 'package:notary_model/model/admin.dart';
-import 'package:notary_model/model/selection_type.dart';
+import 'package:notary_model/model/basic_user.dart';
 import 'package:rapidoc_utils/widgets/image_utils.dart';
 import 'package:rapidoc_utils/widgets/menu_drawer.dart';
 import 'package:rapidoc_utils/widgets/route_guard_widget.dart';
@@ -122,21 +121,20 @@ Widget createDrawer(BuildContext context) {
         onTap: () => {
           Navigator.push(
             context,
-            MaterialPageRoute(
-                builder: (context) => CustomerSelection(
-                      selectionType: SelectionType.MULTIPLE,
-                    )),
+            MaterialPageRoute(builder: (context) => ListCustomerPage()),
           )
         },
       ),
       DrawerMenuItem(
         title: (lang.assistantList),
         icon: Icons.people_alt_outlined,
-        onTap: () => {
+        onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ListAssistantPage()),
-          )
+            MaterialPageRoute(
+              builder: (context) => ListAssistantPage(),
+            ),
+          );
         },
       ),
       DrawerMenuItem(
@@ -148,6 +146,24 @@ Widget createDrawer(BuildContext context) {
             MaterialPageRoute(builder: (context) => LoadTemplatePage()),
           );
         },
+      ),
+      DrawerMenuItem(
+        title: (lang.fileSpec),
+        icon: Icons.file_download,
+        onTap: () => Navigator.push(
+            context, MaterialPageRoute(builder: ((context) => FileSpecList()))),
+      ),
+      DrawerMenuItem(
+        title: lang.listFilesCustomer,
+        icon: Icons.file_present_rounded,
+        onTap: () => Navigator.push(context,
+            MaterialPageRoute(builder: (context) => ListFilesCustomer())),
+      ),
+      DrawerMenuItem(
+        title: lang.savedTemplates,
+        icon: Icons.file_copy_sharp,
+        onTap: () => Navigator.push(context,
+            MaterialPageRoute(builder: (context) => PrintedDocumentsPage())),
       ),
       DrawerMenuItem(
         title: (lang.profile),
@@ -185,36 +201,10 @@ Widget createDrawer(BuildContext context) {
           });
         },
       ),
-      DrawerMenuItem(
-        title: (lang.fileSpec),
-        icon: Icons.file_download,
-        onTap: () => Navigator.push(
-            context, MaterialPageRoute(builder: ((context) => FileSpecList()))),
-      ),
-      DrawerMenuItem(
-        title: lang.addfolder,
-        icon: Icons.folder,
-        onTap: () => {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => AddFolderCustomer()))
-        },
-      ),
-      DrawerMenuItem(
-        title: lang.listFilesCustomer,
-        icon: Icons.file_present_rounded,
-        onTap: () => Navigator.push(context,
-            MaterialPageRoute(builder: (context) => ListFilesCustomer())),
-      ),
-      DrawerMenuItem(
-        title: lang.savedTemplates,
-        icon: Icons.file_copy_sharp,
-        onTap: () => Navigator.push(context,
-            MaterialPageRoute(builder: (context) => PrintedDocumentsPage())),
-      ),
     ],
     header: DrawerHeader(
       decoration: const BoxDecoration(),
-      child: StreamBuilder<Admin?>(
+      child: StreamBuilder<BasicUser?>(
           stream: authManager.userSubject,
           builder: (context, snapshot) {
             if (!snapshot.hasData) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:http_error_handler/error_handler.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/pages/file-spec/add_file_spec.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
@@ -163,11 +164,14 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
                   TextButton(
                       child: Text(lang.yes.toUpperCase()),
                       onPressed: () async {
-                        await service.deleteFileSpec(data.id);
+                       try{ await service.deleteFileSpec(data.id);
                         Navigator.of(context).pop(true);
                         tableKey.currentState?.refreshPage();
                         await showSnackBar2(context, lang.delete);
-                      }),
+                       } catch (error, stacktrace) {
+                  showServerError(context, error: error);
+                  print(stacktrace);
+                }}),
                 ],
               ),
             );

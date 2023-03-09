@@ -11,6 +11,7 @@ import 'package:notary_admin/src/services/assistant/assistant_service.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
 import 'package:notary_admin/src/services/files/files_service.dart';
 import 'package:notary_model/model/admin.dart';
+import 'package:notary_model/model/basic_user.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:notary_admin/src/db_services/token_db_service.dart';
 import 'package:notary_admin/src/services/login_service.dart';
@@ -82,10 +83,10 @@ void initServices() {
   GetIt.instance.registerSingleton(PrintedDocService(dio));
 
   GetIt.instance.registerSingleton(
-    AuthManager<Admin>(
-      parser: (json) => Admin.fromJson(json),
+    AuthManager<BasicUser>(
+      parser: (json) => BasicUser.fromJson(json),
       serializer: (client) => client.toJson(),
-      getUserFromServer: (Admin? current) async {
+      getUserFromServer: (BasicUser? current) async {
         final _svc = GetIt.instance.get<ProfileService>();
         return _svc.getCurrentUser();
       },

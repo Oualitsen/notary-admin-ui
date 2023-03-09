@@ -93,7 +93,8 @@ class _HtmlEditorTemplateState extends BasicState<HtmlEditorTemplate>
       var res = await service.updateHtmlData(widget.template.id, newHtmlData);
       await showSnackBar2(context, lang.updatedSuccessfully);
       Navigator.of(context).pop(res);
-    } catch (error) {
+   } catch (error, stackTrace) {
+      print(stackTrace);
       showServerError(context, error: error);
     } finally {
       progressSubject.add(false);

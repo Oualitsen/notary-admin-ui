@@ -5,6 +5,7 @@ import 'package:notary_admin/src/pages/assistant/add_assistant_page.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
+import 'package:notary_model/model/admin.dart';
 import 'package:notary_model/model/assistant.dart';
 import 'package:notary_model/model/assistant_input.dart';
 import 'package:notary_model/model/gender.dart';
@@ -19,7 +20,7 @@ import 'assistant_credentials_input.dart';
 
 class AssistantDetailsPage extends StatefulWidget {
   static const home = "/";
-  final Assistant assistant;
+  final Admin assistant;
   AssistantDetailsPage({Key? key, required this.assistant}) : super(key: key);
 
   @override
@@ -33,7 +34,7 @@ class _AssistantDetailsPageState extends BasicState<AssistantDetailsPage>
   //late Assistant assistant;
   final newPwdCtr = TextEditingController();
   final GlobalKey<FormState> _formKeyNewPassword = GlobalKey<FormState>();
-  late Assistant assistant;
+  late Admin assistant;
 
   @override
   void initState() {
@@ -68,7 +69,7 @@ class _AssistantDetailsPageState extends BasicState<AssistantDetailsPage>
                   color: Colors.white,
                 ),
                 onPressed: () {
-                  push<Assistant>(context, AddAssistantPage())
+                  push<Admin>(context, AddAssistantPage())
                       .listen((c) => setState(() => assistant = c));
                 },
               ),
@@ -194,15 +195,20 @@ class _AssistantDetailsPageState extends BasicState<AssistantDetailsPage>
   }
 
   setPasswordAssistant() async {
-    if (_formKeyNewPassword.currentState!.validate() || true) {
-      // Process data.
-      var result =
-          await service.ResetPasswordAssistant(assistant.id, newPwdCtr.text);
-      showSnackBar2(context, lang.passwordChanged);
+    if (_formKeyNewPassword.currentState!.validate()) {
+      progressSubject.add(true);
+      try {
+        var result =
+            await service.ResetPasswordAssistant(assistant.id, newPwdCtr.text);
 
-      // Find the ScaffoldMessenger in the widget tree
-      // and use it to show a SnackBar.
-      Navigator.pop(context);
+        showSnackBar2(context, lang.passwordChanged);
+        Navigator.pop(context);
+     } catch (error, stacktrace) {
+                  showServerError(context, error: error);
+                  print(stacktrace);
+                } finally {
+        progressSubject.add(false);
+      }
     }
   }
 

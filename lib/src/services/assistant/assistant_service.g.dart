@@ -19,14 +19,14 @@ class _AssistantService implements AssistantService {
   String? baseUrl;
 
   @override
-  Future<Assistant> saveAssistant(input) async {
+  Future<Admin> saveAssistant(input) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(input.toJson());
-    final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<Assistant>(Options(
+    final _result =
+        await _dio.fetch<Map<String, dynamic>>(_setStreamType<Admin>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
@@ -38,18 +38,18 @@ class _AssistantService implements AssistantService {
               data: _data,
             )
             .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
-    final value = Assistant.fromJson(_result.data!);
+    final value = Admin.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<Assistant> getByUsername(text) async {
+  Future<Admin> getByUsername(text) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = text;
-    final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<Assistant>(Options(
+    final _result =
+        await _dio.fetch<Map<String, dynamic>>(_setStreamType<Admin>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
@@ -61,12 +61,12 @@ class _AssistantService implements AssistantService {
               data: _data,
             )
             .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
-    final value = Assistant.fromJson(_result.data!);
+    final value = Admin.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<List<Assistant>> getAssistants({
+  Future<List<Admin>> getAssistants({
     required index,
     required size,
   }) async {
@@ -78,7 +78,7 @@ class _AssistantService implements AssistantService {
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     final _result =
-        await _dio.fetch<List<dynamic>>(_setStreamType<List<Assistant>>(Options(
+        await _dio.fetch<List<dynamic>>(_setStreamType<List<Admin>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
@@ -91,13 +91,13 @@ class _AssistantService implements AssistantService {
             )
             .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
     var value = _result.data!
-        .map((dynamic i) => Assistant.fromJson(i as Map<String, dynamic>))
+        .map((dynamic i) => Admin.fromJson(i as Map<String, dynamic>))
         .toList();
     return value;
   }
 
   @override
-  Future<Assistant> ResetPasswordAssistant(
+  Future<Admin> ResetPasswordAssistant(
     id,
     password,
   ) async {
@@ -105,8 +105,8 @@ class _AssistantService implements AssistantService {
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = password;
-    final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<Assistant>(Options(
+    final _result =
+        await _dio.fetch<Map<String, dynamic>>(_setStreamType<Admin>(Options(
       method: 'PUT',
       headers: _headers,
       extra: _extra,
@@ -118,7 +118,7 @@ class _AssistantService implements AssistantService {
               data: _data,
             )
             .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
-    final value = Assistant.fromJson(_result.data!);
+    final value = Admin.fromJson(_result.data!);
     return value;
   }
 
@@ -157,7 +157,7 @@ class _AssistantService implements AssistantService {
     )
         .compose(
           _dio.options,
-          '/admin/assistant',
+          '/admin/assistant/${id}',
           queryParameters: queryParameters,
           data: _data,
         )

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
+import 'package:notary_admin/src/widgets/widget_roles.dart';
 import 'package:notary_admin/src/pages/templates/form_and_view_html.dart';
 import 'package:notary_admin/src/pages/templates/html_editor_template.dart';
 import 'package:notary_admin/src/pages/templates/upload_template.dart';
@@ -12,7 +13,9 @@ import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
+import 'package:notary_model/model/role.dart';
 import 'package:notary_model/model/template_document.dart';
+import 'package:rapidoc_utils/alerts/alert_vertical_widget.dart';
 import 'package:rxdart/subjects.dart';
 
 class LoadTemplatePage extends StatefulWidget {
@@ -35,7 +38,7 @@ class _LoadTemplatePageState extends BasicState<LoadTemplatePage>
 
   void init() {
     if (!initialized) {
-      items = [lang.editFileName, lang.editContent, lang.generatForm];
+      items = [lang.editFileName, lang.editContent, lang.delete];
       dropDownValueStream.add(items.first);
       initialized = true;
     }
@@ -45,31 +48,37 @@ class _LoadTemplatePageState extends BasicState<LoadTemplatePage>
   Widget build(BuildContext context) {
     init();
     return WidgetUtils.wrapRoute(
-      (context, type) => Scaffold(
-        appBar: AppBar(title: Text(lang.fileList)),
-        floatingActionButton: ElevatedButton(
-          onPressed: loadFiles,
-          child: Text(lang.addFiles),
-        ),
-        body: InfiniteScrollListView<TemplateDocument>(
-          key: key,
-          comparator: ((a, b) => b.creationDate - a.creationDate),
-          elementBuilder: (BuildContext context, template, index, animation) {
-            return ListTile(
-                leading:
-                    CircleAvatar(child: Text(template.name[0].toUpperCase())),
-                title: Text(template.name),
-                trailing: PopupMenuButton(
-                  onSelected: (value) => onChanged(value, template),
-                  itemBuilder: (item) {
-                    return items
-                        .map((e) => PopupMenuItem(value: e, child: Text(e)))
-                        .toList();
-                  },
-                  child: Text(lang.menu.toUpperCase()),
-                ));
-          },
-          pageLoader: getData,
+      (context, type) => RoleGuardWidget(
+        role: Role.ADMIN,
+        noRoleWidget: Center(
+            child: AlertVerticalWidget.createDanger(
+                lang.noAccessRightError.toUpperCase())),
+        child: Scaffold(
+          appBar: AppBar(title: Text(lang.fileList)),
+          floatingActionButton: ElevatedButton(
+            onPressed: loadFiles,
+            child: Text(lang.addFiles),
+          ),
+          body: InfiniteScrollListView<TemplateDocument>(
+            key: key,
+            comparator: ((a, b) => b.creationDate - a.creationDate),
+            elementBuilder: (BuildContext context, template, index, animation) {
+              return ListTile(
+                  leading:
+                      CircleAvatar(child: Text(template.name[0].toUpperCase())),
+                  title: Text(template.name),
+                  trailing: PopupMenuButton(
+                    onSelected: (value) => onChanged(value, template),
+                    itemBuilder: (item) {
+                      return items
+                          .map((e) => PopupMenuItem(value: e, child: Text(e)))
+                          .toList();
+                    },
+                    child: Text(lang.menu.toUpperCase()),
+                  ));
+            },
+            pageLoader: getData,
+          ),
         ),
       ),
     );
@@ -123,7 +132,7 @@ class _LoadTemplatePageState extends BasicState<LoadTemplatePage>
 
   Future<List<TemplateDocument>> getData(int index) {
     if (index == 0)
-      return service.getFiles(pageIndex: index, pageSize: 20);
+      return service.getTemplates(pageIndex: index, pageSize: 20);
     else
       return Future.value([]);
   }
@@ -155,24 +164,39 @@ class _LoadTemplatePageState extends BasicState<LoadTemplatePage>
         ).then((value) => key.currentState?.reload());
       }
       if (value == items[2]) {
-        var finalList = [];
-        var list = await service.formGenerating(template.id);
-        for (var res in list) {
-          //res =
-          finalList.add(res.replaceAll(" ", "_"));
+        try {
+          await service.delete(template.id);
+          key.currentState?.reload();
+          await showSnackBar2(context, lang.deletedSuccessfully);
+        } catch (error, stackTrace) {
+          print(stackTrace);
+          showServerError(context, error: error);
         }
-        var data = await service.replacements(template.id);
-        //  print(data);
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => FormAndViewHtml(
-              listFormField: finalList,
-              text: data,
-            ),
-          ),
-        ).then((value) => key.currentState?.reload());
-        ;
+
+        //form generating
+        //   try {
+        //     var finalList = [];
+        //     var list = await service.formGenerating(template.id);
+        //     for (var res in list) {
+        //       //res =
+        //       finalList.add(res.replaceAll(" ", "_"));
+        //     }
+        //     var data = await service.replacements(template.id);
+        //     //  print(data);
+        //     Navigator.push(
+        //       context,
+        //       MaterialPageRoute(
+        //         builder: (context) => FormAndViewHtml(
+        //           listFormField: finalList,
+        //           text: data,
+        //         ),
+        //       ),
+        //     ).then((value) => key.currentState?.reload());
+        //     ;
+        //   } catch (error, stackTrace) {
+        //     print(stackTrace);
+        //     showServerError(context, error: error);
+        //   }
       }
     }
   }
