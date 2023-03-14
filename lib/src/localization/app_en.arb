@@ -275,7 +275,7 @@
   "createdFileSpec": "Creation date",
   "addFileSpec": "Add a Specification Folder",
   "nameFileSpec": "Specification folder name",
-  "listDocumentsFileSpec": "List of documents",
+  "listDocumentsFileSpec": "documents",
   "originalDocument": "Original document",
   "requiredDocument": "Required Document",
   "noDocument": "No documents yet",
@@ -293,5 +293,17 @@
   "noAccessRightError": "You do not have permission to access to this feature. Contact your server administrator to request access.",
   "selectTemplate": "Select template",
   "noCreatedDocumentprint": "Document not created",
-  "deletedSuccessfully": "Deleted Successfully"
+  "deletedSuccessfully": "Deleted Successfully",
+  "stepGroups": "Step groups",
+  "stepGroup": "Step group",
+  "step": "Step",
+  "steps": "Steps",
+  "stepGroupDetails": "Step group details",
+  "addStepGroup": "Add step group",
+  "stepsEmptyError": "Step group cannot be created without steps",
+  "noSteps": "Steps not created",
+  "estimationTime": "Estimated time",
+  "addSteps": "Add step",
+  "selectStepsGroup": "select steps group",
+  "confirmChangingState": "Are you sure you want to change the current state of the file?"
 }

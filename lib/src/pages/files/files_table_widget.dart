@@ -3,9 +3,10 @@ import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/services/files/files_service.dart';
+import 'package:notary_admin/src/utils/widget_utils_new.dart';
 import 'package:notary_model/model/files.dart';
+import 'package:notary_model/model/steps.dart';
 import 'package:rxdart/src/subjects/subject.dart';
-import 'package:webviewx/webviewx.dart';
 import '../../services/admin/printed_docs_service.dart';
 import '../../widgets/basic_state.dart';
 import '../../widgets/mixins/button_utils_mixin.dart';
@@ -78,15 +79,32 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
         Tooltip(
           message: lang.print,
           child: IconButton(
-            onPressed: () async {
-              // var printDocument = await servicePrintDocument
-              //     .getPrintedDocsById(data.printedDocId);
-            },
+            onPressed: () => null,
             icon: Icon(Icons.print),
           ),
         ),
       ),
-      DataCell(Text(lang.save)),
+      DataCell(Row(
+        children: [
+          Tooltip(
+            message: lang.previous,
+            child: TextButton(
+              onPressed: () => updateCurrentStep(data, false),
+              child: Text(lang.previous),
+            ),
+          ),
+          SizedBox(width: 5),
+          Text(data.currentStep.name),
+          SizedBox(width: 5),
+          Tooltip(
+            message: lang.next,
+            child: TextButton(
+              onPressed: () => updateCurrentStep(data, false),
+              child: Text(lang.next),
+            ),
+          ),
+        ],
+      )),
       DataCell(Text(data.number)),
       DataCell(TextButton(
           onPressed: () async {
@@ -96,56 +114,12 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
                   context: context,
                   builder: (BuildContext context) => AlertDialog(
                         title: Container(
-                            height: 50,
+                            height: 40,
                             color: Colors.blue,
                             child: Center(child: Text(lang.customerList))),
-                        content: Container(
-                          padding: EdgeInsets.all(10),
-                          height: 400,
-                          width: double.maxFinite,
-                          child: data.clientIds.length == 0
-                              ? ListTile(
-                                  title: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Text(lang.noCustomer.toUpperCase()),
-                                  ],
-                                ))
-                              : ListView.builder(
-                                  itemCount: data.clientIds.length,
-                                  itemBuilder: (context, int index) {
-                                    return ListTile(
-                                      title: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Icon(
-                                            Icons.man,
-                                            color:
-                                                Color.fromARGB(158, 3, 18, 27),
-                                          ),
-                                          SizedBox(
-                                            width: 20,
-                                          ),
-                                          Text(
-                                              "${lang.lastName}  :  ${customersList[index].lastName}"),
-                                          SizedBox(
-                                            width: 20,
-                                          ),
-                                          Text(
-                                              "${lang.firstName}  :  ${customersList[index].firstName}"),
-                                          SizedBox(
-                                            width: 20,
-                                          ),
-                                          Text(
-                                              "${lang.dateOfBirth}  :  ${lang.formatDate(customersList[index].dateOfBirth)}"),
-                                          SizedBox(
-                                            width: 20,
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  }),
+                        content: ListCustomers(
+                          listCustomers: customersList,
+                          width: 300,
                         ),
                         actions: <Widget>[
                           TextButton(
@@ -171,46 +145,12 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
                   context: context,
                   builder: (BuildContext context) => AlertDialog(
                         title: Container(
-                            height: 50,
+                            height: 40,
                             color: Colors.blue,
                             child: Center(child: Text(lang.fileList))),
-                        content: Container(
-                          padding: EdgeInsets.all(10),
-                          height: 400,
-                          width: double.maxFinite,
-                          child: data.uploadedFiles.length == 0
-                              ? ListTile(
-                                  title: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Text(lang.noDocument.toUpperCase()),
-                                  ],
-                                ))
-                              : ListView.builder(
-                                  itemCount: documentsUpload.length,
-                                  itemBuilder: (context, int index) {
-                                    return ListTile(
-                                      title: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Icon(
-                                            Icons.file_download,
-                                            color: Color.fromARGB(
-                                                158, 135, 150, 6),
-                                          ),
-                                          SizedBox(
-                                            width: 20,
-                                          ),
-                                          Text(
-                                              "${data.specification.documents[index].name}"),
-                                          SizedBox(
-                                            width: 20,
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  }),
+                        content: widgetListFiles(
+                          documentsUpload: documentsUpload,
+                          width: 300,
                         ),
                         actions: <Widget>[
                           TextButton(
@@ -232,7 +172,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
                 context,
                 MaterialPageRoute(
                     builder: (context) => UpdateDocumentFolderCustomer(
-                          files: data,
+                          file: data,
                         ))).then((value) => {if (value != null) {}});
           },
           child: Text(lang.edit))),
@@ -274,10 +214,59 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   }
 
   @override
-  // TODO: implement notifiers
   List<ChangeNotifier> get notifiers => [];
 
   @override
-  // TODO: implement subjects
   List<Subject> get subjects => [];
+
+  Steps? getStep(Files data, bool goNext) {
+    var steps = data.specification.steps;
+    var currentStep = steps.indexOf(data.currentStep);
+    if (goNext) {
+      if (currentStep < (steps.length - 1)) {
+        return steps.elementAt(currentStep + 1);
+      }
+    } else {
+      if (currentStep > 0) {
+        return steps.elementAt(currentStep - 1);
+      }
+    }
+    return null;
+  }
+
+  void updateCurrentStep(Files data, bool goNext) async {
+    Steps? newStep = getStep(data, goNext);
+    if (newStep != null) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: Text(lang.confirm),
+          content: Text(lang.confirmChangingState),
+          actions: <Widget>[
+            TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+                child: Text(lang.no.toUpperCase())),
+            TextButton(
+                onPressed: () async {
+                  try {
+                    progressSubject.add(true);
+                    await filesService.updateCurrentStep(data.id, newStep);
+                    tableKey.currentState?.refreshPage();
+                    Navigator.of(context).pop(true);
+                    await showSnackBar2(context, lang.updatedSuccessfully);
+                  } catch (error, stacktrace) {
+                    showServerError(context, error: error);
+                    print(stacktrace);
+                  } finally {
+                    progressSubject.add(false);
+                  }
+                },
+                child: Text(lang.yes.toUpperCase())),
+          ],
+        ),
+      );
+    }
+  }
 }
