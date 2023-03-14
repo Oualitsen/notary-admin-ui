@@ -6,6 +6,7 @@ import 'package:notary_model/model/documents.dart';
 import 'package:notary_model/model/files.dart';
 import 'package:notary_model/model/files_input.dart';
 import 'package:notary_model/model/printed_doc.dart';
+import 'package:notary_model/model/steps.dart';
 import 'package:retrofit/retrofit.dart';
 
 part 'files_service.g.dart';
@@ -36,4 +37,8 @@ abstract class FilesService {
 
   @GET("/admin/files/printed/{filesId}")
   Future<PrintedDoc> getPrintedDoc(@Path("filesId") String filesId);
+
+  @PUT("/admin/files/current-step/{filesId}")
+  Future<Files> updateCurrentStep(
+      @Path("filesId") String filesId, @Body() Steps newStep);
 }

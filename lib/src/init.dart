@@ -6,6 +6,8 @@ import 'package:get_it/get_it.dart';
 import 'package:notary_admin/src/services/admin/customer_service.dart';
 import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
 import 'package:notary_admin/src/services/admin/profile_service.dart';
+import 'package:notary_admin/src/services/admin/step_group_service.dart';
+import 'package:notary_admin/src/services/admin/steps_service.dart';
 import 'package:notary_admin/src/services/admin/template_document_service.dart';
 import 'package:notary_admin/src/services/assistant/assistant_service.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
@@ -81,6 +83,8 @@ void initServices() {
   GetIt.instance.registerSingleton(AssistantService(dio));
   GetIt.instance.registerSingleton(FilesService(dio));
   GetIt.instance.registerSingleton(PrintedDocService(dio));
+  GetIt.instance.registerSingleton(StepGroupService(dio));
+  GetIt.instance.registerSingleton(StepsService(dio));
 
   GetIt.instance.registerSingleton(
     AuthManager<BasicUser>(

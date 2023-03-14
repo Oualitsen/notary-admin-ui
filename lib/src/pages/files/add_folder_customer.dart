@@ -1,12 +1,10 @@
-import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:notary_admin/src/pages/customer/customer_selection_page.dart';
-import 'package:notary_admin/src/pages/files/widget_document_picked.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
+import 'package:notary_admin/src/utils/widget_utils_new.dart';
 import 'package:notary_model/model/customer.dart';
 import 'package:notary_model/model/files.dart';
 import 'package:notary_model/model/files_input.dart';
@@ -14,7 +12,6 @@ import 'package:notary_model/model/files_spec.dart';
 import 'package:notary_model/model/printed_doc.dart';
 import 'package:notary_model/model/selection_type.dart';
 import 'package:rxdart/rxdart.dart';
-import '../../services/admin/printed_docs_service.dart';
 import '../../services/admin/template_document_service.dart';
 import '../../services/files/file_spec_service.dart';
 import '../../services/files/files_service.dart';
@@ -33,7 +30,7 @@ class AddFolderCustomer extends StatefulWidget {
 }
 
 class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
-    with WidgetUtilsMixin {
+    with WidgetUtilsMixin, WidgetUtilsFile {
   int currentStep = 0;
   //services
   final serviceFileSpec = GetIt.instance.get<FileSpecService>();
@@ -247,31 +244,11 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
                               if (!snapshot.hasData) {
                                 return SizedBox.shrink();
                               }
-                              return SizedBox(
-                                height: 200,
-                                child: snapshot.data!.isNotEmpty
-                                    ? ListView.builder(
-                                        scrollDirection: Axis.vertical,
-                                        itemCount: snapshot.data!.length,
-                                        itemBuilder:
-                                            (BuildContext context, int index) {
-                                          return ListTile(
-                                            leading: Text(
-                                                "${index + 1}-  ${snapshot.data![index].lastName}   ${snapshot.data![index].firstName}"),
-                                            title: Text(
-                                                "${lang.formatDate(snapshot.data![index].dateOfBirth)}"),
-                                          );
-                                        })
-                                    : Padding(
-                                        padding: const EdgeInsets.all(10),
-                                        child:
-                                            Text(lang.noCustomer.toUpperCase()),
-                                      ),
+                              //
+                              return ListCustomers(
+                                listCustomers: _listcustomerStream.value,
                               );
                             }),
-                        SizedBox(
-                          height: 20,
-                        ),
                         getButtons(
                             onSave: continued,
                             onCancel: previous,
@@ -295,142 +272,11 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
 
                               return SizedBox(
                                 height: 200,
-                                child: ListView.builder(
-                                    itemCount: snapshot.data!.length,
-                                    itemBuilder:
-                                        (BuildContext context, int index) {
-                                      return ListTile(
-                                        leading: Icon(Icons.file_download),
-                                        title: Text(
-                                          " ${_filesSpecStream.value.documents[index].name} ",
-                                          style: TextStyle(
-                                              color:
-                                                  Color.fromARGB(255, 0, 0, 0)),
-                                          maxLines: 50,
-                                        ),
-                                        subtitle: Row(
-                                          children: [
-                                            snapshot.data![index].selected ==
-                                                    true
-                                                ? Flexible(
-                                                    child: Text(
-                                                      snapshot.data![index]
-                                                          .namePickedDocument
-                                                          .toString(),
-                                                      softWrap: true,
-                                                    ),
-                                                  )
-                                                : Text(lang.noUpload),
-                                          ],
-                                        ),
-                                        trailing: Wrap(
-                                          direction: Axis.horizontal,
-                                          alignment: WrapAlignment.end,
-                                          spacing: 10,
-                                          children: [
-                                            snapshot.data![index].selected ==
-                                                    true
-                                                ? TextButton(
-                                                    onPressed: () {
-                                                      showDialog(
-                                                          context: context,
-                                                          builder:
-                                                              (BuildContext) =>
-                                                                  AlertDialog(
-                                                                    title: Text(
-                                                                        lang.confirm),
-                                                                    content:
-                                                                        Text(lang
-                                                                            .confirmDelete),
-                                                                    actions: [
-                                                                      TextButton(
-                                                                          onPressed:
-                                                                              () {
-                                                                            Navigator.of(context).pop(false);
-                                                                          },
-                                                                          child: Text(lang
-                                                                              .no
-                                                                              .toUpperCase())),
-                                                                      TextButton(
-                                                                          onPressed:
-                                                                              () {
-                                                                            var list =
-                                                                                snapshot.data!;
-                                                                            list.removeAt(index);
-                                                                            list.insert(
-                                                                                index,
-                                                                                addPathDocument(
-                                                                                  _filesSpecStream.value.documents[index].id,
-                                                                                  null,
-                                                                                  false,
-                                                                                  '',
-                                                                                  '',
-                                                                                  null,
-                                                                                ));
-                                                                            _pathDocumentsStream.add(list);
-                                                                            Navigator.of(context).pop(true);
-                                                                            allUploaded();
-                                                                          },
-                                                                          child: Text(lang
-                                                                              .confirm
-                                                                              .toUpperCase())),
-                                                                    ],
-                                                                  ));
-                                                    },
-                                                    child: Text(lang.delete))
-                                                : SizedBox.shrink(),
-                                            TextButton(
-                                              onPressed: () async {
-                                                var picked = await FilePicker
-                                                    .platform
-                                                    .pickFiles();
-
-                                                if (picked != null) {
-                                                  var pickedPath = null;
-                                                  if (!kIsWeb) {
-                                                    pickedPath =
-                                                        picked.files.first.path;
-                                                  }
-                                                  final pickedBytes =
-                                                      picked.files.first.bytes;
-
-                                                  final namePickedFile =
-                                                      picked.files.first.name;
-
-                                                  if (pickedBytes != null ||
-                                                      pickedPath != null) {
-                                                    var list =
-                                                        _pathDocumentsStream
-                                                            .value;
-                                                    list.removeAt(index);
-                                                    list.insert(
-                                                        index,
-                                                        addPathDocument(
-                                                          _filesSpecStream
-                                                              .value
-                                                              .documents[index]
-                                                              .id,
-                                                          pickedBytes,
-                                                          true,
-                                                          namePickedFile,
-                                                          _filesSpecStream
-                                                              .value
-                                                              .documents[index]
-                                                              .name,
-                                                          pickedPath,
-                                                        ));
-                                                    _pathDocumentsStream
-                                                        .add(list);
-                                                    allUploaded();
-                                                  } else {}
-                                                }
-                                              },
-                                              child: Text(lang.uploadFile),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    }),
+                                child: widgetListFiles(
+                                  pathDocumentsStream: _pathDocumentsStream,
+                                  allUploadedStream: _allUploadedStream,
+                                  filesSpecStream: _filesSpecStream,
+                                ),
                               );
                             }),
                         SizedBox(
@@ -599,6 +445,7 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
         break;
       case 2:
         {
+          print(_allUploadedStream.value);
           if (_allUploadedStream.value) {
             _currentStepStream.add(_currentStepStream.value + 1);
           } else {
@@ -626,43 +473,9 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
     return result;
   }
 
-  uploadFiles(Files finalFiles) async {
-    try {
-      if (_pathDocumentsStream.value.isNotEmpty) {
-        if (kIsWeb) {
-          for (var pathDoc in _pathDocumentsStream.value) {
-            await serviceUploadDocument.upload(
-              "/admin/files/upload/${finalFiles.id}/${finalFiles.specification.id}/${pathDoc.idDocument}",
-              pathDoc.document!,
-              pathDoc.nameDocument!,
-              callBack: (percentage) {
-                pathDoc.progress.add(percentage);
-              },
-            );
-          }
-        } else {
-          for (var pathDoc in _pathDocumentsStream.value) {
-            await serviceUploadDocument.uploadFileDynamic(
-              "/admin/files/upload/${finalFiles.id}/${finalFiles.specification.id}/${pathDoc.idDocument}",
-              pathDoc.path!,
-              callBack: (percentage) {
-                pathDoc.progress.add(percentage);
-              },
-            );
-          }
-        }
-      }
-    } catch (error, stackTrace) {
-      print(stackTrace);
-      showServerError(context, error: error);
-      throw error;
-    } finally {
-      progressSubject.add(false);
-    }
-  }
-
   save() async {
     try {
+      progressSubject.add(true);
       if (_selectFileSpecKey.currentState!.validate() &&
               _listcustomerStream.value.isNotEmpty &&
               _folderValidateStream.value ||
@@ -681,7 +494,7 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
             printedDocId: _printedDocIdStream.value.id));
 
         if (files != null) {
-          uploadFiles(files);
+          uploadFiles(context, files, _pathDocumentsStream.value);
           await showSnackBar2(context, lang.createdsuccssfully);
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => ListFilesCustomer()));
@@ -694,37 +507,6 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
     } finally {
       progressSubject.add(false);
     }
-  }
-
-  void allUploaded() {
-    for (var pathDoc in _pathDocumentsStream.value) {
-      if (!pathDoc.selected) {
-        _allUploadedStream.add(false);
-        return;
-      } else {
-        _allUploadedStream.add(true);
-      }
-    }
-  }
-
-  PathsDocuments addPathDocument(
-      String idDocument,
-      Uint8List? document,
-      bool selected,
-      String namePickedDocument,
-      String nameDocument,
-      String? path) {
-    var result;
-    result = PathsDocuments(
-      idDocument: idDocument,
-      selected: selected,
-      document: document,
-      namePickedDocument: namePickedDocument,
-      nameDocument: nameDocument,
-      path: path,
-    );
-
-    return result;
   }
 
   @override

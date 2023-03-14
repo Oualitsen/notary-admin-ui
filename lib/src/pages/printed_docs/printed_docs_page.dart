@@ -1,15 +1,12 @@
-import 'package:extended_image_library/extended_image_library.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
-import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/pages/printed_docs/html_editor_printed_doc.dart';
 import 'package:notary_admin/src/pages/printed_docs/printed_doc_view.dart';
 import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_model/model/printed_doc.dart';
-import 'package:rxdart/src/subjects/subject.dart';
 import 'package:rxdart/subjects.dart';
 
 import '../../utils/widget_utils.dart';
@@ -46,7 +43,7 @@ class _PrintedDocumentsPageState extends BasicState<PrintedDocumentsPage>
     init();
     return WidgetUtils.wrapRoute((context, type) => Scaffold(
           appBar: AppBar(
-            title: Text(lang.listFilesCustomer),
+            title: Text(lang.savedTemplates),
           ),
           body: InfiniteScrollListView<PrintedDoc>(
             key: key,

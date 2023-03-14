@@ -8,7 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_responsive_tools/device_screen_type.dart';
 import 'package:get_it/get_it.dart';
 import 'package:notary_admin/src/db_services/token_db_service.dart';
+import 'package:notary_admin/src/pages/step_group/step_group_page.dart';
+import 'package:notary_admin/src/pages/steps/steps_page.dart';
 import 'package:notary_admin/src/pages/templates/load_template.dart';
+import 'package:notary_admin/src/pages/test/test_page.dart';
 import 'package:notary_admin/src/utils/injector.dart';
 import 'package:notary_admin/src/widgets/mixins/lang.dart';
 import 'package:notary_model/model/basic_user.dart';
@@ -17,7 +20,6 @@ import 'package:rapidoc_utils/widgets/menu_drawer.dart';
 import 'package:rapidoc_utils/widgets/route_guard_widget.dart';
 import 'package:rapidoc_utils/widgets/template_builder.dart';
 
-import '../pages/files/add_folder_customer.dart';
 import '../pages/file-spec/file_spec_List.dart';
 
 class WidgetUtils {
@@ -113,7 +115,22 @@ Widget createDrawer(BuildContext context) {
       DrawerMenuItem(
         title: (lang.search),
         icon: Icons.search,
-        onTap: () => {},
+        onTap: () => {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => TestArchving()),
+          )
+        },
+      ),
+      DrawerMenuItem(
+        title: (lang.steps),
+        icon: Icons.people,
+        onTap: () => {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => StepsPage()),
+          )
+        },
       ),
       DrawerMenuItem(
         title: (lang.customers),

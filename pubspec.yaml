@@ -61,6 +61,9 @@ dependencies:
   menu_button: ^1.4.2+1
   select_form_field: ^2.2.0
   document_file_save_plus: ^1.0.9
+  popup_card: ^0.1.0
+  archive: ^3.3.6
+  jsaver: ^1.2.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

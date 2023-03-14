@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:archive/archive_io.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
@@ -28,8 +31,9 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
   Widget build(BuildContext context) {
     columns = [
       DataColumn(label: Text(lang.createdFileSpec)),
-      DataColumn(label: Text(lang.fileSpec)),
-      DataColumn(label: Text(lang.list)),
+      DataColumn(label: Text(lang.name)),
+      DataColumn(label: Text(lang.listDocumentsFileSpec)),
+      DataColumn(label: Text(lang.steps)),
       DataColumn(label: Text(lang.edit)),
       DataColumn(label: Text(lang.delete)),
     ];
@@ -62,76 +66,22 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
     var cellList = [
       DataCell(Text(lang.formatDate(data.creationDate))),
       DataCell(Text(data.name)),
-      DataCell(TextButton(
+      DataCell(
+        TextButton(
           onPressed: () {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) => AlertDialog(
-                actions: [
-                  Center(
-                    child: ElevatedButton(
-                      child: Text(lang.ok.toUpperCase()),
-                      onPressed: () => Navigator.of(context).pop(false),
-                    ),
-                  ),
-                ],
-                title: Container(
-                    height: 50,
-                    color: Colors.blue,
-                    child: Center(child: Text(lang.listDocumentsFileSpec))),
-                content: Container(
-                  padding: EdgeInsets.all(10),
-                  height: 400,
-                  width: double.maxFinite,
-                  child: data.documents.length == 0
-                      ? ListTile(
-                          title: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Text(lang.noDocument.toUpperCase()),
-                          ],
-                        ))
-                      : ListView.builder(
-                          itemCount: data.documents.length,
-                          itemBuilder: (context, int index) {
-                            return ListTile(
-                              title: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Icon(
-                                    Icons.folder,
-                                    color: Color.fromARGB(158, 3, 18, 27),
-                                  ),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text(" ${data.documents[index].name}"),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text(
-                                      "${lang.createdFileSpec} : ${data.documents[index].creationDate.toString()}"),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text(data.documents[index].optional == true
-                                      ? "${lang.originalDocument} : ${lang.yes}"
-                                      : "${lang.originalDocument} : ${lang.no}"),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text(data.documents[index].original == true
-                                      ? "${lang.requiredDocument} : ${lang.yes}"
-                                      : "${lang.requiredDocument} : ${lang.no}"),
-                                ],
-                              ),
-                            );
-                          }),
-                ),
-              ),
-            );
+            documentList(context, data);
           },
-          child: Text(lang.listDocumentsFileSpec))),
+          child: Text(lang.listDocumentsFileSpec),
+        ),
+      ),
+      DataCell(
+        TextButton(
+          onPressed: () {
+            stepsList(context, data);
+          },
+          child: Text(lang.steps),
+        ),
+      ),
       DataCell(
         TextButton(
           onPressed: () async {
@@ -164,14 +114,16 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
                   TextButton(
                       child: Text(lang.yes.toUpperCase()),
                       onPressed: () async {
-                       try{ await service.deleteFileSpec(data.id);
-                        Navigator.of(context).pop(true);
-                        tableKey.currentState?.refreshPage();
-                        await showSnackBar2(context, lang.delete);
-                       } catch (error, stacktrace) {
-                  showServerError(context, error: error);
-                  print(stacktrace);
-                }}),
+                        try {
+                          await service.deleteFileSpec(data.id);
+                          Navigator.of(context).pop(true);
+                          tableKey.currentState?.refreshPage();
+                          await showSnackBar2(context, lang.delete);
+                        } catch (error, stacktrace) {
+                          showServerError(context, error: error);
+                          print(stacktrace);
+                        }
+                      }),
                 ],
               ),
             );
@@ -186,10 +138,123 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
   }
 
   @override
-  // TODO: implement notifiers
   List<ChangeNotifier> get notifiers => [];
 
   @override
-  // TODO: implement subjects
   List<Subject> get subjects => [];
+
+  void documentList(BuildContext context, FilesSpec data) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        actions: [
+          Center(
+            child: ElevatedButton(
+              child: Text(lang.ok.toUpperCase()),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+          ),
+        ],
+        title: Center(child: Text(lang.listDocumentsFileSpec)),
+        content: Container(
+          padding: EdgeInsets.all(10),
+          height: 400,
+          width: double.maxFinite,
+          child: data.documents.length == 0
+              ? ListTile(
+                  title: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(lang.noDocument.toUpperCase()),
+                  ],
+                ))
+              : ListView.builder(
+                  itemCount: data.documents.length,
+                  itemBuilder: (context, int index) {
+                    return ListTile(
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.folder,
+                            color: Color.fromARGB(158, 3, 18, 27),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(" ${data.documents[index].name}"),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                              "${lang.createdFileSpec} : ${data.documents[index].creationDate.toString()}"),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(data.documents[index].optional == true
+                              ? "${lang.originalDocument} : ${lang.yes}"
+                              : "${lang.originalDocument} : ${lang.no}"),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(data.documents[index].original == true
+                              ? "${lang.requiredDocument} : ${lang.yes}"
+                              : "${lang.requiredDocument} : ${lang.no}"),
+                        ],
+                      ),
+                    );
+                  }),
+        ),
+      ),
+    );
+  }
+
+  void stepsList(BuildContext context, FilesSpec data) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          actions: [
+            Center(
+              child: ElevatedButton(
+                child: Text(lang.ok.toUpperCase()),
+                onPressed: () => Navigator.of(context).pop(false),
+              ),
+            ),
+          ],
+          title: Container(height: 50, child: Center(child: Text(lang.steps))),
+          content: Container(
+            padding: EdgeInsets.all(10),
+            height: 400,
+            width: 400,
+            child: data.steps.length == 0
+                ? ListTile(title: Text(lang.noSteps.toUpperCase()))
+                : ListView.builder(
+                    itemCount: data.steps.length,
+                    itemBuilder: (context, int index) {
+                      var step = data.steps.toList()[index];
+                      return ListTile(
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.folder,
+                              color: Color.fromARGB(158, 3, 18, 27),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Text(" ${step.name}"),
+                            SizedBox(
+                              width: 10,
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+          ),
+        );
+      },
+    );
+  }
 }
