@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
-import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/step_input.dart';
@@ -49,14 +48,15 @@ class AddStepWidgetState extends BasicState<AddStepWidget>
                 return ValidationUtils.requiredField(text, context);
               },
               controller: nameController,
-              decoration: (getDecoration(lang.contactName, true, lang.name))),
+              decoration: (getDecoration(lang.name, true, lang.name))),
           const SizedBox(height: 16),
           TextFormField(
             validator: (text) {
               return ValidationUtils.requiredField(text, context);
             },
             controller: estimatedTimeController,
-            decoration: (getDecoration(lang.estimationTime, true)),
+            decoration:
+                (getDecoration(lang.estimationTime, true, lang.estimationTime)),
           ),
         ],
       ),
@@ -73,8 +73,10 @@ class AddStepWidgetState extends BasicState<AddStepWidget>
     if (key.currentState?.validate() ?? false) {
       String? id = widget.step?.id ?? null;
 
-      return StepInput(id: id,
-         name: nameController.text, estimatedTime: int.tryParse(estimatedTimeController.text) ?? 0);
+      return StepInput(
+          id: id,
+          name: nameController.text,
+          estimatedTime: int.tryParse(estimatedTimeController.text) ?? 0);
     }
     return null;
   }

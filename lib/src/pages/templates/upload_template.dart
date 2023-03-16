@@ -94,22 +94,14 @@ class _UploadTemplatePageState extends BasicState<UploadTemplatePage>
             alignment: Alignment.center,
             child: ElevatedButton(
               onPressed: loadFiles,
-              child: Wrap(
-                children: [
-                  Text(
-                    lang.addFileTitle.toUpperCase(),
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  SizedBox(width: 5),
-                  Icon(Icons.add_circle_outline_rounded),
-                ],
+              child: Text(
+                lang.addFileTitle.toUpperCase(),
+                style: TextStyle(fontSize: 16),
               ),
             ),
           ),
         ),
-        floatingActionButton: wrap(
-          getButtons(onSave: save),
-        ),
+        floatingActionButton: getButtons(onSave: save),
       ),
     );
   }

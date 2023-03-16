@@ -7,7 +7,7 @@
   "yes": "yes",
   "login": "Login",
   "password": "Password",
-  "userName": "User name",
+  "userName": "Username",
   "requiredField": "Required field",
   "phoneNumber": "Phone number",
   "cancel": "Cancel",
@@ -275,14 +275,14 @@
   "createdFileSpec": "Creation date",
   "addFileSpec": "Add a Specification Folder",
   "nameFileSpec": "Specification folder name",
-  "listDocumentsFileSpec": "documents",
+  "listDocumentsFileSpec": "Documents",
   "originalDocument": "Original document",
   "requiredDocument": "Required Document",
   "noDocument": "No documents yet",
   "filesNumber": "File code",
   "formToHtml": "Form to html",
   "dataForDocument": "Data for document",
-  "listFilesCustomer": "Customer folders",
+  "listFilesCustomer": "Files",
   "noUpload": "Not uploaded yet",
   "remplaceFile": "Replace file",
   "nameForDocument": "Name For Document",
@@ -305,5 +305,6 @@
   "estimationTime": "Estimated time",
   "addSteps": "Add step",
   "selectStepsGroup": "select steps group",
-  "confirmChangingState": "Are you sure you want to change the current state of the file?"
+  "confirmChangingState": "Are you sure you want to change the current state of the file?",
+  "reset": "Reset"
 }

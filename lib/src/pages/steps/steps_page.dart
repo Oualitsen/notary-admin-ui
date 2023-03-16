@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
-import 'package:notary_admin/src/pages/steps/add_step.dart';
+import 'package:notary_admin/src/pages/steps/add_step_widget.dart';
 import 'package:notary_admin/src/pages/steps/steps_table_widget.dart';
 import 'package:notary_admin/src/services/admin/steps_service.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';

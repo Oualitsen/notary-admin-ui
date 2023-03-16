@@ -1,13 +1,12 @@
 import 'package:notary_model/model/admin.dart';
-import 'package:notary_model/model/assistant.dart';
 import 'package:notary_model/model/assistant_input.dart';
 import 'package:dio/dio.dart';
 import 'package:retrofit/http.dart';
-part 'assistant_service.g.dart';
+part 'admin_assistant_service.g.dart';
 
 @RestApi()
-abstract class AssistantService {
-  factory AssistantService(Dio dio) = _AssistantService;
+abstract class AdminAssistantService {
+  factory AdminAssistantService(Dio dio) = _AdminAssistantService;
   @POST("/admin/assistant")
   Future<Admin> saveAssistant(@Body() AssistantInput input);
 

@@ -3,10 +3,11 @@ import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:notary_admin/src/pages/assistant/assistant_details_input.dart';
 import 'package:notary_admin/src/pages/assistant/assistant_credentials_input.dart';
-import 'package:notary_admin/src/services/assistant/assistant_service.dart';
+import 'package:notary_admin/src/services/assistant/admin_assistant_service.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
+import 'package:notary_model/model/admin.dart';
 import 'package:notary_model/model/assistant_input.dart';
 import 'package:notary_model/model/role.dart';
 import 'package:rxdart/src/subjects/subject.dart';
@@ -26,7 +27,7 @@ class _AddAssistantPageState extends BasicState<AddAssistantPage>
   final _currentStepStream = BehaviorSubject.seeded(0);
   late AssistantDetails assistantDetails;
   late AssistantCredentials assistantCredentials;
-  final service = GetIt.instance.get<AssistantService>();
+  final service = GetIt.instance.get<AdminAssistantService>();
   @override
   Widget build(BuildContext context) {
     return WidgetUtils.wrapRoute(
@@ -54,7 +55,6 @@ class _AddAssistantPageState extends BasicState<AddAssistantPage>
                     children: [
                       AssistantDetailsInput(
                         key: assistantDetailsKey,
-                        //   assistant: widget.assistant,
                       ),
                       SizedBox(height: 16),
                       getButtons(
@@ -116,20 +116,15 @@ class _AddAssistantPageState extends BasicState<AddAssistantPage>
         break;
       case 1:
         {
-          try{
           var credentials =
-              await assistantCredentilasKey.currentState!.readCredentails();
+              assistantCredentilasKey.currentState!.readCredentails();
 
           if (credentials != null) {
             assistantCredentials = credentials;
-            await save();
+            save();
           } else {
             print("@@@@@@@@@@@@@ error");
           }
- } catch (error, stacktrace) {
-                  showServerError(context, error: error);
-                  print(stacktrace);
-                }
         }
         break;
     }
@@ -147,18 +142,19 @@ class _AddAssistantPageState extends BasicState<AddAssistantPage>
   save() async {
     try {
       var input = AssistantInput(
+          id: null,
           firstName: assistantDetails.firstName,
           lastName: assistantDetails.lastName,
           username: assistantCredentials.username,
           password: assistantCredentials.password,
-          roles: Set.of([Role.ASSISTANT]),
+          roles: [Role.ASSISTANT],
           gender: assistantDetails.gender);
       var res = await service.saveAssistant(input);
       await showSnackBar2(context, lang.updatedSuccessfully);
       Navigator.of(context).pop(res);
     } catch (error, stackTrace) {
       showServerError(context, error: error);
-      print(stackTrace);
+      print("@@@@@@@@@@@@@@@@@@@ \n $stackTrace");
       throw error;
     } finally {
       progressSubject.add(false);

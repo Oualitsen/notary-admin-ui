@@ -123,16 +123,6 @@ Widget createDrawer(BuildContext context) {
         },
       ),
       DrawerMenuItem(
-        title: (lang.steps),
-        icon: Icons.people,
-        onTap: () => {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => StepsPage()),
-          )
-        },
-      ),
-      DrawerMenuItem(
         title: (lang.customers),
         icon: Icons.people,
         onTap: () => {
@@ -162,6 +152,16 @@ Widget createDrawer(BuildContext context) {
             context,
             MaterialPageRoute(builder: (context) => LoadTemplatePage()),
           );
+        },
+      ),
+      DrawerMenuItem(
+        title: (lang.steps),
+        icon: Icons.list_alt_outlined,
+        onTap: () => {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => StepsPage()),
+          )
         },
       ),
       DrawerMenuItem(

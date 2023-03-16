@@ -4,7 +4,6 @@ import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:notary_admin/src/pages/file-spec/file_spec_List.dart';
 import 'package:notary_admin/src/pages/steps/step_selection_widget.dart';
-import 'package:notary_admin/src/services/admin/step_group_service.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_model/model/document_spec_input.dart';
@@ -36,7 +35,6 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
   int currentStep = 0;
   final service = GetIt.instance.get<FileSpecService>();
   final serviceTemplate = GetIt.instance.get<TemplateDocumentService>();
-  final serviceStepGroup = GetIt.instance.get<StepGroupService>();
   final _currentStepStream = BehaviorSubject.seeded(0);
   final _listDocumentsInputStream =
       BehaviorSubject.seeded(<DocumentSpecInput>[]);

@@ -42,19 +42,12 @@ class _DocumentsTableState extends BasicState<DocumentsTable>
               return SizedBox.shrink();
             }
             return snapshot.data!.isEmpty
-                ? ListTile(
-                    title: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(lang.noDocument.toUpperCase()),
-                    ],
-                  ))
+                ? ListTile(title: Text(lang.noDocument.toUpperCase()))
                 : ListView.builder(
                     itemCount: snapshot.data!.length,
                     itemBuilder: (context, int index) {
                       return ListTile(
-                        title: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
+                        title: Wrap(
                           children: [
                             Icon(
                               Icons.folder,

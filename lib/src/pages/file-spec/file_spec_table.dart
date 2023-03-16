@@ -99,7 +99,7 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
         ),
       ),
       DataCell(
-        IconButton(
+        TextButton(
           onPressed: () {
             showDialog(
               context: context,
@@ -128,9 +128,7 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
               ),
             );
           },
-          icon: Icon(
-            Icons.delete,
-          ),
+          child: Text(lang.delete),
         ),
       ),
     ];
@@ -147,33 +145,29 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
     showDialog(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        actions: [
-          Center(
-            child: ElevatedButton(
-              child: Text(lang.ok.toUpperCase()),
-              onPressed: () => Navigator.of(context).pop(false),
-            ),
-          ),
-        ],
-        title: Center(child: Text(lang.listDocumentsFileSpec)),
+        title: Container(
+            height: 50,
+            child: Wrap(alignment: WrapAlignment.spaceBetween, children: [
+              Text(lang.listDocumentsFileSpec),
+              Tooltip(
+                message: lang.cancel,
+                child: IconButton(
+                  icon: Icon(Icons.cancel),
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+              ),
+            ])),
         content: Container(
           padding: EdgeInsets.all(10),
           height: 400,
-          width: double.maxFinite,
+          width: 800,
           child: data.documents.length == 0
-              ? ListTile(
-                  title: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(lang.noDocument.toUpperCase()),
-                  ],
-                ))
+              ? ListTile(title: Text(lang.noDocument.toUpperCase()))
               : ListView.builder(
                   itemCount: data.documents.length,
                   itemBuilder: (context, int index) {
                     return ListTile(
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
+                      title: Wrap(
                         children: [
                           Icon(
                             Icons.folder,
@@ -214,15 +208,18 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          actions: [
-            Center(
-              child: ElevatedButton(
-                child: Text(lang.ok.toUpperCase()),
-                onPressed: () => Navigator.of(context).pop(false),
-              ),
-            ),
-          ],
-          title: Container(height: 50, child: Center(child: Text(lang.steps))),
+          title: Container(
+              height: 50,
+              child: Wrap(alignment: WrapAlignment.spaceBetween, children: [
+                Text(lang.steps),
+                Tooltip(
+                  message: lang.cancel,
+                  child: IconButton(
+                    icon: Icon(Icons.cancel),
+                    onPressed: () => Navigator.of(context).pop(false),
+                  ),
+                ),
+              ])),
           content: Container(
             padding: EdgeInsets.all(10),
             height: 400,
@@ -234,22 +231,8 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
                     itemBuilder: (context, int index) {
                       var step = data.steps.toList()[index];
                       return ListTile(
-                        title: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Icon(
-                              Icons.folder,
-                              color: Color.fromARGB(158, 3, 18, 27),
-                            ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Text(" ${step.name}"),
-                            SizedBox(
-                              width: 10,
-                            ),
-                          ],
-                        ),
+                        leading: CircleAvatar(child: Text("${(index + 1)}")),
+                        title: Text(" ${step.name}"),
                       );
                     }),
           ),
