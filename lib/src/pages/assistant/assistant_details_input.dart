@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
+import 'package:notary_model/model/admin.dart';
 import 'package:notary_model/model/assistant.dart';
 import 'package:notary_model/model/gender.dart';
 
 import 'package:rxdart/src/subjects/subject.dart';
 
 class AssistantDetailsInput extends StatefulWidget {
-  final Assistant? assistant;
+  final Admin? assistant;
   const AssistantDetailsInput({super.key, this.assistant});
 
   @override
@@ -20,11 +21,12 @@ class AssistantDetailsInputState extends BasicState<AssistantDetailsInput>
   final key = GlobalKey<FormState>();
   final firstNameCrtl = TextEditingController();
   final lastNameCrtl = TextEditingController();
-
+  Gender? gender;
   @override
   void initState() {
     firstNameCrtl.text = widget.assistant?.firstName ?? "";
     lastNameCrtl.text = widget.assistant?.lastName ?? "";
+    gender = widget.assistant?.gender ?? null;
     super.initState();
   }
 
@@ -44,7 +46,27 @@ class AssistantDetailsInputState extends BasicState<AssistantDetailsInput>
             decoration: getDecoration(lang.lastName, true),
             controller: lastNameCrtl,
             validator: (text) => ValidationUtils.requiredField(text, context),
-          )
+          ),
+          const SizedBox(height: 16),
+          DropdownButtonFormField<Gender>(
+            decoration: getDecoration(lang.gender, true),
+            value: gender,
+            items: Gender.values
+                .map(
+                  (e) => DropdownMenuItem<Gender>(
+                    child: Text(lang.genderValue(e)),
+                    value: e,
+                  ),
+                )
+                .toList(),
+            onChanged: (e) {
+              setState(() {
+                gender = e;
+              });
+            },
+            validator: (value) => ValidationUtils.requiredField(
+                value == null ? null : "$value", context),
+          ),
         ],
       ),
     );
@@ -52,8 +74,7 @@ class AssistantDetailsInputState extends BasicState<AssistantDetailsInput>
 
   AssistantDetails? readDetails() {
     if (key.currentState!.validate()) {
-      return AssistantDetails(
-          firstNameCrtl.text, lastNameCrtl.text, Gender.MALE);
+      return AssistantDetails(firstNameCrtl.text, lastNameCrtl.text, gender!);
     }
     return null;
   }

@@ -6,13 +6,11 @@ import 'package:get_it/get_it.dart';
 import 'package:notary_admin/src/services/admin/customer_service.dart';
 import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
 import 'package:notary_admin/src/services/admin/profile_service.dart';
-import 'package:notary_admin/src/services/admin/step_group_service.dart';
 import 'package:notary_admin/src/services/admin/steps_service.dart';
 import 'package:notary_admin/src/services/admin/template_document_service.dart';
-import 'package:notary_admin/src/services/assistant/assistant_service.dart';
+import 'package:notary_admin/src/services/assistant/admin_assistant_service.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
 import 'package:notary_admin/src/services/files/files_service.dart';
-import 'package:notary_model/model/admin.dart';
 import 'package:notary_model/model/basic_user.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:notary_admin/src/db_services/token_db_service.dart';
@@ -80,10 +78,9 @@ void initServices() {
   GetIt.instance.registerSingleton(PhoneCodeService(dio));
   GetIt.instance.registerSingleton(CustomerService(dio));
   GetIt.instance.registerSingleton(TemplateDocumentService(dio));
-  GetIt.instance.registerSingleton(AssistantService(dio));
+  GetIt.instance.registerSingleton(AdminAssistantService(dio));
   GetIt.instance.registerSingleton(FilesService(dio));
   GetIt.instance.registerSingleton(PrintedDocService(dio));
-  GetIt.instance.registerSingleton(StepGroupService(dio));
   GetIt.instance.registerSingleton(StepsService(dio));
 
   GetIt.instance.registerSingleton(

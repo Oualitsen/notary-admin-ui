@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:notary_admin/src/services/assistant/assistant_service.dart';
+import 'package:notary_admin/src/services/assistant/admin_assistant_service.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/assistant.dart';
@@ -8,8 +8,7 @@ import 'package:notary_model/model/assistant.dart';
 import 'package:rxdart/src/subjects/subject.dart';
 
 class AssistantCredentailsInput extends StatefulWidget {
-  final Assistant? assistant;
-  const AssistantCredentailsInput({super.key, this.assistant});
+  const AssistantCredentailsInput({super.key});
 
   @override
   State<AssistantCredentailsInput> createState() =>
@@ -18,7 +17,6 @@ class AssistantCredentailsInput extends StatefulWidget {
 
 class AssistantCredentailsInputState
     extends BasicState<AssistantCredentailsInput> with WidgetUtilsMixin {
-  final service = GetIt.instance.get<AssistantService>();
   final key = GlobalKey<FormState>();
   final usernameCtrl = TextEditingController();
   final passwordCtrl = TextEditingController();
@@ -43,18 +41,11 @@ class AssistantCredentailsInputState
     );
   }
 
-  Future<AssistantCredentials?> readCredentails() async {
+  AssistantCredentials? readCredentails() {
     if (key.currentState!.validate()) {
-      try {
-        var assistant = await service.getByUsername(usernameCtrl.text);
-        if (assistant.id == widget.assistant?.id) {
-          return AssistantCredentials(usernameCtrl.text, passwordCtrl.text);
-        }
-      } catch (error) {
-        return AssistantCredentials(usernameCtrl.text, passwordCtrl.text);
-      }
+      return AssistantCredentials(usernameCtrl.text, passwordCtrl.text);
     }
-    return Future.value();
+    return null;
   }
 
   @override

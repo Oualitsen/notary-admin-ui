@@ -43,7 +43,8 @@
     "estimationTime",
     "addSteps",
     "selectStepsGroup",
-    "confirmChangingState"
+    "confirmChangingState",
+    "reset"
   ],
 
   "fr": [
@@ -90,6 +91,7 @@
     "estimationTime",
     "addSteps",
     "selectStepsGroup",
-    "confirmChangingState"
+    "confirmChangingState",
+    "reset"
   ]
 }

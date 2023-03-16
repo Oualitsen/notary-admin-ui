@@ -10,7 +10,7 @@ import 'package:notary_model/model/customer.dart';
 import 'package:rxdart/src/subjects/subject.dart';
 
 class CustomerTableWidget extends StatefulWidget {
-  final GlobalKey? tableKey;
+  final GlobalKey<LazyPaginatedDataTableState>? tableKey;
   CustomerTableWidget({super.key, this.tableKey});
 
   @override
@@ -23,7 +23,16 @@ class _CustomerTableWidgetState extends BasicState<CustomerTableWidget>
   bool initialized = false;
   final columnSpacing = 65.0;
   List<DataColumn> columns = [];
-  final tableKey = GlobalKey<LazyPaginatedDataTableState>();
+  late GlobalKey<LazyPaginatedDataTableState> tableKey;
+
+  @override
+  void initState() {
+    tableKey = widget.tableKey != null
+        ? widget.tableKey!
+        : GlobalKey<LazyPaginatedDataTableState>();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     columns = [

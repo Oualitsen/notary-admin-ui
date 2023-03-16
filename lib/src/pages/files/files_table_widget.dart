@@ -37,7 +37,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
       DataColumn(label: Text(lang.print)),
       DataColumn(label: Text(lang.state)),
       DataColumn(label: Text(lang.filesNumber)),
-      DataColumn(label: Text(lang.customerName)),
+      DataColumn(label: Text(lang.customer)),
       DataColumn(label: Text(lang.fileSpec)),
       DataColumn(label: Text(lang.fileList)),
       DataColumn(label: Text(lang.edit)),
@@ -78,9 +78,9 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
       DataCell(
         Tooltip(
           message: lang.print,
-          child: IconButton(
+          child: TextButton(
             onPressed: () => null,
-            icon: Icon(Icons.print),
+            child: Text(lang.print),
           ),
         ),
       ),
@@ -99,7 +99,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
           Tooltip(
             message: lang.next,
             child: TextButton(
-              onPressed: () => updateCurrentStep(data, false),
+              onPressed: () => updateCurrentStep(data, true),
               child: Text(lang.next),
             ),
           ),
@@ -114,20 +114,24 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
                   context: context,
                   builder: (BuildContext context) => AlertDialog(
                         title: Container(
-                            height: 40,
-                            color: Colors.blue,
-                            child: Center(child: Text(lang.customerList))),
+                            height: 50,
+                            child: Wrap(
+                                alignment: WrapAlignment.spaceBetween,
+                                children: [
+                                  Text(lang.customerList),
+                                  Tooltip(
+                                    message: lang.cancel,
+                                    child: IconButton(
+                                      icon: Icon(Icons.cancel),
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(false),
+                                    ),
+                                  ),
+                                ])),
                         content: ListCustomers(
                           listCustomers: customersList,
                           width: 300,
                         ),
-                        actions: <Widget>[
-                          TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(false);
-                              },
-                              child: Text(lang.previous.toUpperCase())),
-                        ],
                       ));
             } catch (error, stacktrace) {
               showServerError(context, error: error);
@@ -145,20 +149,24 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
                   context: context,
                   builder: (BuildContext context) => AlertDialog(
                         title: Container(
-                            height: 40,
-                            color: Colors.blue,
-                            child: Center(child: Text(lang.fileList))),
+                            height: 50,
+                            child: Wrap(
+                                alignment: WrapAlignment.spaceBetween,
+                                children: [
+                                  Text(lang.fileList),
+                                  Tooltip(
+                                    message: lang.cancel,
+                                    child: IconButton(
+                                      icon: Icon(Icons.cancel),
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(false),
+                                    ),
+                                  ),
+                                ])),
                         content: widgetListFiles(
                           documentsUpload: documentsUpload,
                           width: 300,
                         ),
-                        actions: <Widget>[
-                          TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(false);
-                              },
-                              child: Text(lang.previous.toUpperCase())),
-                        ],
                       ));
             } catch (error, stacktrace) {
               showServerError(context, error: error);

@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'assistant_service.dart';
+part of 'admin_assistant_service.dart';
 
 // **************************************************************************
 // RetrofitGenerator
@@ -8,8 +8,8 @@ part of 'assistant_service.dart';
 
 // ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers
 
-class _AssistantService implements AssistantService {
-  _AssistantService(
+class _AdminAssistantService implements AdminAssistantService {
+  _AdminAssistantService(
     this._dio, {
     this.baseUrl,
   });

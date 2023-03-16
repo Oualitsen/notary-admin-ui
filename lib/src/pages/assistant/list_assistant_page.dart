@@ -6,7 +6,7 @@ import 'package:notary_admin/src/widgets/widget_roles.dart';
 import 'package:notary_admin/src/pages/assistant/add_assistant_page.dart';
 import 'package:notary_admin/src/pages/assistant/assistant_detail_page.dart';
 import 'package:notary_admin/src/pages/assistant/assistant_table_widget.dart';
-import 'package:notary_admin/src/services/assistant/assistant_service.dart';
+import 'package:notary_admin/src/services/assistant/admin_assistant_service.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
@@ -25,7 +25,7 @@ class ListAssistantPage extends StatefulWidget {
 
 class _ListAssistantPageState extends BasicState<ListAssistantPage>
     with WidgetUtilsMixin {
-  final service = GetIt.instance.get<AssistantService>();
+  final service = GetIt.instance.get<AdminAssistantService>();
   final tableKey = GlobalKey<LazyPaginatedDataTableState>();
   @override
   Widget build(BuildContext context) {
