@@ -13,7 +13,8 @@ import '../../widgets/mixins/button_utils_mixin.dart';
 
 class PrintedDocViewHtml extends StatefulWidget {
   final String text;
-  const PrintedDocViewHtml({super.key, required this.text});
+  final String? title;
+  const PrintedDocViewHtml({super.key, required this.text, this.title});
 
   @override
   State<PrintedDocViewHtml> createState() => _PrintedDocViewHtmlState();
@@ -49,7 +50,9 @@ class _PrintedDocViewHtmlState extends BasicState<PrintedDocViewHtml>
     return WidgetUtils.wrapRoute(
       (context, type) => Scaffold(
         appBar: AppBar(
-          title: Text(lang.formToHtml),
+          title: widget.title != null
+              ? Text(widget.title!.toUpperCase())
+              : Text(lang.print),
           actions: [
             Tooltip(
               message: lang.print,

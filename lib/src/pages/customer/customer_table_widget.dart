@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
+import 'package:notary_admin/src/pages/customer/add_customer_page.dart';
 import 'package:notary_admin/src/pages/customer/customer_detail_page.dart';
 import 'package:notary_admin/src/services/admin/customer_service.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
@@ -41,8 +42,8 @@ class _CustomerTableWidgetState extends BasicState<CustomerTableWidget>
       DataColumn(label: Text(lang.gender.toUpperCase())),
       DataColumn(label: Text(lang.dateOfBirth.toUpperCase())),
       DataColumn(label: Text(lang.idCard.toUpperCase())),
-      DataColumn(label: Text(lang.expiryDate.toUpperCase())),
       DataColumn(label: Text(lang.address.toUpperCase())),
+      DataColumn(label: Text(lang.edit.toUpperCase())),
       DataColumn(label: Text(lang.customerDetails.toUpperCase())),
       DataColumn(label: Text(lang.delete.toUpperCase()))
     ];
@@ -78,8 +79,16 @@ class _CustomerTableWidgetState extends BasicState<CustomerTableWidget>
       DataCell(Text(lang.genderName(data.gender))),
       DataCell(Text(lang.formatDate(data.dateOfBirth))),
       DataCell(Text(data.idCard.idCardId)),
-      DataCell(Text(lang.formatDate(data.idCard.expiryDate))),
       DataCell(Text(lang.formatAddress(data.address))),
+      DataCell(
+        TextButton(
+          child: Text(lang.edit),
+          onPressed: () {
+            push(context, AddCustomerPage(customer: data))
+                .listen((_) => tableKey.currentState?.refreshPage());
+          },
+        ),
+      ),
       DataCell(
         TextButton(
           child: Text(lang.customerDetails),

@@ -11,7 +11,8 @@ import 'package:notary_admin/src/db_services/token_db_service.dart';
 import 'package:notary_admin/src/pages/step_group/step_group_page.dart';
 import 'package:notary_admin/src/pages/steps/steps_page.dart';
 import 'package:notary_admin/src/pages/templates/load_template.dart';
-import 'package:notary_admin/src/pages/test/test_page.dart';
+import 'package:notary_admin/src/pages/archiving/archive_page.dart';
+import 'package:notary_admin/src/pages/archiving/add_archive_page.dart';
 import 'package:notary_admin/src/utils/injector.dart';
 import 'package:notary_admin/src/widgets/mixins/lang.dart';
 import 'package:notary_model/model/basic_user.dart';
@@ -115,10 +116,15 @@ Widget createDrawer(BuildContext context) {
       DrawerMenuItem(
         title: (lang.search),
         icon: Icons.search,
+        onTap: () {},
+      ),
+      DrawerMenuItem(
+        title: (lang.archives),
+        icon: Icons.archive,
         onTap: () => {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => TestArchving()),
+            MaterialPageRoute(builder: (context) => ArchivePage()),
           )
         },
       ),

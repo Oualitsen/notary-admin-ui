@@ -7,6 +7,7 @@ import 'package:notary_model/model/assistant.dart';
 import 'package:notary_model/model/gender.dart';
 
 import 'package:rxdart/src/subjects/subject.dart';
+import 'package:rxdart/subjects.dart';
 
 class AssistantDetailsInput extends StatefulWidget {
   final Admin? assistant;
@@ -21,12 +22,12 @@ class AssistantDetailsInputState extends BasicState<AssistantDetailsInput>
   final key = GlobalKey<FormState>();
   final firstNameCrtl = TextEditingController();
   final lastNameCrtl = TextEditingController();
-  Gender? gender;
+  final gender = BehaviorSubject<Gender?>();
   @override
   void initState() {
     firstNameCrtl.text = widget.assistant?.firstName ?? "";
     lastNameCrtl.text = widget.assistant?.lastName ?? "";
-    gender = widget.assistant?.gender ?? null;
+    gender.add(widget.assistant?.gender ?? null);
     super.initState();
   }
 
@@ -50,7 +51,7 @@ class AssistantDetailsInputState extends BasicState<AssistantDetailsInput>
           const SizedBox(height: 16),
           DropdownButtonFormField<Gender>(
             decoration: getDecoration(lang.gender, true),
-            value: gender,
+            value: gender.valueOrNull,
             items: Gender.values
                 .map(
                   (e) => DropdownMenuItem<Gender>(
@@ -60,9 +61,7 @@ class AssistantDetailsInputState extends BasicState<AssistantDetailsInput>
                 )
                 .toList(),
             onChanged: (e) {
-              setState(() {
-                gender = e;
-              });
+              gender.add(e);
             },
             validator: (value) => ValidationUtils.requiredField(
                 value == null ? null : "$value", context),
@@ -74,7 +73,8 @@ class AssistantDetailsInputState extends BasicState<AssistantDetailsInput>
 
   AssistantDetails? readDetails() {
     if (key.currentState!.validate()) {
-      return AssistantDetails(firstNameCrtl.text, lastNameCrtl.text, gender!);
+      return AssistantDetails(
+          firstNameCrtl.text, lastNameCrtl.text, gender.value!);
     }
     return null;
   }

@@ -47,7 +47,6 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
 """;
   @override
   void initState() {
-    var idPrintDocument = widget.idPrintDocument;
     text = toPrint + widget.text;
     listFormField = widget.listFormField;
     _controller =
@@ -216,9 +215,8 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
         if (name != null) {
           var input = PrintedDocInput(
               id: null, htmlData: _htmlDocument.value, name: name);
-          var res = await printedDocService.create(input);
-          await showSnackBar2(context, lang.savedSuccessfully);
-          Navigator.of(context).pop(res);
+
+          Navigator.of(context).pop(input);
         }
       } catch (error, stacktrace) {
         print(stacktrace);

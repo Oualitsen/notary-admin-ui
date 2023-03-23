@@ -22,7 +22,7 @@ class CustomerGeneralFormState extends BasicState<CustomerGeneralForm>
   final lastNameCtrl = TextEditingController();
   final selectedDay = BehaviorSubject<DateTime>();
   final dateOfBirthCtrl = TextEditingController();
-  Gender? gender;
+  final gender = BehaviorSubject<Gender?>();
   bool initialized = false;
   void init() {
     if (initialized) {
@@ -34,7 +34,7 @@ class CustomerGeneralFormState extends BasicState<CustomerGeneralForm>
       firstNameCtrl.text = customer.firstName;
       lastNameCtrl.text = customer.lastName;
       dateOfBirthCtrl.text = lang.formatDate(customer.dateOfBirth);
-      gender = customer.gender;
+      gender.add(customer.gender);
       selectedDay
           .add(DateTime.fromMillisecondsSinceEpoch(customer.dateOfBirth));
     }
@@ -68,7 +68,7 @@ class CustomerGeneralFormState extends BasicState<CustomerGeneralForm>
             children: [
               DropdownButtonFormField<Gender>(
                 decoration: getDecoration(lang.gender, true),
-                value: gender,
+                value: gender.valueOrNull,
                 items: Gender.values
                     .map(
                       (e) => DropdownMenuItem<Gender>(
@@ -78,9 +78,7 @@ class CustomerGeneralFormState extends BasicState<CustomerGeneralForm>
                     )
                     .toList(),
                 onChanged: (e) {
-                  setState(() {
-                    gender = e;
-                  });
+                  gender.add(e);
                 },
                 validator: (value) => ValidationUtils.requiredField(
                     value == null ? null : "$value", context),
@@ -107,7 +105,7 @@ class CustomerGeneralFormState extends BasicState<CustomerGeneralForm>
       CustomerGeneralInfo result = new CustomerGeneralInfo(
         firstName: firstNameCtrl.text,
         lastName: lastNameCtrl.text,
-        gender: gender!,
+        gender: gender.value!,
         dateOfBirth: selectedDay.value.millisecondsSinceEpoch,
       );
       return result;

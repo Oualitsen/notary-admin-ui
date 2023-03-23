@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:notary_model/model/customer.dart';
 import 'package:notary_model/model/documents.dart';
 import 'package:notary_model/model/files.dart';
+import 'package:notary_model/model/files_archive.dart';
 import 'package:notary_model/model/files_input.dart';
 import 'package:notary_model/model/printed_doc.dart';
 import 'package:notary_model/model/steps.dart';
@@ -41,4 +42,15 @@ abstract class FilesService {
   @PUT("/admin/files/current-step/{filesId}")
   Future<Files> updateCurrentStep(
       @Path("filesId") String filesId, @Body() Steps newStep);
+
+  @PUT("/admin/files/archive/{id}")
+  Future<FilesArchive> archiveFiles(@Path("id") String id);
+
+  @GET("/admin/files/archive")
+  Future<List<FilesArchive>> getArchived(
+      {@Query("size") int pageSize: 20, @Query("index") int pageIndex: 0});
+
+  @GET("/admin/files/archive-date")
+  Future<List<FilesArchive>> getArchivedFiles(
+      @Query("startDate") int startDate, @Query("endDate") int endDate);
 }
