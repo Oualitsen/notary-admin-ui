@@ -46,17 +46,12 @@ class _HtmlEditorTemplateState extends BasicState<HtmlEditorTemplate>
           ],
         ),
         body: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              HtmlEditor(
-                controller: controller,
-                htmlEditorOptions: HtmlEditorOptions(
-                  initialText: widget.template.htmlData,
-                ),
-                otherOptions: OtherOptions(height: 800),
-              ),
-            ],
+          child: HtmlEditor(
+            controller: controller,
+            htmlEditorOptions: HtmlEditorOptions(
+              initialText: widget.template.htmlData,
+            ),
+            otherOptions: OtherOptions(height: 800),
           ),
         ),
       ),

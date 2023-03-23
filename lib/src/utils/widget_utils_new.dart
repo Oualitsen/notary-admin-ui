@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
+import 'package:notary_admin/src/pages/customer/customer_detail_page.dart';
 import 'package:notary_admin/src/services/upload_service.dart';
 import 'package:notary_admin/src/widgets/mixins/lang.dart';
 import 'package:notary_model/model/customer.dart';
@@ -106,11 +107,22 @@ class ListCustomers extends StatelessWidget {
               scrollDirection: Axis.vertical,
               itemCount: listCustomers.length,
               itemBuilder: (BuildContext context, int index) {
+                var customer = listCustomers[index];
                 return ListTile(
-                  title: Text("${listCustomers[index].lastName}"),
-                  subtitle: Text("${listCustomers[index].firstName}"),
-                  trailing: Text(
-                      "${lang.idCard} : ${listCustomers[index].idCard.idCardId}"),
+                  leading: CircleAvatar(
+                      child: Text(
+                          "${customer.lastName[0].toUpperCase()}${customer.firstName[0].toUpperCase()}")),
+                  title: Text("${customer.lastName} ${customer.firstName}"),
+                  subtitle:
+                      Text("${lang.idCard} : ${customer.idCard.idCardId}"),
+                  trailing: Icon(Icons.arrow_forward),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          CustomerDetailsPage(customer: customer),
+                    ),
+                  ),
                 );
               })
           : Padding(
@@ -168,26 +180,23 @@ class widgetListFiles extends StatelessWidget {
             itemCount: _pathDocumentsStream!.value.length,
             itemBuilder: (BuildContext context, int index) {
               return ListTile(
-                leading: Icon(Icons.file_download),
+                leading: CircleAvatar(
+                  child: Text("${(index + 1)}"),
+                ),
                 title: file == null
                     ? Text(
-                        " ${_pathDocumentsStream!.value[index].nameDocument} ",
-                        style: TextStyle(color: Color.fromARGB(255, 0, 0, 0)))
+                        " ${_pathDocumentsStream!.value[index].nameDocument} ")
                     : Text(
                         " ${file!.specification.documents[index].name} ",
-                        style: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
                         maxLines: 50,
                       ),
-                subtitle: Row(
+                subtitle: Wrap(
                   children: [
                     _pathDocumentsStream!.value[index].selected == true
-                        ? Flexible(
-                            child: Text(
-                              _pathDocumentsStream!
-                                  .value[index].namePickedDocument
-                                  .toString(),
-                              softWrap: true,
-                            ),
+                        ? Text(
+                            _pathDocumentsStream!
+                                .value[index].namePickedDocument!,
+                            softWrap: true,
                           )
                         : file == null
                             ? Text(lang.noUpload)
@@ -195,24 +204,17 @@ class widgetListFiles extends StatelessWidget {
                     StreamBuilder<double>(
                         stream: _pathDocumentsStream!.value[index].progress,
                         builder: (context, snapshot) {
-                          if (snapshot.hasError) {
-                            return IconButton(
-                                onPressed: () {},
-                                icon: Icon(
-                                  Icons.refresh,
-                                  color:
-                                      Theme.of(context).colorScheme.secondary,
-                                ));
+                          if (!snapshot.hasData) {
+                            return SizedBox.shrink();
                           }
-                          if (snapshot.hasData) {
-                            return Text(
-                              "   ...${snapshot.data} %",
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 0, 0, 0),
+                          return Row(
+                            children: [
+                              SizedBox(
+                                width: 5,
                               ),
-                            );
-                          }
-                          return SizedBox.shrink();
+                              Text("${snapshot.data} %"),
+                            ],
+                          );
                         }),
                   ],
                 ),
@@ -223,49 +225,11 @@ class widgetListFiles extends StatelessWidget {
                   children: [
                     file == null &&
                             _pathDocumentsStream!.value[index].selected == true
-                        ? TextButton(
-                            onPressed: () {
-                              showDialog(
-                                  context: context,
-                                  builder: (BuildContext) => AlertDialog(
-                                        title: Text(lang.confirm),
-                                        content: Text(lang.confirmDelete),
-                                        actions: [
-                                          TextButton(
-                                              onPressed: () {
-                                                Navigator.of(context)
-                                                    .pop(false);
-                                              },
-                                              child:
-                                                  Text(lang.no.toUpperCase())),
-                                          TextButton(
-                                              onPressed: () {
-                                                var list =
-                                                    _pathDocumentsStream!.value;
-                                                list.removeAt(index);
-                                                list.insert(
-                                                    index,
-                                                    addPathDocument(
-                                                      _filesSpecStream!.value
-                                                          .documents[index].id,
-                                                      null,
-                                                      false,
-                                                      '',
-                                                      '',
-                                                      null,
-                                                    ));
-                                                _pathDocumentsStream!.add(list);
-                                                Navigator.of(context).pop(true);
-                                                allUploaded(false);
-                                              },
-                                              child: Text(
-                                                  lang.confirm.toUpperCase())),
-                                        ],
-                                      ));
-                            },
+                        ? OutlinedButton(
+                            onPressed: (() => _delete(context, index)),
                             child: Text(lang.delete))
                         : SizedBox.shrink(),
-                    TextButton(
+                    ElevatedButton(
                       child: file == null
                           ? Text(lang.uploadFile)
                           : Text(lang.remplaceFile),
@@ -356,5 +320,41 @@ class widgetListFiles extends StatelessWidget {
                     child: Text(lang.noDocument.toUpperCase()),
                   ),
           );
+  }
+
+  _delete(BuildContext context, int index) {
+    var lang = getLang(context);
+    showDialog(
+        context: context,
+        builder: (BuildContext) => AlertDialog(
+              title: Text(lang.confirm),
+              content: Text(lang.confirmDelete),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(false);
+                    },
+                    child: Text(lang.no.toUpperCase())),
+                TextButton(
+                    onPressed: () {
+                      var list = _pathDocumentsStream!.value;
+                      list.removeAt(index);
+                      list.insert(
+                          index,
+                          addPathDocument(
+                            _filesSpecStream!.value.documents[index].id,
+                            null,
+                            false,
+                            '',
+                            _filesSpecStream!.value.documents[index].name,
+                            null,
+                          ));
+                      _pathDocumentsStream!.add(list);
+                      Navigator.of(context).pop(true);
+                      allUploaded(false);
+                    },
+                    child: Text(lang.confirm.toUpperCase())),
+              ],
+            ));
   }
 }

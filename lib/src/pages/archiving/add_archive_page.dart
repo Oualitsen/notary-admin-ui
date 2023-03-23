@@ -1,64 +1,81 @@
+import 'package:extended_image_library/extended_image_library.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:notary_admin/src/pages/customer/customer_selection_page.dart';
+import 'package:notary_admin/src/pages/files/list_files_customer.dart';
+import 'package:notary_admin/src/pages/templates/upload_template.dart';
+import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
+import 'package:notary_admin/src/services/files/files_archive_service.dart';
+import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/utils/widget_utils_new.dart';
 import 'package:notary_model/model/customer.dart';
-import 'package:notary_model/model/files.dart';
-import 'package:notary_model/model/files_input.dart';
+import 'package:notary_model/model/files_archive.dart';
+import 'package:notary_model/model/files_archive_input.dart';
 import 'package:notary_model/model/files_spec.dart';
 import 'package:notary_model/model/printed_doc.dart';
-import 'package:notary_model/model/printed_doc_input.dart';
 import 'package:notary_model/model/selection_type.dart';
+import 'package:notary_model/model/steps.dart';
 import 'package:rxdart/rxdart.dart';
 import '../../services/admin/template_document_service.dart';
 import '../../services/files/file_spec_service.dart';
-import '../../services/files/files_service.dart';
 import '../../services/upload_service.dart';
 import '../../widgets/basic_state.dart';
 import '../../widgets/mixins/button_utils_mixin.dart';
 import '../templates/form_and_view_html.dart';
-import 'list_files_customer.dart';
 
-class AddFolderCustomer extends StatefulWidget {
-  const AddFolderCustomer({
-    super.key,
-  });
+class AddArchivePage extends StatefulWidget {
+  final DateTime? initDate;
+  const AddArchivePage({this.initDate, super.key});
   @override
-  State<AddFolderCustomer> createState() => _AddFolderCustomerState();
+  State<AddArchivePage> createState() => _AddArchivePageState();
 }
 
-class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
+class _AddArchivePageState extends BasicState<AddArchivePage>
     with WidgetUtilsMixin, WidgetUtilsFile {
   int currentStep = 0;
   //services
   final serviceFileSpec = GetIt.instance.get<FileSpecService>();
-  final serviceFiles = GetIt.instance.get<FilesService>();
+  final serviceFiles = GetIt.instance.get<FilesArchiveService>();
   final serviceTemplateDocument = GetIt.instance.get<TemplateDocumentService>();
   final serviceUploadDocument = GetIt.instance.get<UploadService>();
+  final printedDocService = GetIt.instance.get<PrintedDocService>();
   //Stream
   final _currentStepStream = BehaviorSubject.seeded(0);
-  final _printedDocInputStream = BehaviorSubject<PrintedDocInput>();
   final _listcustomerStream = BehaviorSubject.seeded(<Customer>[]);
   final _folderValidateStream = BehaviorSubject.seeded(false);
+  final _documentNameStream = BehaviorSubject.seeded("");
   final _filesSpecStream = BehaviorSubject<FilesSpec>();
   final _pathDocumentsStream = BehaviorSubject.seeded(<PathsDocuments>[]);
   final _allUploadedStream = BehaviorSubject.seeded(false);
+  final selectedDay = BehaviorSubject.seeded(DateTime.now());
+  final templateFileStream = BehaviorSubject<UploadData?>();
+
   //Key
   final GlobalKey<FormState> _selectFileSpecKey = GlobalKey();
   //controlers
   final _selectFileSpecCtrl = TextEditingController();
   final _numberFileCtrl = TextEditingController();
+  final archvingDateCtrl = TextEditingController();
   //var
-  void initState() {
+  bool initialized = false;
+  void init() {
+    if (initialized) return;
+    initialized = true;
     _folderValidateStream.add(false);
-    super.initState();
+    if (widget.initDate != null) {
+      selectedDay.add(widget.initDate!);
+      archvingDateCtrl.text = lang.formatDateDate(widget.initDate!);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    init();
     return WidgetUtils.wrapRoute(
       (context, type) => Scaffold(
         appBar: AppBar(
@@ -84,6 +101,20 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
+                            SizedBox(
+                              height: 20,
+                            ),
+                            wrapInIgnorePointer(
+                              onTap: selectDate,
+                              child: TextFormField(
+                                  controller: archvingDateCtrl,
+                                  validator: (text) {
+                                    return ValidationUtils.requiredField(
+                                        text, context);
+                                  },
+                                  decoration: getDecoration(
+                                      lang.selectArchivingDate, true)),
+                            ),
                             SizedBox(
                               height: 20,
                             ),
@@ -141,27 +172,7 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
                               return ButtonBar(children: [
                                 ElevatedButton(
                                   onPressed: snapshot.data == 1
-                                      ? () {
-                                          Navigator.push<List<Customer>>(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    CustomerSelection(
-                                                      selectionType:
-                                                          SelectionType
-                                                              .MULTIPLE,
-                                                    )),
-                                          ).then((value) async {
-                                            if (value != null) {
-                                              _listcustomerStream.add(value);
-                                              if (_listcustomerStream
-                                                  .value.isEmpty) {
-                                                await showSnackBar2(
-                                                    context, lang.noCustomer);
-                                              }
-                                            }
-                                          });
-                                        }
+                                      ? selectCustomers
                                       : null,
                                   child: Icon(Icons.add),
                                 ),
@@ -242,9 +253,9 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
                               return ButtonBar(children: [
                                 ElevatedButton(
                                   onPressed: snapshot.data == 3
-                                      ? () => generateForm()
+                                      ? uploadTemplate
                                       : null,
-                                  child: Icon(Icons.add),
+                                  child: Icon(Icons.add_outlined),
                                 ),
                               ]);
                             }),
@@ -253,8 +264,8 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
                     content: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        StreamBuilder<PrintedDocInput>(
-                            stream: _printedDocInputStream,
+                        StreamBuilder<String>(
+                            stream: _documentNameStream,
                             builder: (context, snapshot) {
                               if (snapshot.hasData == false) {
                                 return Text(
@@ -262,8 +273,8 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
                               }
 
                               return ListTile(
-                                subtitle: Text("${lang.documentName}"),
-                                title: Text("${snapshot.data!.name}"),
+                                leading: Text("${lang.documentName} : "),
+                                title: Text("${snapshot.data!}"),
                               );
                             }),
                         StreamBuilder<bool>(
@@ -364,25 +375,26 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
               _listcustomerStream.value.isNotEmpty &&
               _folderValidateStream.value ||
           false) {
-        // Process data.
-        var listCustomersIds =
-            _listcustomerStream.value.map((e) => e.id).toList();
+        var printedDocId = "";
 
-        var files = await serviceFiles.saveFiles(FilesInput(
+        var input = FilesArchiveInput(
             id: null,
+            currentStep: Steps("", 0, 0, name: "archived", estimatedTime: 0),
+            printedDocId: printedDocId,
             number: _numberFileCtrl.text,
-            imageIds: [],
-            clientIds: listCustomersIds,
-            uploadedFiles: [],
             specification: _filesSpecStream.value,
-            printedDocInput: _printedDocInputStream.value));
+            customers: _listcustomerStream.value,
+            uploadedFiles: [],
+            archvingDate: selectedDay.value.millisecondsSinceEpoch);
 
-        if (files != null) {
-          uploadFiles(context, files, _pathDocumentsStream.value);
-          await showSnackBar2(context, lang.createdsuccssfully);
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => ListFilesCustomer()));
+        var archive = await serviceFiles.saveFilesArchive(input);
+
+        if (templateFileStream.valueOrNull != null) {
+          upload(archive.id, templateFileStream.value!);
         }
+        uploadFiles2(context, archive, _pathDocumentsStream.value);
+        await showSnackBar2(context, lang.createdsuccssfully);
+        Navigator.pop(context);
       }
     } catch (error, stackTrace) {
       print(stackTrace);
@@ -393,44 +405,36 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
     }
   }
 
-  @override
-  List<ChangeNotifier> get notifiers => [];
-
-  @override
-  List<Subject> get subjects => [];
+  void selectDate() {
+    final now = selectedDay.value;
+    showDatePicker(
+            context: context,
+            initialDate: now,
+            firstDate: DateTime.now().add(Duration(days: -365 * 100)),
+            lastDate: DateTime.now())
+        .asStream()
+        .where((event) => event != null)
+        .map((event) => event!)
+        .listen(((event) {
+      selectedDay.add(event);
+      archvingDateCtrl.text = lang.formatDateDate(event);
+    }));
+  }
 
   void selectFileSpec() {
     showDialog(
         context: context,
         builder: (BuildContext context) => AlertDialog(
-              title: Container(
-                height: 50,
-                child: Wrap(alignment: WrapAlignment.spaceBetween, children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(lang.selectFileSpec.toUpperCase()),
-                  ),
-                  Tooltip(
-                    message: lang.cancel,
-                    child: InkWell(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Icon(
-                          Icons.cancel,
-                          size: 26,
-                        ),
-                      ),
-                      onTap: () => Navigator.of(context).pop(false),
-                    ),
-                  ),
-                ]),
-              ),
+              title: Center(child: Text(lang.selectFileSpec.toUpperCase())),
+              titlePadding: EdgeInsets.all(30),
               content: SizedBox(
                 width: 400,
                 height: 300,
                 child: InfiniteScrollListView(
                     elementBuilder: ((context, element, index, animation) {
                       return ListTile(
+                        leading:
+                            Text("${lang.formatDate(element.creationDate)}"),
                         title: Text("${element.name}"),
                         onTap: () {
                           _selectFileSpecCtrl.text = element.name;
@@ -455,35 +459,122 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
                     refreshable: true,
                     pageLoader: getTemplates),
               ),
+              actions: [
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(false);
+                    },
+                    child: Text(lang.previous))
+              ],
             ));
   }
 
-  generateForm() async {
-    try {
-      var finalList = [];
-      var list = await serviceTemplateDocument
-          .formGenerating(_filesSpecStream.value.templateId);
-      for (var res in list) {
-        finalList.add(res.replaceAll(" ", "_"));
-      }
-      var data = await serviceTemplateDocument
-          .replacements(_filesSpecStream.value.templateId);
-
-      Navigator.push<PrintedDocInput>(
-          context,
-          MaterialPageRoute(
-              builder: (context) => FormAndViewHtml(
-                    listFormField: finalList,
-                    text: data,
-                  ))).then((value) {
-        if (value != null) {
-          _printedDocInputStream.add(value);
-          _folderValidateStream.add(true);
+  void selectCustomers() {
+    Navigator.push<List<Customer>>(
+      context,
+      MaterialPageRoute(
+          builder: (context) => CustomerSelection(
+                selectionType: SelectionType.MULTIPLE,
+              )),
+    ).then((value) async {
+      if (value != null) {
+        _listcustomerStream.add(value);
+        if (_listcustomerStream.value.isEmpty) {
+          await showSnackBar2(context, lang.noCustomer);
         }
-      });
-    } catch (error, stacktrace) {
-      showServerError(context, error: error);
-      print(stacktrace);
+      }
+    });
+  }
+
+  void uploadTemplate() async {
+    _folderValidateStream.add(false);
+
+    var pickedFile = await FilePicker.platform.pickFiles();
+    if (pickedFile != null) {
+      var path = null;
+      if (!kIsWeb) {
+        path = pickedFile.files.first.path;
+      }
+      var data = UploadData(
+        data: pickedFile.files.first.bytes,
+        name: pickedFile.files.first.name,
+        path: path,
+      );
+      _documentNameStream.add(data.name);
+      templateFileStream.add(data);
+      _folderValidateStream.add(true);
     }
+  }
+
+  void upload(String archiveId, UploadData data) async {
+    try {
+      var uri = "/admin/archive/upload-template/${archiveId}";
+      if (kIsWeb && data.data != null) {
+        await serviceUploadDocument.upload(
+          uri,
+          data.data!,
+          data.name,
+          callBack: (percentage) {
+            data.progress.add(percentage);
+          },
+        );
+      } else if (!kIsWeb && data.path != null) {
+        await serviceUploadDocument.uploadFileDynamic(
+          uri,
+          data.path!,
+          callBack: (percentage) {
+            data.progress.add(percentage);
+          },
+        );
+      }
+    } catch (error, stacktrace) {
+      print(stacktrace);
+      showServerError(context, error: error);
+    }
+  }
+
+  @override
+  List<ChangeNotifier> get notifiers => [];
+
+  @override
+  List<Subject> get subjects => [];
+
+  uploadFiles2(BuildContext context, FilesArchive finalFiles,
+      List<PathsDocuments> _pathDocumentsStream) async {
+    final serviceUploadDocument = GetIt.instance.get<UploadService>();
+    try {
+      if (_pathDocumentsStream.isNotEmpty) {
+        if (kIsWeb) {
+          for (var pathDoc in _pathDocumentsStream) {
+            if (pathDoc.selected) {
+              await serviceUploadDocument.upload(
+                "/admin/archive/upload/${finalFiles.id}/${finalFiles.specification.id}/${pathDoc.idDocument}",
+                pathDoc.document!,
+                pathDoc.nameDocument!,
+                callBack: (percentage) {
+                  pathDoc.progress.add(percentage);
+                },
+              );
+            }
+          }
+        } else {
+          for (var pathDoc in _pathDocumentsStream) {
+            if (pathDoc.selected) {
+              await serviceUploadDocument.uploadFileDynamic(
+                "/admin/archive/upload/${finalFiles.id}/${finalFiles.specification.id}/${pathDoc.idDocument}",
+                pathDoc.path!,
+                callBack: (percentage) {
+                  pathDoc.progress.add(percentage);
+                },
+              );
+            }
+          }
+        }
+      }
+    } catch (error, stackTrace) {
+      print(stackTrace);
+      showServerError(context, error: error);
+      throw error;
+    } finally {}
   }
 }

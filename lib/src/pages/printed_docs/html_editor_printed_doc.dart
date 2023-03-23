@@ -36,40 +36,23 @@ class _HtmlEditorPrintedDocState extends BasicState<HtmlEditorPrintedDoc>
           title: Text(widget.template.name),
           elevation: 0,
           actions: [
-            IconButton(
-                icon: Icon(Icons.refresh),
-                onPressed: () {
-                  if (kIsWeb) {
-                    controller.reloadWeb();
-                  } else {
-                    controller.editorController!.reload();
-                    controller.setText(widget.template.name);
-                  }
-                })
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton.icon(
+                onPressed: onSave,
+                label: Text(lang.save),
+                icon: Icon(Icons.save),
+              ),
+            ),
           ],
         ),
         body: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              HtmlEditor(
-                controller: controller,
-                htmlEditorOptions: HtmlEditorOptions(
-                  hint: 'Your text here...',
-                  shouldEnsureVisible: true,
-                  initialText: widget.template.htmlData,
-                ),
-                otherOptions: OtherOptions(
-                  height: 700,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [getButtons(onSave: onSave)]),
-              ),
-            ],
+          child: HtmlEditor(
+            controller: controller,
+            htmlEditorOptions: HtmlEditorOptions(
+              initialText: widget.template.htmlData,
+            ),
+            otherOptions: OtherOptions(height: 800),
           ),
         ),
       ),

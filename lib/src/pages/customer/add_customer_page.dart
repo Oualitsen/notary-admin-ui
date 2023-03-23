@@ -136,9 +136,8 @@ class _AddCustomerPageState extends BasicState<AddCustomerPage>
           var generalInfo =
               customerGeneralInfoKey.currentState!.readCustomerGeneralInfo();
 
-          setState(() {
-            customerGeneralInfo = generalInfo;
-          });
+          customerGeneralInfo = generalInfo;
+
           if (customerGeneralInfo != null) {
             _currentStepStream.add(_currentStepStream.value + 1);
           }
@@ -148,9 +147,8 @@ class _AddCustomerPageState extends BasicState<AddCustomerPage>
         {
           var addressInput = addressInputKey.currentState!.readAddress();
 
-          setState(() {
-            address = addressInput;
-          });
+          address = addressInput;
+
           if (address != null) {
             _currentStepStream.add(_currentStepStream.value + 1);
           }
@@ -160,9 +158,8 @@ class _AddCustomerPageState extends BasicState<AddCustomerPage>
         {
           var idCardInput = idCardInputKey.currentState!.readAddress();
 
-          setState(() {
-            idCard = idCardInput;
-          });
+          idCard = idCardInput;
+
           if (idCard != null) {
             save();
           }

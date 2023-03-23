@@ -64,18 +64,22 @@ class _LoadTemplatePageState extends BasicState<LoadTemplatePage>
             comparator: ((a, b) => b.creationDate - a.creationDate),
             elementBuilder: (BuildContext context, template, index, animation) {
               return ListTile(
-                  leading:
-                      CircleAvatar(child: Text(template.name[0].toUpperCase())),
-                  title: Text(template.name),
-                  trailing: PopupMenuButton(
-                    onSelected: (value) => onChanged(value, template),
-                    itemBuilder: (item) {
-                      return items
-                          .map((e) => PopupMenuItem(value: e, child: Text(e)))
-                          .toList();
-                    },
+                leading:
+                    CircleAvatar(child: Text(template.name[0].toUpperCase())),
+                title: Text(template.name),
+                trailing: PopupMenuButton(
+                  onSelected: (value) => onChanged(value, template),
+                  itemBuilder: (item) {
+                    return items
+                        .map((e) => PopupMenuItem(value: e, child: Text(e)))
+                        .toList();
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(15),
                     child: Text(lang.menu.toUpperCase()),
-                  ));
+                  ),
+                ),
+              );
             },
             pageLoader: getData,
           ),

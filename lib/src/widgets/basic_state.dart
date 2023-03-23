@@ -114,4 +114,8 @@ extension AppLocalizationsExt on AppLocalizations {
         return genderFemale;
     }
   }
+
+  String monthName(int date) {
+    return DateFormat('MMMM').format(DateTime.fromMillisecondsSinceEpoch(date));
+  }
 }

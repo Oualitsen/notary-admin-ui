@@ -1,15 +1,15 @@
-import 'dart:io';
-
-import 'package:archive/archive_io.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/pages/file-spec/add_file_spec.dart';
+import 'package:notary_admin/src/pages/steps/add_step_widget.dart';
+import 'package:notary_admin/src/services/admin/steps_service.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_model/model/document_spec_input.dart';
 import 'package:notary_model/model/files_spec.dart';
+import 'package:notary_model/model/step_input.dart';
 import 'package:rxdart/rxdart.dart';
 import '../../widgets/mixins/button_utils_mixin.dart';
 
@@ -27,6 +27,8 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
   bool initialized = false;
   List<DataColumn> columns = [];
   final tableKey = GlobalKey<LazyPaginatedDataTableState>();
+  final stepService = GetIt.instance.get<StepsService>();
+  final stepKey = GlobalKey<AddStepWidgetState>();
   @override
   Widget build(BuildContext context) {
     columns = [
@@ -68,17 +70,13 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
       DataCell(Text(data.name)),
       DataCell(
         TextButton(
-          onPressed: () {
-            documentList(context, data);
-          },
+          onPressed: () => documentList(context, data),
           child: Text(lang.listDocumentsFileSpec),
         ),
       ),
       DataCell(
         TextButton(
-          onPressed: () {
-            stepsList(context, data);
-          },
+          onPressed: () => stepsList(context, data),
           child: Text(lang.steps),
         ),
       ),
@@ -146,56 +144,47 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
       context: context,
       builder: (BuildContext context) => AlertDialog(
         title: Container(
-            height: 50,
-            child: Wrap(alignment: WrapAlignment.spaceBetween, children: [
-              Text(lang.listDocumentsFileSpec),
-              Tooltip(
-                message: lang.cancel,
-                child: IconButton(
-                  icon: Icon(Icons.cancel),
-                  onPressed: () => Navigator.of(context).pop(false),
+          height: 50,
+          child: Wrap(alignment: WrapAlignment.spaceBetween, children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(lang.listDocumentsFileSpec),
+            ),
+            Tooltip(
+              message: lang.cancel,
+              child: InkWell(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(
+                    Icons.cancel,
+                    size: 26,
+                  ),
                 ),
+                onTap: () => Navigator.of(context).pop(false),
               ),
-            ])),
+            ),
+          ]),
+        ),
         content: Container(
-          padding: EdgeInsets.all(10),
           height: 400,
-          width: 800,
+          width: 400,
           child: data.documents.length == 0
               ? ListTile(title: Text(lang.noDocument.toUpperCase()))
               : ListView.builder(
                   itemCount: data.documents.length,
                   itemBuilder: (context, int index) {
+                    var isRequired = data.documents[index].optional
+                        ? lang.isNotRequired
+                        : lang.isNotRequired;
+                    var isOriginal = data.documents[index].original
+                        ? lang.isOriginal
+                        : lang.isNotOriginal;
                     return ListTile(
-                      title: Wrap(
-                        children: [
-                          Icon(
-                            Icons.folder,
-                            color: Color.fromARGB(158, 3, 18, 27),
-                          ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Text(" ${data.documents[index].name}"),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Text(
-                              "${lang.createdFileSpec} : ${data.documents[index].creationDate.toString()}"),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Text(data.documents[index].optional == true
-                              ? "${lang.originalDocument} : ${lang.yes}"
-                              : "${lang.originalDocument} : ${lang.no}"),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Text(data.documents[index].original == true
-                              ? "${lang.requiredDocument} : ${lang.yes}"
-                              : "${lang.requiredDocument} : ${lang.no}"),
-                        ],
+                      leading: CircleAvatar(
+                        child: Text("${(index + 1)}"),
                       ),
+                      title: Text("${data.documents[index].name}"),
+                      subtitle: Text("${isRequired} , ${isOriginal}"),
                     );
                   }),
         ),
@@ -209,17 +198,24 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
       builder: (BuildContext context) {
         return AlertDialog(
           title: Container(
-              height: 50,
-              child: Wrap(alignment: WrapAlignment.spaceBetween, children: [
-                Text(lang.steps),
-                Tooltip(
-                  message: lang.cancel,
-                  child: IconButton(
-                    icon: Icon(Icons.cancel),
-                    onPressed: () => Navigator.of(context).pop(false),
+            height: 50,
+            child: Wrap(alignment: WrapAlignment.spaceBetween, children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(lang.steps),
+              ),
+              InkWell(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(
+                    Icons.cancel,
+                    size: 26,
                   ),
                 ),
-              ])),
+                onTap: () => Navigator.of(context).pop(false),
+              ),
+            ]),
+          ),
           content: Container(
             padding: EdgeInsets.all(10),
             height: 400,
@@ -231,9 +227,8 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
                     itemBuilder: (context, int index) {
                       var step = data.steps.toList()[index];
                       return ListTile(
-                        leading: CircleAvatar(child: Text("${(index + 1)}")),
-                        title: Text(" ${step.name}"),
-                      );
+                          leading: CircleAvatar(child: Text("${(index + 1)}")),
+                          title: Text("${step.name}"));
                     }),
           ),
         );
