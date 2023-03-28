@@ -330,8 +330,10 @@
   "isOriginal": "Original",
   "isNotOriginal": "Copy",
   "currentStep": "Current step",
+  "isDoubleSided": "Double-sided",
   "addArchive": "Add an archive",
   "completeTemplate": "Complete template",
   "noTemplateInstance": "No Document Generated",
   "additionalDocuments": "Additional documents"
+
 }
