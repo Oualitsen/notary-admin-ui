@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http_error_handler/error_handler.dart';
+import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_model/model/document_spec_input.dart';
 import 'package:rxdart/rxdart.dart';
@@ -16,263 +17,97 @@ class AddDocument extends StatefulWidget {
 }
 
 class _AddDocumentState extends BasicState<AddDocument> with WidgetUtilsMixin {
-  int currentStep = 0;
-  final _currentStepStream = BehaviorSubject.seeded(0);
   final _isOriginalDocumentStream = BehaviorSubject.seeded(false);
   final _isRequiredDocumentStream = BehaviorSubject.seeded(false);
-
-  final GlobalKey<FormState> _documentNameKey = GlobalKey<FormState>();
-  final GlobalKey<FormState> _detailDocumentKey = GlobalKey<FormState>();
-  final GlobalKey<FormState> _dateExpirationKey = GlobalKey<FormState>();
-
+  final _isDoubleSidedStream = BehaviorSubject.seeded(false);
+  final GlobalKey<FormState> key = GlobalKey<FormState>();
   final _nameDocumentCtrl = TextEditingController();
-  final _expiryDateDocumentCtrl = TextEditingController();
-  bool _isOriginalDocumentCtrl = false;
-  bool _isRequiredCtrl = false;
-  final selectDateExpiration = BehaviorSubject<DateTime>();
-
-  @override
-  void initState() {
-    super.initState();
-
-    selectDateExpiration.listen((date) {
-      _expiryDateDocumentCtrl.text =
-          lang.formatDate(date.millisecondsSinceEpoch);
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(lang.addFileSpec),
-      ),
-      body: StreamBuilder<int>(
-        stream: _currentStepStream,
-        initialData: _currentStepStream.value,
-        builder: (context, snapshot) {
-          int activeState = snapshot.data ?? 0;
-
-          return Stepper(
-            physics: ScrollPhysics(),
-            currentStep: activeState,
-            onStepTapped: (step) => tapped(step),
-            controlsBuilder: (context, _) {
-              return SizedBox.shrink();
-            },
-            steps: <Step>[
-              Step(
-                title: Text(lang.documentName.toUpperCase()),
-                content: Column(
-                  children: [
-                    Form(
-                      key: _documentNameKey,
-                      child: TextFormField(
-                        controller: _nameDocumentCtrl,
-                        decoration:
-                            InputDecoration(hintText: lang.documentName),
-                        validator: (String? value) {
-                          if (value == null || value.isEmpty) {
-                            return lang.requiredField;
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    getButtons(
-                        onSave: continued,
-                        skipCancel: true,
-                        saveLabel: lang.next.toUpperCase()),
-                  ],
-                ),
-                isActive: activeState == 0,
-                state: getState(0),
+    return WidgetUtils.wrapRoute((context, type) => Scaffold(
+          appBar: AppBar(
+            title: Text(lang.addFileSpec),
+          ),
+          body: Form(
+            key: key,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ListView(
+                children: [
+                  SizedBox(
+                    height: 16,
+                  ),
+                  TextFormField(
+                    controller: _nameDocumentCtrl,
+                    decoration: getDecoration(lang.name, true),
+                    validator: (text) {
+                      return ValidationUtils.requiredField(text, context);
+                    },
+                  ),
+                  SizedBox(height: 16),
+                  StreamBuilder<bool>(
+                      stream: _isOriginalDocumentStream,
+                      initialData: _isOriginalDocumentStream.value,
+                      builder: (context, snapshot) {
+                        return CheckboxListTile(
+                          title: Text(lang.isOriginal),
+                          value: _isOriginalDocumentStream.value,
+                          onChanged: (value) {
+                            if (value != null) {
+                              _isOriginalDocumentStream.add(value);
+                            }
+                          },
+                        );
+                      }),
+                  StreamBuilder<bool>(
+                      stream: _isRequiredDocumentStream,
+                      initialData: _isRequiredDocumentStream.value,
+                      builder: (context, snapshot) {
+                        return CheckboxListTile(
+                          title: Text(lang.isRequired),
+                          value: _isRequiredDocumentStream.value,
+                          onChanged: (value) {
+                            print(value);
+                            if (value != null) {
+                              _isRequiredDocumentStream.add(value);
+                            }
+                          },
+                        );
+                      }),
+                  StreamBuilder<bool>(
+                      stream: _isDoubleSidedStream,
+                      initialData: _isDoubleSidedStream.value,
+                      builder: (context, snapshot) {
+                        return CheckboxListTile(
+                          title: Text(lang.isDoubleSided),
+                          value: _isDoubleSidedStream.value,
+                          onChanged: (value) {
+                            print(value);
+                            if (value != null) {
+                              _isDoubleSidedStream.add(value);
+                            }
+                          },
+                        );
+                      }),
+                  getButtons(onSave: save),
+                ],
               ),
-              Step(
-                title: Text(lang.general.toUpperCase()),
-                content: Column(
-                  children: [
-                    Form(
-                      key: _detailDocumentKey,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Container(
-                            width: 30,
-                            height: 50,
-                            child: StreamBuilder<bool>(
-                                stream: _isOriginalDocumentStream,
-                                initialData: _isOriginalDocumentCtrl,
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasData == false) {
-                                    return SizedBox.shrink();
-                                  }
-                                  return Checkbox(
-                                    value: _isOriginalDocumentCtrl,
-                                    onChanged: (value) {
-                                      if (value != null) {
-                                        _isOriginalDocumentCtrl = value;
-                                        _isOriginalDocumentStream.add(value);
-                                      }
-                                    },
-                                  );
-                                }),
-                          ),
-                          Center(
-                            child: Container(
-                              padding: EdgeInsets.all(10),
-                              width: 200,
-                              height: 50,
-                              child: Text(
-                                lang.originalDocument,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 20),
-                          Container(
-                            width: 40,
-                            height: 50,
-                            child: StreamBuilder<bool>(
-                                stream: _isRequiredDocumentStream,
-                                initialData: _isRequiredCtrl,
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasData == false) {
-                                    return SizedBox.shrink();
-                                  }
-                                  return Checkbox(
-                                    value: _isRequiredCtrl,
-                                    onChanged: (value) {
-                                      print(value);
-                                      if (value != null) {
-                                        _isRequiredCtrl = value;
-                                        _isRequiredDocumentStream.add(value);
-                                      }
-                                    },
-                                  );
-                                }),
-                          ),
-                          Center(
-                            child: Container(
-                              padding: EdgeInsets.all(10),
-                              width: 200,
-                              height: 50,
-                              child: Text(
-                                lang.requiredDocument,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    getButtons(
-                      onSave: continued,
-                      onCancel: previous,
-                      saveLabel: lang.next.toUpperCase(),
-                      cancelLabel: lang.previous.toUpperCase(),
-                    ),
-                  ],
-                ),
-                isActive: activeState == 1,
-                state: getState(1),
-              ),
-              Step(
-                title: Text(lang.expiryDate.toUpperCase()),
-                content: Column(
-                  children: [
-                    Form(
-                      key: _dateExpirationKey,
-                      child: wrapInIgnorePointer(
-                        onTap: selectDate,
-                        child: TextFormField(
-                            controller: _expiryDateDocumentCtrl,
-                            validator: (text) {
-                              return ValidationUtils.requiredField(
-                                  text, context);
-                            },
-                            decoration: getDecoration(lang.expiryDate, true)),
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    getButtons(
-                        onSave: continued,
-                        onCancel: previous,
-                        cancelLabel: lang.previous.toUpperCase(),
-                        saveLabel: lang.submit.toUpperCase()),
-                  ],
-                ),
-                isActive: activeState == 2,
-                state: getState(2),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  tapped(int step) {
-    _currentStepStream.add(step);
-  }
-
-  previous() {
-    int value = _currentStepStream.value;
-    value > 0 ? value -= 1 : value = 0;
-    _currentStepStream.add(value);
-  }
-
-  continued() async {
-    var value = _currentStepStream.value;
-
-    switch (value) {
-      case 0:
-        {
-          if (_documentNameKey.currentState?.validate() ?? false) {
-            _currentStepStream.add(_currentStepStream.value + 1);
-          }
-        }
-        break;
-      case 1:
-        {
-          _currentStepStream.add(_currentStepStream.value + 1);
-        }
-        break;
-      case 2:
-        {
-           
-          save();
-        }
-        break;
-    }
-  }
-
-  StepState getState(int currentState) {
-    final value = _currentStepStream.value;
-    if (value >= currentState) {
-      return StepState.complete;
-    } else {
-      return StepState.disabled;
-    }
+            ),
+          ),
+        ));
   }
 
   save() async {
     try {
-      if (_documentNameKey.currentState!.validate() &&
-              _detailDocumentKey.currentState!.validate() &&
-              _dateExpirationKey.currentState!.validate() ||
-          true) {
-        // Process data.
-        Navigator.of(context).pop(DocumentSpecInput(
-          id: null,
-          name: _nameDocumentCtrl.text,
-          optional: _isRequiredCtrl,
-          original: _isOriginalDocumentCtrl,
-          //a voir avec l'expiration des documents
-          // expiryDate: selectDateExpiration.value.millisecondsSinceEpoch
-        ));
+      if (key.currentState!.validate()) {
+        final doc = DocumentSpecInput(
+            id: null,
+            name: _nameDocumentCtrl.text,
+            optional: _isOriginalDocumentStream.value,
+            original: _isRequiredDocumentStream.value,
+            doubleSided: _isDoubleSidedStream.value);
+        Navigator.of(context).pop(doc);
       }
     } catch (error, stackTrace) {
       print(stackTrace);
@@ -281,20 +116,6 @@ class _AddDocumentState extends BasicState<AddDocument> with WidgetUtilsMixin {
     } finally {
       progressSubject.add(false);
     }
-  }
-
-  selectDate() {
-    final now = selectDateExpiration.valueOrNull ?? DateTime.now();
-    showDatePicker(
-      context: context,
-      initialDate: now,
-      firstDate: DateTime.now(),
-      lastDate: now.add(Duration(days: 365 * 10000)),
-    )
-        .asStream()
-        .where((event) => event != null)
-        .map((event) => event!)
-        .listen(selectDateExpiration.add);
   }
 
   @override

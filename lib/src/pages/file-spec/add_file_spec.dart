@@ -57,6 +57,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
           .map((e) => DocumentSpecInput(
               id: e.id,
               name: e.name,
+              doubleSided: e.doubleSided,
               optional: e.optional,
               original: e.original))
           .toList();
@@ -269,7 +270,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                       stream: _listDocumentsInputStream,
                       initialData: _listDocumentsInputStream.value,
                       builder: (context, snapshot) {
-                        if (snapshot.hasData == false) {
+                        if (!snapshot.hasData) {
                           return SizedBox.shrink();
                         }
                         return Column(

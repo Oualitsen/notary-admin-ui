@@ -82,7 +82,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
     return filesService.getFilesAll(
         pageIndex: page.pageIndex, pageSize: page.pageSize);
   }
-
+ 
   Future<int> getTotal() {
     return filesService.getFilesCount();
   }

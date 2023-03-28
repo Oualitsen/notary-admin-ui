@@ -329,5 +329,6 @@
   "isNotRequired": "Optional",
   "isOriginal": "Original",
   "isNotOriginal": "Copy",
-  "currentStep": "Current step"
+  "currentStep": "Current step",
+  "isDoubleSided": "Double-sided"
 }

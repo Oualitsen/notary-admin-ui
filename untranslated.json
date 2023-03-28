@@ -68,7 +68,8 @@
     "isNotRequired",
     "isOriginal",
     "isNotOriginal",
-    "currentStep"
+    "currentStep",
+    "isDoubleSided"
   ],
 
   "fr": [
@@ -140,6 +141,7 @@
     "isNotRequired",
     "isOriginal",
     "isNotOriginal",
-    "currentStep"
+    "currentStep",
+    "isDoubleSided"
   ]
 }
