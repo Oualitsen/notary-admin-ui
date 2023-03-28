@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
+import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_model/model/files.dart';
 import 'package:rxdart/rxdart.dart';
 import '../../services/files/files_service.dart';
@@ -147,51 +148,8 @@ class _WidgetDocumentPickedState extends BasicState<WidgetDocumentPicked>
                           pathDocumentsStream.value[index].selected == true &&
                                   files.uploadedFiles.isEmpty
                               ? OutlinedButton(
-                                  onPressed: () {
-                                    showDialog(
-                                        context: context,
-                                        builder: (BuildContext) => AlertDialog(
-                                              title: Text(lang.confirm),
-                                              content: Text(lang.confirmDelete),
-                                              actions: [
-                                                TextButton(
-                                                    onPressed: () {
-                                                      Navigator.of(context)
-                                                          .pop(false);
-                                                    },
-                                                    child: Text(
-                                                        lang.no.toUpperCase())),
-                                                TextButton(
-                                                    onPressed: () {
-                                                      var list =
-                                                          pathDocumentsStream
-                                                              .value;
-                                                      list.removeAt(index);
-                                                      list.insert(
-                                                          index,
-                                                          addPathDocument(
-                                                            files
-                                                                .specification
-                                                                .documents[
-                                                                    index]
-                                                                .id,
-                                                            null,
-                                                            false,
-                                                            '',
-                                                            '',
-                                                            null,
-                                                          ));
-                                                      pathDocumentsStream
-                                                          .add(list);
-                                                      allUploaded(false);
-                                                      Navigator.of(context)
-                                                          .pop(true);
-                                                    },
-                                                    child: Text(lang.confirm
-                                                        .toUpperCase())),
-                                              ],
-                                            ));
-                                  },
+                                  onPressed: () =>
+                                      delete(snapshot.data![index], index),
                                   child: Icon(Icons.delete))
                               : SizedBox.shrink(),
                           files.uploadedFiles.isEmpty
@@ -450,6 +408,40 @@ class _WidgetDocumentPickedState extends BasicState<WidgetDocumentPicked>
 
   @override
   List<Subject> get subjects => throw UnimplementedError();
+
+  delete(PathsDocuments pathsDocuments, int index) {
+    WidgetMixin.showDialog2(
+      context,
+      label: lang.confirm,
+      content: Text(lang.confirmDelete),
+      actions: [
+        TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+            child: Text(lang.no.toUpperCase())),
+        TextButton(
+            onPressed: () {
+              var list = pathDocumentsStream.value;
+              list.removeAt(index);
+              list.insert(
+                  index,
+                  addPathDocument(
+                    files.specification.documents[index].id,
+                    null,
+                    false,
+                    '',
+                    '',
+                    null,
+                  ));
+              pathDocumentsStream.add(list);
+              allUploaded(false);
+              Navigator.of(context).pop(true);
+            },
+            child: Text(lang.confirm.toUpperCase())),
+      ],
+    );
+  }
 }
 
 class PathsDocuments {

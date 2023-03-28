@@ -3,17 +3,17 @@ import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
+import 'package:notary_admin/src/pages/file-spec/document/replace_document_widget.dart';
 import 'package:notary_admin/src/pages/printed_docs/printed_doc_view.dart';
-import 'package:notary_admin/src/services/admin/steps_service.dart';
+import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
 import 'package:notary_admin/src/services/files/files_service.dart';
-import 'package:notary_admin/src/utils/widget_utils_new.dart';
+import 'package:notary_admin/src/utils/widget_mixin_new.dart';
+import 'package:notary_admin/src/widgets/basic_state.dart';
+import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/files.dart';
 import 'package:notary_model/model/steps.dart';
 import 'package:rxdart/subjects.dart';
-import '../../services/admin/printed_docs_service.dart';
-import '../../widgets/basic_state.dart';
-import '../../widgets/mixins/button_utils_mixin.dart';
-import 'update_document_folder_customer.dart';
+
 
 class FilesTableWidget extends StatefulWidget {
   final GlobalKey? tableKey;
@@ -25,7 +25,7 @@ class FilesTableWidget extends StatefulWidget {
 }
 
 class _FilesTableWidgetState extends BasicState<FilesTableWidget>
-    with WidgetUtilsMixin, WidgetUtilsFile {
+    with WidgetUtilsMixin {
   final filesService = GetIt.instance.get<FilesService>();
   final servicePrintDocument = GetIt.instance.get<PrintedDocService>();
   final tableKey = GlobalKey<LazyPaginatedDataTableState>();
@@ -127,36 +127,14 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   List<Subject> get subjects => [];
 
   void updateCurrentStep(Files data) async {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Container(
-          height: 50,
-          child: Wrap(alignment: WrapAlignment.spaceBetween, children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(lang.selectStep.toUpperCase()),
-            ),
-            Tooltip(
-              message: lang.cancel,
-              child: InkWell(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(
-                    Icons.cancel,
-                    size: 26,
-                  ),
-                ),
-                onTap: () => Navigator.of(context).pop(false),
-              ),
-            ),
-          ]),
-        ),
-        content: SizedBox(
-          height: 400,
-          width: 400,
-          child: InfiniteScrollListView(
-              elementBuilder: (context, element, index, animation) {
+    WidgetMixin.showDialog2(
+      context,
+      label: lang.selectStep.toUpperCase(),
+      content: SizedBox(
+        height: 400,
+        width: 400,
+        child: InfiniteScrollListView(
+          elementBuilder: (context, element, index, animation) {
             return ListTile(
               leading: CircleAvatar(
                 child: Text("${(index + 1)}"),
@@ -170,47 +148,46 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
                 Navigator.pop(context);
               },
             );
-          }, pageLoader: ((index) {
+          },
+          pageLoader: ((index) {
             if (index == 0) {
               return Future.value(data.specification.steps);
             } else
               return Future.value(<Steps>[]);
-          })),
+          }),
         ),
       ),
     );
   }
 
   Future<void> confirmStep(String id, Steps newStep) async {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text(lang.confirm),
-        content: Text(lang.confirmChangingState),
-        actions: <Widget>[
-          TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              child: Text(lang.no.toUpperCase())),
-          TextButton(
-              onPressed: () async {
-                try {
-                  progressSubject.add(true);
-                  await filesService.updateCurrentStep(id, newStep);
-                  tableKey.currentState?.refreshPage();
-                  Navigator.of(context).pop(true);
-                  await showSnackBar2(context, lang.updatedSuccessfully);
-                } catch (error, stacktrace) {
-                  showServerError(context, error: error);
-                  print(stacktrace);
-                } finally {
-                  progressSubject.add(false);
-                }
-              },
-              child: Text(lang.yes.toUpperCase())),
-        ],
-      ),
+    return WidgetMixin.showDialog2(
+      context,
+      label: lang.confirm,
+      content: Text(lang.confirmChangingState),
+      actions: <Widget>[
+        TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+            child: Text(lang.no.toUpperCase())),
+        TextButton(
+            onPressed: () async {
+              try {
+                progressSubject.add(true);
+                await filesService.updateCurrentStep(id, newStep);
+                tableKey.currentState?.refreshPage();
+                Navigator.of(context).pop(true);
+                await showSnackBar2(context, lang.updatedSuccessfully);
+              } catch (error, stacktrace) {
+                showServerError(context, error: error);
+                print(stacktrace);
+              } finally {
+                progressSubject.add(false);
+              }
+            },
+            child: Text(lang.yes.toUpperCase())),
+      ],
     );
   }
 
@@ -239,33 +216,15 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   customerDetails(Files data) async {
     try {
       var customersList = await filesService.getFilesCustomers(data.id);
-      showDialog(
-          context: context,
-          builder: (BuildContext context) => AlertDialog(
-                title: Container(
-                    height: 50,
-                    child:
-                        Wrap(alignment: WrapAlignment.spaceBetween, children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(lang.customerList),
-                      ),
-                      Tooltip(
-                        message: lang.cancel,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: InkWell(
-                            child: Icon(Icons.cancel),
-                            onTap: () => Navigator.of(context).pop(false),
-                          ),
-                        ),
-                      ),
-                    ])),
-                content: ListCustomers(
-                  listCustomers: customersList,
-                  width: 300,
-                ),
-              ));
+      WidgetMixin.showDialog2(
+        context,
+        label: lang.customerList,
+        content: WidgetMixin.ListCustomers(
+          context,
+          listCustomers: customersList,
+          width: 300,
+        ),
+      );
     } catch (error, stacktrace) {
       showServerError(context, error: error);
       print(stacktrace);
@@ -273,164 +232,60 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   }
 
   archiveFiles(Files data) {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-              title: Text(lang.confirm),
-              content: Text(lang.confirmArchiveFiles),
-              actions: <Widget>[
-                TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(false);
-                    },
-                    child: Text(lang.no.toUpperCase())),
-                TextButton(
-                    onPressed: () async {
-                      await archive(data);
-                      Navigator.of(context).pop(true);
-                      tableKey.currentState?.refreshPage();
-                    },
-                    child: Text(lang.yes.toUpperCase())),
-              ],
-            ));
+    WidgetMixin.showDialog2(
+      context,
+      label: lang.confirm,
+      content: Text(lang.confirmArchiveFiles),
+      actions: <Widget>[
+        TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+            child: Text(lang.no.toUpperCase())),
+        TextButton(
+            onPressed: () async {
+              await archive(data);
+              Navigator.of(context).pop(true);
+              tableKey.currentState?.refreshPage();
+            },
+            child: Text(lang.yes.toUpperCase())),
+      ],
+    );
   }
 
   deleteFiles(Files data) {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-              title: Text(lang.confirm),
-              content: Text(lang.confirmDelete),
-              actions: <Widget>[
-                TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(false);
-                    },
-                    child: Text(lang.no.toUpperCase())),
-                TextButton(
-                    onPressed: () async {
-                      try {
-                        await filesService.deleteFile(data.id);
-                      } catch (error, stacktrace) {
-                        showServerError(context, error: error);
-                        print(stacktrace);
-                      }
-                      Navigator.of(context).pop(true);
-                      tableKey.currentState?.refreshPage();
-                      await showSnackBar2(context, lang.delete);
-                    },
-                    child: Text(lang.yes.toUpperCase())),
-              ],
-            ));
+    WidgetMixin.showDialog2(
+      context,
+      label: lang.confirm,
+      content: Text(lang.confirmDelete),
+      actions: <Widget>[
+        TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+            child: Text(lang.no.toUpperCase())),
+        TextButton(
+            onPressed: () async {
+              try {
+                await filesService.deleteFile(data.id);
+              } catch (error, stacktrace) {
+                showServerError(context, error: error);
+                print(stacktrace);
+              }
+              Navigator.of(context).pop(true);
+              tableKey.currentState?.refreshPage();
+              await showSnackBar2(context, lang.delete);
+            },
+            child: Text(lang.yes.toUpperCase())),
+      ],
+    );
   }
 
   updateDocumentFolderCustomer(Files file) {
-    final _pathDocumentsStream = BehaviorSubject.seeded(<PathsDocuments>[]);
-    final _pathDocumentsUpdateStream =
-        BehaviorSubject.seeded(<PathsDocuments>[]);
-    final allUploadedStream = BehaviorSubject.seeded(false);
-    _pathDocumentsStream.add(file.specification.documents
-        .map(
-          (e) => PathsDocuments(
-            idDocument: e.id,
-            document: null,
-            selected: true,
-            namePickedDocument: '',
-            nameDocument: e.name,
-            path: null,
-          ),
-        )
-        .toList());
-    _pathDocumentsUpdateStream.add(file.specification.documents
-        .map(
-          (e) => PathsDocuments(
-            idDocument: e.id,
-            document: null,
-            selected: false,
-            namePickedDocument: '',
-            nameDocument: '',
-            path: null,
-          ),
-        )
-        .toList());
-    return showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Container(
-              height: 50,
-              child: Wrap(alignment: WrapAlignment.spaceBetween, children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(lang.listDocumentsFileSpec),
-                ),
-                Tooltip(
-                  message: lang.cancel,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: InkWell(
-                      child: Icon(Icons.cancel),
-                      onTap: () => Navigator.of(context).pop(false),
-                    ),
-                  ),
-                ),
-              ])),
-          content: Container(
-            height: 300,
-            width: 400,
-            child: StreamBuilder<List<PathsDocuments>>(
-                stream: _pathDocumentsStream,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData == false) {
-                    return SizedBox.shrink();
-                  }
-                  return widgetListFiles(
-                      file: file,
-                      pathDocumentsStream: _pathDocumentsStream,
-                      pathDocumentsUpdateStream: _pathDocumentsUpdateStream,
-                      allUploadedStream: allUploadedStream);
-                }),
-          ),
-          actions: [
-            StreamBuilder<bool>(
-                stream: allUploadedStream,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData == false) {
-                    return SizedBox.shrink();
-                  }
-                  return ButtonBar(
-                    alignment: MainAxisAlignment.end,
-                    children: [
-                      ElevatedButton(
-                          onPressed: snapshot.data!
-                              ? (() async {
-                                  try {
-                                    progressSubject.add(true);
-                                    if (_pathDocumentsUpdateStream
-                                        .value.isNotEmpty) {
-                                      await uploadFiles(context, file,
-                                          _pathDocumentsUpdateStream.value);
-
-                                      await showSnackBar2(
-                                          context, lang.savedSuccessfully);
-                                      Navigator.pop(context);
-                                    }
-                                  } catch (error, stackTrace) {
-                                    print(stackTrace);
-                                    showServerError(context, error: error);
-                                    throw error;
-                                  } finally {
-                                    progressSubject.add(false);
-                                  }
-                                })
-                              : null,
-                          child: Text(lang.submit)),
-                    ],
-                  );
-                }),
-          ],
-        );
-      },
+    return WidgetMixin.showDialog2(
+      context,
+      label: lang.listDocumentsFileSpec,
+      content: ReplaceDocumentWidget(files: file),
     );
   }
 }

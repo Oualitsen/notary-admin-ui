@@ -69,7 +69,14 @@
     "isOriginal",
     "isNotOriginal",
     "currentStep",
-    "isDoubleSided"
+
+    "isDoubleSided",
+
+    "addArchive",
+    "completeTemplate",
+    "noTemplateInstance",
+    "additionalDocuments"
+
   ],
 
   "fr": [
@@ -142,6 +149,13 @@
     "isOriginal",
     "isNotOriginal",
     "currentStep",
-    "isDoubleSided"
+
+    "isDoubleSided",
+
+    "addArchive",
+    "completeTemplate",
+    "noTemplateInstance",
+    "additionalDocuments"
+
   ]
 }
