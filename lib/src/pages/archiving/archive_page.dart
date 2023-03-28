@@ -39,7 +39,7 @@ class _ArchivePageState extends BasicState<ArchivePage> with WidgetUtilsMixin {
                 }),
             ElevatedButton(
               onPressed: (() => push(context, AddArchivePage())),
-              child: Text(lang.addFiles),
+              child: Text(lang.addArchive),
             )
           ],
         ),

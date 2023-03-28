@@ -6,6 +6,7 @@ import 'package:notary_admin/src/pages/file-spec/add_file_spec.dart';
 import 'package:notary_admin/src/pages/steps/add_step_widget.dart';
 import 'package:notary_admin/src/services/admin/steps_service.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
+import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_model/model/document_spec_input.dart';
 import 'package:notary_model/model/files_spec.dart';
@@ -98,34 +99,7 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
       ),
       DataCell(
         TextButton(
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) => AlertDialog(
-                title: Text(lang.confirm),
-                content: Text(lang.confirmDelete),
-                actions: <Widget>[
-                  TextButton(
-                    child: Text(lang.no.toUpperCase()),
-                    onPressed: () => Navigator.of(context).pop(false),
-                  ),
-                  TextButton(
-                      child: Text(lang.yes.toUpperCase()),
-                      onPressed: () async {
-                        try {
-                          await service.deleteFileSpec(data.id);
-                          Navigator.of(context).pop(true);
-                          tableKey.currentState?.refreshPage();
-                          await showSnackBar2(context, lang.delete);
-                        } catch (error, stacktrace) {
-                          showServerError(context, error: error);
-                          print(stacktrace);
-                        }
-                      }),
-                ],
-              ),
-            );
-          },
+          onPressed: () => deleteFileSpec(data),
           child: Text(lang.delete),
         ),
       ),
@@ -140,99 +114,79 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
   List<Subject> get subjects => [];
 
   void documentList(BuildContext context, FilesSpec data) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Container(
-          height: 50,
-          child: Wrap(alignment: WrapAlignment.spaceBetween, children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(lang.listDocumentsFileSpec),
-            ),
-            Tooltip(
-              message: lang.cancel,
-              child: InkWell(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(
-                    Icons.cancel,
-                    size: 26,
-                  ),
-                ),
-                onTap: () => Navigator.of(context).pop(false),
+    WidgetMixin.showDialog2(
+      context,
+      label: lang.listDocumentsFileSpec,
+      content: Container(
+        height: 400,
+        width: 400,
+        child: ListView.builder(
+          itemCount: data.documents.length,
+          itemBuilder: (context, int index) {
+            var isRequired = data.documents[index].optional
+                ? lang.isNotRequired
+                : lang.isNotRequired;
+            var isOriginal = data.documents[index].original
+                ? lang.isOriginal
+                : lang.isNotOriginal;
+            return ListTile(
+              leading: CircleAvatar(
+                child: Text("${(index + 1)}"),
               ),
-            ),
-          ]),
-        ),
-        content: Container(
-          height: 400,
-          width: 400,
-          child: data.documents.length == 0
-              ? ListTile(title: Text(lang.noDocument.toUpperCase()))
-              : ListView.builder(
-                  itemCount: data.documents.length,
-                  itemBuilder: (context, int index) {
-                    var isRequired = data.documents[index].optional
-                        ? lang.isNotRequired
-                        : lang.isNotRequired;
-                    var isOriginal = data.documents[index].original
-                        ? lang.isOriginal
-                        : lang.isNotOriginal;
-                    return ListTile(
-                      leading: CircleAvatar(
-                        child: Text("${(index + 1)}"),
-                      ),
-                      title: Text("${data.documents[index].name}"),
-                      subtitle: Text("${isRequired} , ${isOriginal}"),
-                    );
-                  }),
+              title: Text("${data.documents[index].name}"),
+              subtitle: Text("${isRequired} , ${isOriginal}"),
+            );
+          },
         ),
       ),
     );
   }
 
   void stepsList(BuildContext context, FilesSpec data) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Container(
-            height: 50,
-            child: Wrap(alignment: WrapAlignment.spaceBetween, children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(lang.steps),
-              ),
-              InkWell(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(
-                    Icons.cancel,
-                    size: 26,
-                  ),
-                ),
-                onTap: () => Navigator.of(context).pop(false),
-              ),
-            ]),
-          ),
-          content: Container(
-            padding: EdgeInsets.all(10),
-            height: 400,
-            width: 400,
-            child: data.steps.length == 0
-                ? ListTile(title: Text(lang.noSteps.toUpperCase()))
-                : ListView.builder(
-                    itemCount: data.steps.length,
-                    itemBuilder: (context, int index) {
-                      var step = data.steps.toList()[index];
-                      return ListTile(
-                          leading: CircleAvatar(child: Text("${(index + 1)}")),
-                          title: Text("${step.name}"));
-                    }),
-          ),
-        );
-      },
+    WidgetMixin.showDialog2(
+      context,
+      label: lang.steps,
+      content: Container(
+        padding: EdgeInsets.all(10),
+        height: 400,
+        width: 400,
+        child: ListView.builder(
+            itemCount: data.steps.length,
+            itemBuilder: (context, int index) {
+              var step = data.steps.toList()[index];
+              return ListTile(
+                  leading: CircleAvatar(child: Text("${(index + 1)}")),
+                  title: Text("${step.name}"));
+            }),
+      ),
+    );
+  }
+
+  deleteFileSpec(FilesSpec data) {
+    WidgetMixin.showDialog2(
+      context,
+      label: lang.confirm,
+      content: Text(lang.confirmDelete),
+      actions: <Widget>[
+        TextButton(
+          child: Text(lang.no.toUpperCase()),
+          onPressed: () => Navigator.of(context).pop(false),
+        ),
+        TextButton(
+          child: Text(lang.yes.toUpperCase()),
+          onPressed: () async {
+            try {
+              await service.deleteFileSpec(data.id);
+              Navigator.of(context).pop(true);
+              tableKey.currentState?.refreshPage();
+              await showSnackBar2(context, lang.delete);
+            } catch (error, stacktrace) {
+              showServerError(context, error: error);
+              print(stacktrace);
+            }
+          },
+        ),
+      ],
     );
   }
 }

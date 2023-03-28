@@ -5,6 +5,7 @@ import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:notary_admin/src/pages/file-spec/file_spec_List.dart';
 import 'package:notary_admin/src/pages/steps/step_selection_widget.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
+import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_model/model/document_spec_input.dart';
 import 'package:notary_model/model/files_spec.dart';
@@ -421,37 +422,28 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
   List<Subject> get subjects => [];
 
   void selectTemplate() {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-              title: Center(child: Text(lang.selectTemplate)),
-              titlePadding: EdgeInsets.all(30),
-              content: SizedBox(
-                width: 400,
-                height: 300,
-                child: InfiniteScrollListView(
-                    elementBuilder: ((context, element, index, animation) {
-                      return ListTile(
-                        leading: Text(lang.formatDate(element.creationDate)),
-                        title: Text(element.name),
-                        onTap: () {
-                          _templateFileSpecCtrl.text = element.name;
-                          templateIdStream.add(element.id);
-                          Navigator.of(context).pop(true);
-                        },
-                      );
-                    }),
-                    refreshable: true,
-                    pageLoader: getTemplates),
-              ),
-              actions: [
-                ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(false);
-                    },
-                    child: Text(lang.previous))
-              ],
-            ));
+    WidgetMixin.showDialog2(
+      context,
+      label: lang.selectTemplate,
+      content: SizedBox(
+        width: 400,
+        height: 300,
+        child: InfiniteScrollListView(
+            elementBuilder: ((context, element, index, animation) {
+              return ListTile(
+                leading: Text(lang.formatDate(element.creationDate)),
+                title: Text(element.name),
+                onTap: () {
+                  _templateFileSpecCtrl.text = element.name;
+                  templateIdStream.add(element.id);
+                  Navigator.of(context).pop(true);
+                },
+              );
+            }),
+            refreshable: true,
+            pageLoader: getTemplates),
+      ),
+    );
   }
 
   void deleteStep(int currentStepIndex) {

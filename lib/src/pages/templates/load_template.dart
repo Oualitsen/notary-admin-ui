@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
+import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/widgets/widget_roles.dart';
 import 'package:notary_admin/src/pages/templates/form_and_view_html.dart';
 import 'package:notary_admin/src/pages/templates/html_editor_template.dart';
@@ -90,34 +91,31 @@ class _LoadTemplatePageState extends BasicState<LoadTemplatePage>
 
   Future<String?> showTextInputDialog(
       BuildContext context, TemplateDocument file) async {
-    return showDialog<String>(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text(lang.editFileName),
-            content: Form(
-              key: fileNameKey,
-              child: TextFormField(
-                controller: templateNameCrtl,
-                autofocus: true,
-                textInputAction: TextInputAction.next,
-                validator: (text) {
-                  return ValidationUtils.requiredField(text, context);
-                },
-              ),
-            ),
-            actions: <Widget>[
-              getButtons(
-                onSave: () {
-                  if (fileNameKey.currentState?.validate() ?? false) {
-                    Navigator.of(context).pop(templateNameCrtl.text);
-                    templateNameCrtl.clear();
-                  }
-                },
-              )
-            ],
-          );
-        });
+    return WidgetMixin.showDialog2<String>(
+      context,
+      label: lang.editFileName,
+      content: Form(
+        key: fileNameKey,
+        child: TextFormField(
+          controller: templateNameCrtl,
+          autofocus: true,
+          textInputAction: TextInputAction.next,
+          validator: (text) {
+            return ValidationUtils.requiredField(text, context);
+          },
+        ),
+      ),
+      actions: <Widget>[
+        getButtons(
+          onSave: () {
+            if (fileNameKey.currentState?.validate() ?? false) {
+              Navigator.of(context).pop(templateNameCrtl.text);
+              templateNameCrtl.clear();
+            }
+          },
+        )
+      ],
+    );
   }
 
   void onSave(TemplateDocument template, String newName) async {

@@ -1,4 +1,3 @@
-import 'package:extended_image_library/extended_image_library.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -6,18 +5,18 @@ import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:notary_admin/src/pages/customer/customer_selection_page.dart';
-import 'package:notary_admin/src/pages/files/list_files_customer.dart';
+import 'package:notary_admin/src/pages/file-spec/document/replace_document_widget.dart';
 import 'package:notary_admin/src/pages/templates/upload_template.dart';
 import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
 import 'package:notary_admin/src/services/files/files_archive_service.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
+import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
-import 'package:notary_admin/src/utils/widget_utils_new.dart';
+import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget.dart';
 import 'package:notary_model/model/customer.dart';
 import 'package:notary_model/model/files_archive.dart';
 import 'package:notary_model/model/files_archive_input.dart';
 import 'package:notary_model/model/files_spec.dart';
-import 'package:notary_model/model/printed_doc.dart';
 import 'package:notary_model/model/selection_type.dart';
 import 'package:notary_model/model/steps.dart';
 import 'package:rxdart/rxdart.dart';
@@ -26,7 +25,6 @@ import '../../services/files/file_spec_service.dart';
 import '../../services/upload_service.dart';
 import '../../widgets/basic_state.dart';
 import '../../widgets/mixins/button_utils_mixin.dart';
-import '../templates/form_and_view_html.dart';
 
 class AddArchivePage extends StatefulWidget {
   final DateTime? initDate;
@@ -36,7 +34,7 @@ class AddArchivePage extends StatefulWidget {
 }
 
 class _AddArchivePageState extends BasicState<AddArchivePage>
-    with WidgetUtilsMixin, WidgetUtilsFile {
+    with WidgetUtilsMixin {
   int currentStep = 0;
   //services
   final serviceFileSpec = GetIt.instance.get<FileSpecService>();
@@ -48,10 +46,8 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
   final _currentStepStream = BehaviorSubject.seeded(0);
   final _listcustomerStream = BehaviorSubject.seeded(<Customer>[]);
   final _folderValidateStream = BehaviorSubject.seeded(false);
-  final _documentNameStream = BehaviorSubject.seeded("");
   final _filesSpecStream = BehaviorSubject<FilesSpec>();
   final _pathDocumentsStream = BehaviorSubject.seeded(<PathsDocuments>[]);
-  final _allUploadedStream = BehaviorSubject.seeded(false);
   final selectedDay = BehaviorSubject.seeded(DateTime.now());
   final templateFileStream = BehaviorSubject<UploadData?>();
 
@@ -79,7 +75,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
     return WidgetUtils.wrapRoute(
       (context, type) => Scaffold(
         appBar: AppBar(
-          title: Text(lang.addfolder),
+          title: Text(lang.addArchive),
         ),
         body: StreamBuilder<int>(
             stream: _currentStepStream,
@@ -189,7 +185,8 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
                                 return SizedBox.shrink();
                               }
                               //
-                              return ListCustomers(
+                              return WidgetMixin.ListCustomers(
+                                context,
                                 listCustomers: _listcustomerStream.value,
                               );
                             }),
@@ -207,20 +204,17 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
                     title: Text(lang.selectDocuments.toUpperCase()),
                     content: Column(
                       children: [
-                        StreamBuilder<List<PathsDocuments>>(
-                            stream: _pathDocumentsStream,
+                        StreamBuilder<FilesSpec>(
+                            stream: _filesSpecStream,
+                            initialData: _filesSpecStream.valueOrNull,
                             builder: (context, snapshot) {
-                              if (snapshot.hasData == false) {
+                              if (!snapshot.hasData) {
                                 return SizedBox.shrink();
                               }
-
-                              return SizedBox(
-                                height: 200,
-                                child: widgetListFiles(
-                                  pathDocumentsStream: _pathDocumentsStream,
-                                  allUploadedStream: _allUploadedStream,
-                                  filesSpecStream: _filesSpecStream,
-                                ),
+                              return UploadDocumentsWidget(
+                                filesSpec: snapshot.data!,
+                                onNext: (pathDocuments) =>
+                                    _pathDocumentsStream.add(pathDocuments),
                               );
                             }),
                         SizedBox(
@@ -264,8 +258,8 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
                     content: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        StreamBuilder<String>(
-                            stream: _documentNameStream,
+                        StreamBuilder<UploadData?>(
+                            stream: templateFileStream,
                             builder: (context, snapshot) {
                               if (snapshot.hasData == false) {
                                 return Text(
@@ -273,8 +267,8 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
                               }
 
                               return ListTile(
-                                leading: Text("${lang.documentName} : "),
-                                title: Text("${snapshot.data!}"),
+                                subtitle: Text("${lang.documentName}"),
+                                title: Text("${snapshot.data!.name}"),
                               );
                             }),
                         StreamBuilder<bool>(
@@ -322,34 +316,21 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
 
     switch (value) {
       case 0:
-        {
-          if (_selectFileSpecKey.currentState?.validate() ?? false) {
-            _currentStepStream.add(_currentStepStream.value + 1);
-          }
+        if (_selectFileSpecKey.currentState?.validate() ?? false) {
+          _currentStepStream.add(_currentStepStream.value + 1);
         }
         break;
-      case 1:
-        {
-          if (_listcustomerStream.value.isNotEmpty) {
-            _currentStepStream.add(_currentStepStream.value + 1);
-          } else {
-            await showSnackBar2(context, lang.noCustomer);
-          }
-        }
 
-        break;
-      case 2:
-        {
-          print(_allUploadedStream.value);
-          if (_allUploadedStream.value) {
-            _currentStepStream.add(_currentStepStream.value + 1);
-          } else {
-            showSnackBar2(context, lang.noDocument);
-          }
+      case 1:
+        if (_listcustomerStream.value.isNotEmpty) {
+          _currentStepStream.add(_currentStepStream.value + 1);
         }
         break;
-      case 3:
-        {}
+
+      case 2:
+        if (_pathDocumentsStream.value.isNotEmpty) {
+          _currentStepStream.add(_currentStepStream.value + 1);
+        }
         break;
     }
   }
@@ -363,12 +344,12 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
     }
   }
 
-  Future<List<FilesSpec>> getTemplates(int index) {
+  Future<List<FilesSpec>> getFilesSpec(int index) {
     var result = serviceFileSpec.getFileSpecs(pageIndex: index, pageSize: 10);
     return result;
   }
 
-  save() async {
+  void save() async {
     try {
       progressSubject.add(true);
       if (_selectFileSpecKey.currentState!.validate() &&
@@ -379,7 +360,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
 
         var input = FilesArchiveInput(
             id: null,
-            currentStep: Steps("", 0, 0, name: "archived", estimatedTime: 0),
+            currentStep: Steps("", 0, 0, name: lang.archive, estimatedTime: 0),
             printedDocId: printedDocId,
             number: _numberFileCtrl.text,
             specification: _filesSpecStream.value,
@@ -390,9 +371,9 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
         var archive = await serviceFiles.saveFilesArchive(input);
 
         if (templateFileStream.valueOrNull != null) {
-          upload(archive.id, templateFileStream.value!);
+          await uploadScannedTemplate(archive.id, templateFileStream.value!);
         }
-        uploadFiles2(context, archive, _pathDocumentsStream.value);
+        uploadScannedDocuments(context, archive, _pathDocumentsStream.value);
         await showSnackBar2(context, lang.createdsuccssfully);
         Navigator.pop(context);
       }
@@ -422,66 +403,53 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
   }
 
   void selectFileSpec() {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-              title: Center(child: Text(lang.selectFileSpec.toUpperCase())),
-              titlePadding: EdgeInsets.all(30),
-              content: SizedBox(
-                width: 400,
-                height: 300,
-                child: InfiniteScrollListView(
-                    elementBuilder: ((context, element, index, animation) {
-                      return ListTile(
-                        leading:
-                            Text("${lang.formatDate(element.creationDate)}"),
-                        title: Text("${element.name}"),
-                        onTap: () {
-                          _selectFileSpecCtrl.text = element.name;
-                          _filesSpecStream.add(element);
-                          _pathDocumentsStream
-                              .add(_filesSpecStream.value.documents
-                                  .map(
-                                    (e) => PathsDocuments(
-                                      idDocument: e.id,
-                                      document: null,
-                                      selected: false,
-                                      namePickedDocument: null,
-                                      path: null,
-                                      nameDocument: e.name,
-                                    ),
-                                  )
-                                  .toList());
-                          Navigator.of(context).pop(true);
-                        },
-                      );
-                    }),
-                    refreshable: true,
-                    pageLoader: getTemplates),
-              ),
-              actions: [
-                ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(false);
-                    },
-                    child: Text(lang.previous))
-              ],
-            ));
+    WidgetMixin.showDialog2(
+      context,
+      label: lang.selectFileSpec.toUpperCase(),
+      content: SizedBox(
+        width: 400,
+        height: 300,
+        child: listFilesSpecWidget(),
+      ),
+    );
+  }
+
+  Widget listFilesSpecWidget() {
+    return InfiniteScrollListView(
+        elementBuilder: ((context, element, index, animation) {
+          return ListTile(
+            leading: Text("${lang.formatDate(element.creationDate)}"),
+            title: Text("${element.name}"),
+            onTap: () {
+              _selectFileSpecCtrl.text = element.name;
+              _filesSpecStream.add(element);
+              _pathDocumentsStream.add(_filesSpecStream.value.documents
+                  .map(
+                    (e) => PathsDocuments(
+                      idDocument: e.id,
+                      document: null,
+                      selected: false,
+                      namePickedDocument: null,
+                      path: null,
+                      nameDocument: e.name,
+                    ),
+                  )
+                  .toList());
+              Navigator.of(context).pop(true);
+            },
+          );
+        }),
+        pageLoader: getFilesSpec);
   }
 
   void selectCustomers() {
-    Navigator.push<List<Customer>>(
-      context,
-      MaterialPageRoute(
-          builder: (context) => CustomerSelection(
-                selectionType: SelectionType.MULTIPLE,
-              )),
-    ).then((value) async {
-      if (value != null) {
-        _listcustomerStream.add(value);
-        if (_listcustomerStream.value.isEmpty) {
-          await showSnackBar2(context, lang.noCustomer);
-        }
+    push<List<Customer>>(
+        context,
+        CustomerSelection(
+          selectionType: SelectionType.MULTIPLE,
+        )).listen((event) async {
+      if (event.isNotEmpty) {
+        _listcustomerStream.add(event);
       }
     });
   }
@@ -500,15 +468,55 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
         name: pickedFile.files.first.name,
         path: path,
       );
-      _documentNameStream.add(data.name);
       templateFileStream.add(data);
       _folderValidateStream.add(true);
     }
   }
 
-  void upload(String archiveId, UploadData data) async {
+  void uploadScannedDocuments(BuildContext context, FilesArchive finalFiles,
+      List<PathsDocuments> _pathDocumentsStream) async {
+    final serviceUploadDocument = GetIt.instance.get<UploadService>();
+    var uri =
+        "/admin/archive/upload/${finalFiles.id}/${finalFiles.specification.id}/";
     try {
-      var uri = "/admin/archive/upload-template/${archiveId}";
+      if (_pathDocumentsStream.isNotEmpty) {
+        if (kIsWeb) {
+          for (var pathDoc in _pathDocumentsStream) {
+            if (pathDoc.selected) {
+              await serviceUploadDocument.upload(
+                uri + "${pathDoc.idDocument}",
+                pathDoc.document!,
+                pathDoc.nameDocument,
+                callBack: (percentage) {
+                  pathDoc.progress.add(percentage);
+                },
+              );
+            }
+          }
+        } else {
+          for (var pathDoc in _pathDocumentsStream) {
+            if (pathDoc.selected) {
+              await serviceUploadDocument.uploadFileDynamic(
+                uri + "${pathDoc.idDocument}",
+                pathDoc.path!,
+                callBack: (percentage) {
+                  pathDoc.progress.add(percentage);
+                },
+              );
+            }
+          }
+        }
+      }
+    } catch (error, stackTrace) {
+      print(stackTrace);
+      showServerError(context, error: error);
+      throw error;
+    } finally {}
+  }
+
+  uploadScannedTemplate(String archiveId, UploadData data) async {
+    var uri = "/admin/archive/upload-template/${archiveId}";
+    try {
       if (kIsWeb && data.data != null) {
         await serviceUploadDocument.upload(
           uri,
@@ -538,43 +546,4 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
 
   @override
   List<Subject> get subjects => [];
-
-  uploadFiles2(BuildContext context, FilesArchive finalFiles,
-      List<PathsDocuments> _pathDocumentsStream) async {
-    final serviceUploadDocument = GetIt.instance.get<UploadService>();
-    try {
-      if (_pathDocumentsStream.isNotEmpty) {
-        if (kIsWeb) {
-          for (var pathDoc in _pathDocumentsStream) {
-            if (pathDoc.selected) {
-              await serviceUploadDocument.upload(
-                "/admin/archive/upload/${finalFiles.id}/${finalFiles.specification.id}/${pathDoc.idDocument}",
-                pathDoc.document!,
-                pathDoc.nameDocument!,
-                callBack: (percentage) {
-                  pathDoc.progress.add(percentage);
-                },
-              );
-            }
-          }
-        } else {
-          for (var pathDoc in _pathDocumentsStream) {
-            if (pathDoc.selected) {
-              await serviceUploadDocument.uploadFileDynamic(
-                "/admin/archive/upload/${finalFiles.id}/${finalFiles.specification.id}/${pathDoc.idDocument}",
-                pathDoc.path!,
-                callBack: (percentage) {
-                  pathDoc.progress.add(percentage);
-                },
-              );
-            }
-          }
-        }
-      }
-    } catch (error, stackTrace) {
-      print(stackTrace);
-      showServerError(context, error: error);
-      throw error;
-    } finally {}
-  }
 }

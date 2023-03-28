@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
+import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_model/model/printed_doc_input.dart';
 import 'package:rxdart/rxdart.dart';
@@ -226,33 +227,30 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
   }
 
   Future<String?> getName() async {
-    return showDialog<String>(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text(lang.fileName),
-            content: Form(
-              key: fileNameKey,
-              child: TextFormField(
-                controller: templateNameCrtl,
-                autofocus: true,
-                textInputAction: TextInputAction.next,
-                validator: (text) {
-                  return ValidationUtils.requiredField(text, context);
-                },
-              ),
-            ),
-            actions: <Widget>[
-              getButtons(
-                onSave: () {
-                  if (fileNameKey.currentState?.validate() ?? false) {
-                    Navigator.of(context).pop(templateNameCrtl.text);
-                    templateNameCrtl.clear();
-                  }
-                },
-              )
-            ],
-          );
-        });
+    return WidgetMixin.showDialog2<String>(
+      context,
+      label: lang.fileName,
+      content: Form(
+        key: fileNameKey,
+        child: TextFormField(
+          controller: templateNameCrtl,
+          autofocus: true,
+          textInputAction: TextInputAction.next,
+          validator: (text) {
+            return ValidationUtils.requiredField(text, context);
+          },
+        ),
+      ),
+      actions: <Widget>[
+        getButtons(
+          onSave: () {
+            if (fileNameKey.currentState?.validate() ?? false) {
+              Navigator.of(context).pop(templateNameCrtl.text);
+              templateNameCrtl.clear();
+            }
+          },
+        )
+      ],
+    );
   }
 }

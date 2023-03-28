@@ -1,37 +1,40 @@
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:notary_admin/src/pages/customer/customer_selection_page.dart';
+import 'package:notary_admin/src/pages/templates/form_and_view_html.dart';
+import 'package:notary_admin/src/pages/templates/upload_template.dart';
+import 'package:notary_admin/src/services/admin/template_document_service.dart';
+import 'package:notary_admin/src/services/files/file_spec_service.dart';
+import 'package:notary_admin/src/services/files/files_service.dart';
+import 'package:notary_admin/src/services/upload_service.dart';
+import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
-import 'package:notary_admin/src/utils/widget_utils_new.dart';
+import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget.dart';
+import 'package:notary_admin/src/widgets/basic_state.dart';
+import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/customer.dart';
-import 'package:notary_model/model/files.dart';
 import 'package:notary_model/model/files_input.dart';
 import 'package:notary_model/model/files_spec.dart';
-import 'package:notary_model/model/printed_doc.dart';
 import 'package:notary_model/model/printed_doc_input.dart';
 import 'package:notary_model/model/selection_type.dart';
 import 'package:rxdart/rxdart.dart';
-import '../../services/admin/template_document_service.dart';
-import '../../services/files/file_spec_service.dart';
-import '../../services/files/files_service.dart';
-import '../../services/upload_service.dart';
-import '../../widgets/basic_state.dart';
-import '../../widgets/mixins/button_utils_mixin.dart';
-import '../templates/form_and_view_html.dart';
+
 import 'list_files_customer.dart';
 
-class AddFolderCustomer extends StatefulWidget {
-  const AddFolderCustomer({
+class AddFilesCustomer extends StatefulWidget {
+  const AddFilesCustomer({
     super.key,
   });
   @override
-  State<AddFolderCustomer> createState() => _AddFolderCustomerState();
+  State<AddFilesCustomer> createState() => _AddFilesCustomerState();
 }
 
-class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
-    with WidgetUtilsMixin, WidgetUtilsFile {
+class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
+    with WidgetUtilsMixin {
   int currentStep = 0;
   //services
   final serviceFileSpec = GetIt.instance.get<FileSpecService>();
@@ -44,8 +47,8 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
   final _listcustomerStream = BehaviorSubject.seeded(<Customer>[]);
   final _folderValidateStream = BehaviorSubject.seeded(false);
   final _filesSpecStream = BehaviorSubject<FilesSpec>();
+  final additionalDocumentsStream = BehaviorSubject.seeded(<UploadData>[]);
   final _pathDocumentsStream = BehaviorSubject.seeded(<PathsDocuments>[]);
-  final _allUploadedStream = BehaviorSubject.seeded(false);
   //Key
   final GlobalKey<FormState> _selectFileSpecKey = GlobalKey();
   //controlers
@@ -78,7 +81,7 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
                 },
                 steps: <Step>[
                   Step(
-                    title: Text(lang.selectFileSpec.toUpperCase()),
+                    title: Text(lang.general.toUpperCase()),
                     content: Form(
                         key: _selectFileSpecKey,
                         child: Column(
@@ -178,7 +181,8 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
                                 return SizedBox.shrink();
                               }
                               //
-                              return ListCustomers(
+                              return WidgetMixin.ListCustomers(
+                                context,
                                 listCustomers: _listcustomerStream.value,
                               );
                             }),
@@ -196,8 +200,9 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
                     title: Text(lang.selectDocuments.toUpperCase()),
                     content: Column(
                       children: [
-                        StreamBuilder<List<PathsDocuments>>(
-                            stream: _pathDocumentsStream,
+                        StreamBuilder<FilesSpec>(
+                            stream: _filesSpecStream,
+                            initialData: _filesSpecStream.valueOrNull,
                             builder: (context, snapshot) {
                               if (snapshot.hasData == false) {
                                 return SizedBox.shrink();
@@ -205,10 +210,10 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
 
                               return SizedBox(
                                 height: 200,
-                                child: widgetListFiles(
-                                  pathDocumentsStream: _pathDocumentsStream,
-                                  allUploadedStream: _allUploadedStream,
-                                  filesSpecStream: _filesSpecStream,
+                                child: UploadDocumentsWidget(
+                                  filesSpec: snapshot.data!,
+                                  onNext: (pathDocuments) =>
+                                      _pathDocumentsStream.add(pathDocuments),
                                 ),
                               );
                             }),
@@ -229,7 +234,7 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
                   Step(
                     title: Row(
                       children: [
-                        Text(lang.addFiles.toUpperCase()),
+                        Text(lang.completeTemplate.toUpperCase()),
                         SizedBox(
                           width: 20,
                         ),
@@ -258,7 +263,7 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
                             builder: (context, snapshot) {
                               if (snapshot.hasData == false) {
                                 return Text(
-                                    lang.noCreatedDocumentprint.toUpperCase());
+                                    lang.noTemplateInstance.toUpperCase());
                               }
 
                               return ListTile(
@@ -279,7 +284,8 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
                                       onPressed: previous,
                                       child: Text(lang.previous)),
                                   ElevatedButton(
-                                      onPressed: snapshot.data! ? save : null,
+                                      onPressed:
+                                          snapshot.data! ? continued : null,
                                       child: Text(lang.submit.toUpperCase())),
                                 ],
                               );
@@ -289,6 +295,61 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
                     isActive: activeState == 3,
                     state: getState(3),
                   ),
+                  Step(
+                    title: Row(
+                      children: [
+                        Text(lang.additionalDocuments.toUpperCase()),
+                        SizedBox(
+                          width: 20,
+                        ),
+                        StreamBuilder<int>(
+                            stream: _currentStepStream,
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData == false) {
+                                return SizedBox.shrink();
+                              }
+                              return ButtonBar(children: [
+                                ElevatedButton(
+                                  onPressed:
+                                      snapshot.data == 4 ? loadFiles : null,
+                                  child: Icon(Icons.add),
+                                ),
+                              ]);
+                            }),
+                      ],
+                    ),
+                    content: Column(
+                      children: [
+                        StreamBuilder<List<UploadData>>(
+                            stream: additionalDocumentsStream,
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData == false) {
+                                return SizedBox.shrink();
+                              }
+
+                              return Container(
+                                height: 200,
+                                child: ListView.builder(
+                                  itemCount: snapshot.data!.length,
+                                  itemBuilder: (context, index) {
+                                    return ListTile(
+                                      title:
+                                          Text("${snapshot.data![index].name}"),
+                                    );
+                                  },
+                                ),
+                              );
+                            }),
+                        getButtons(
+                            onSave: save,
+                            onCancel: previous,
+                            saveLabel: lang.next,
+                            cancelLabel: lang.previous)
+                      ],
+                    ),
+                    isActive: activeState == 4,
+                    state: getState(4),
+                  )
                 ],
               );
             }),
@@ -329,8 +390,7 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
         break;
       case 2:
         {
-          print(_allUploadedStream.value);
-          if (_allUploadedStream.value) {
+          if (_pathDocumentsStream.value.isNotEmpty) {
             _currentStepStream.add(_currentStepStream.value + 1);
           } else {
             showSnackBar2(context, lang.noDocument);
@@ -338,7 +398,8 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
         }
         break;
       case 3:
-        {}
+        _currentStepStream.add(_currentStepStream.value + 1);
+
         break;
     }
   }
@@ -352,7 +413,7 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
     }
   }
 
-  Future<List<FilesSpec>> getTemplates(int index) {
+  Future<List<FilesSpec>> getFilesSpec(int index) {
     var result = serviceFileSpec.getFileSpecs(pageIndex: index, pageSize: 10);
     return result;
   }
@@ -361,27 +422,33 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
     try {
       progressSubject.add(true);
       if (_selectFileSpecKey.currentState!.validate() &&
-              _listcustomerStream.value.isNotEmpty &&
-              _folderValidateStream.value ||
-          false) {
-        // Process data.
+          _listcustomerStream.value.isNotEmpty &&
+          _folderValidateStream.value) {
         var listCustomersIds =
             _listcustomerStream.value.map((e) => e.id).toList();
+        var input = FilesInput(
+          id: null,
+          number: _numberFileCtrl.text,
+          imageIds: [],
+          customerIds: listCustomersIds,
+          uploadedFiles: [],
+          specification: _filesSpecStream.value,
+          printedDocInput: _printedDocInputStream.value,
+          additionalDocumentIds: [],
+        );
+        var files = await serviceFiles.saveFiles(input);
 
-        var files = await serviceFiles.saveFiles(FilesInput(
-            id: null,
-            number: _numberFileCtrl.text,
-            imageIds: [],
-            clientIds: listCustomersIds,
-            uploadedFiles: [],
-            specification: _filesSpecStream.value,
-            printedDocInput: _printedDocInputStream.value));
-
-        if (files != null) {
-          uploadFiles(context, files, _pathDocumentsStream.value);
+        if (_pathDocumentsStream.value.isNotEmpty &&
+            additionalDocumentsStream.value.isNotEmpty) {
+          await WidgetMixin.uploadFiles(
+              context, files, _pathDocumentsStream.value);
+          await WidgetMixin.uploadAdditionalData(
+              context, files, additionalDocumentsStream.value);
           await showSnackBar2(context, lang.createdsuccssfully);
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => ListFilesCustomer()));
+        } else {
+          showSnackBar2(context, "error");
         }
       }
     } catch (error, stackTrace) {
@@ -400,62 +467,27 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
   List<Subject> get subjects => [];
 
   void selectFileSpec() {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-              title: Container(
-                height: 50,
-                child: Wrap(alignment: WrapAlignment.spaceBetween, children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(lang.selectFileSpec.toUpperCase()),
-                  ),
-                  Tooltip(
-                    message: lang.cancel,
-                    child: InkWell(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Icon(
-                          Icons.cancel,
-                          size: 26,
-                        ),
-                      ),
-                      onTap: () => Navigator.of(context).pop(false),
-                    ),
-                  ),
-                ]),
-              ),
-              content: SizedBox(
-                width: 400,
-                height: 300,
-                child: InfiniteScrollListView(
-                    elementBuilder: ((context, element, index, animation) {
-                      return ListTile(
-                        title: Text("${element.name}"),
-                        onTap: () {
-                          _selectFileSpecCtrl.text = element.name;
-                          _filesSpecStream.add(element);
-                          _pathDocumentsStream
-                              .add(_filesSpecStream.value.documents
-                                  .map(
-                                    (e) => PathsDocuments(
-                                      idDocument: e.id,
-                                      document: null,
-                                      selected: false,
-                                      namePickedDocument: null,
-                                      path: null,
-                                      nameDocument: e.name,
-                                    ),
-                                  )
-                                  .toList());
-                          Navigator.of(context).pop(true);
-                        },
-                      );
-                    }),
-                    refreshable: true,
-                    pageLoader: getTemplates),
-              ),
-            ));
+    WidgetMixin.showDialog2(
+      context,
+      label: lang.selectFileSpec.toUpperCase(),
+      content: SizedBox(
+        width: 400,
+        height: 300,
+        child: InfiniteScrollListView(
+            elementBuilder: ((context, element, index, animation) {
+              return ListTile(
+                title: Text("${element.name}"),
+                onTap: () {
+                  _selectFileSpecCtrl.text = element.name;
+                  _filesSpecStream.add(element);
+                  Navigator.of(context).pop(true);
+                },
+              );
+            }),
+            refreshable: true,
+            pageLoader: getFilesSpec),
+      ),
+    );
   }
 
   generateForm() async {
@@ -464,7 +496,7 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
       var list = await serviceTemplateDocument
           .formGenerating(_filesSpecStream.value.templateId);
       for (var res in list) {
-        finalList.add(res.replaceAll(" ", "_"));
+        finalList.add(res.replaceAll(RegExp(r' '), "_"));
       }
       var data = await serviceTemplateDocument
           .replacements(_filesSpecStream.value.templateId);
@@ -484,6 +516,29 @@ class _AddFolderCustomerState extends BasicState<AddFolderCustomer>
     } catch (error, stacktrace) {
       showServerError(context, error: error);
       print(stacktrace);
+    }
+  }
+
+  Future loadFiles() async {
+    try {
+      var pickedFile = await FilePicker.platform.pickFiles(
+        allowMultiple: false,
+      );
+      if (pickedFile != null) {
+        var path = null;
+        if (!kIsWeb) {
+          path = pickedFile.files.first.path;
+        }
+        var data = UploadData(
+            data: pickedFile.files.first.bytes,
+            name: pickedFile.files.first.name,
+            path: path);
+        var list = additionalDocumentsStream.value;
+        list.add(data);
+        additionalDocumentsStream.add(list);
+      }
+    } catch (e) {
+      print("[ERROR]${e.toString}");
     }
   }
 }

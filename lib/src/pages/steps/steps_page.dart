@@ -29,11 +29,11 @@ class _StepsPageState extends BasicState<StepsPage> with WidgetUtilsMixin {
           appBar: AppBar(
             title: Text(lang.stepGroup),
           ),
-          floatingActionButton: FloatingActionButton(
+          floatingActionButton: ElevatedButton(
             onPressed: () {
               addNewStep(context);
             },
-            child: Icon(Icons.add),
+            child: Text(lang.addSteps),
           ),
           body: Padding(
               padding: EdgeInsets.all(20),

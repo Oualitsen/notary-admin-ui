@@ -68,7 +68,11 @@
     "isNotRequired",
     "isOriginal",
     "isNotOriginal",
-    "currentStep"
+    "currentStep",
+    "addArchive",
+    "completeTemplate",
+    "noTemplateInstance",
+    "additionalDocuments"
   ],
 
   "fr": [
@@ -140,6 +144,10 @@
     "isNotRequired",
     "isOriginal",
     "isNotOriginal",
-    "currentStep"
+    "currentStep",
+    "addArchive",
+    "completeTemplate",
+    "noTemplateInstance",
+    "additionalDocuments"
   ]
 }

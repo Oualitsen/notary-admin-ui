@@ -6,6 +6,7 @@ import 'package:notary_admin/src/pages/printed_docs/html_editor_printed_doc.dart
 import 'package:notary_admin/src/pages/printed_docs/printed_doc_view.dart';
 import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
+import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_model/model/printed_doc.dart';
 import 'package:rxdart/subjects.dart';
 
@@ -108,25 +109,24 @@ class _PrintedDocumentsPageState extends BasicState<PrintedDocumentsPage>
         push(context, PrintedDocViewHtml(text: doc.htmlData));
       }
       if (value == items[3]) {
-        showDialog(
-            context: context,
-            builder: (BuildContext) => AlertDialog(
-                  title: Text(lang.confirm),
-                  content: Text(lang.confirmDelete),
-                  actions: [
-                    TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(false);
-                        },
-                        child: Text(lang.no.toUpperCase())),
-                    TextButton(
-                        onPressed: () async {
-                          Navigator.of(context).pop(true);
-                          await _delete(doc);
-                        },
-                        child: Text(lang.confirm.toUpperCase())),
-                  ],
-                ));
+        WidgetMixin.showDialog2(
+          context,
+          label: lang.confirm,
+          content: Text(lang.confirmDelete),
+          actions: [
+            TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+                child: Text(lang.no.toUpperCase())),
+            TextButton(
+                onPressed: () async {
+                  Navigator.of(context).pop(true);
+                  await _delete(doc);
+                },
+                child: Text(lang.confirm.toUpperCase())),
+          ],
+        );
       }
       ;
     }
@@ -147,34 +147,31 @@ class _PrintedDocumentsPageState extends BasicState<PrintedDocumentsPage>
   }
 
   Future<String?> editName(PrintedDoc file) async {
-    return showDialog<String>(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text(lang.editFileName),
-            content: Form(
-              key: fileNameKey,
-              child: TextFormField(
-                controller: templateNameCrtl,
-                autofocus: true,
-                textInputAction: TextInputAction.next,
-                validator: (text) {
-                  return ValidationUtils.requiredField(text, context);
-                },
-              ),
-            ),
-            actions: <Widget>[
-              getButtons(
-                onSave: () {
-                  if (fileNameKey.currentState?.validate() ?? false) {
-                    Navigator.of(context).pop(templateNameCrtl.text);
-                    templateNameCrtl.clear();
-                  }
-                },
-              )
-            ],
-          );
-        });
+    return WidgetMixin.showDialog2<String>(
+      context,
+      label: lang.editFileName,
+      content: Form(
+        key: fileNameKey,
+        child: TextFormField(
+          controller: templateNameCrtl,
+          autofocus: true,
+          textInputAction: TextInputAction.next,
+          validator: (text) {
+            return ValidationUtils.requiredField(text, context);
+          },
+        ),
+      ),
+      actions: <Widget>[
+        getButtons(
+          onSave: () {
+            if (fileNameKey.currentState?.validate() ?? false) {
+              Navigator.of(context).pop(templateNameCrtl.text);
+              templateNameCrtl.clear();
+            }
+          },
+        )
+      ],
+    );
   }
 
   _delete(PrintedDoc doc) async {

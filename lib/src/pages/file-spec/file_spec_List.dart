@@ -24,14 +24,14 @@ class _FileSpecListState extends BasicState<FileSpecList>
           appBar: AppBar(
             title: Text(lang.fileSpec),
           ),
-          floatingActionButton: FloatingActionButton(
+          floatingActionButton: ElevatedButton(
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => AddFileSpec()),
               );
             },
-            child: Icon(Icons.add),
+            child: Text(lang.addFileSpec),
           ),
           body: Padding(padding: EdgeInsets.all(20), child: FileSpecTable()),
         ));
