@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
-import 'package:notary_admin/src/pages/files/add_folder_customer.dart';
+import 'package:notary_admin/src/pages/files/add_files_page.dart';
 import 'package:notary_model/model/files.dart';
 import 'package:rxdart/src/subjects/subject.dart';
 
@@ -30,7 +30,7 @@ class _ListFilesCustomerState extends BasicState<ListFilesCustomer>
               onPressed: () => Navigator.push<Files?>(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => AddFolderCustomer()))
+                              builder: (context) => AddFilesCustomer()))
                       .then((value) {
                     if (value != null) {
                       tableKey.currentState?.add(value);

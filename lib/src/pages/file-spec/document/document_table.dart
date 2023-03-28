@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_model/model/document_spec_input.dart';
 import 'package:rxdart/rxdart.dart';
@@ -32,7 +33,7 @@ class _DocumentsTableState extends BasicState<DocumentsTable>
   Widget build(BuildContext context) {
     return Container(
       width: double.maxFinite,
-      height: 300,
+      height: 200,
       alignment: Alignment.topLeft,
       child: StreamBuilder<List<DocumentSpecInput>>(
           stream: _listDocumentsStream,
@@ -46,72 +47,21 @@ class _DocumentsTableState extends BasicState<DocumentsTable>
                 : ListView.builder(
                     itemCount: snapshot.data!.length,
                     itemBuilder: (context, int index) {
+                      var isRequired = snapshot.data![index].optional
+                          ? lang.isNotRequired
+                          : lang.isNotRequired;
+                      var isOriginal = snapshot.data![index].original
+                          ? lang.isOriginal
+                          : lang.isNotOriginal;
                       return ListTile(
-                        title: Wrap(
-                          children: [
-                            Icon(
-                              Icons.folder,
-                              color: Color.fromARGB(158, 3, 18, 27),
-                            ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Text("${snapshot.data![index].name}"),
-                            SizedBox(
-                              width: 10,
-                            ),
-
-                            Text(snapshot.data![index].optional == true
-                                ? "${lang.originalDocument} : ${lang.yes}"
-                                : "${lang.originalDocument} : ${lang.no}"),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Text(snapshot.data![index].original == true
-                                ? "${lang.requiredDocument} : ${lang.yes}"
-                                : "${lang.requiredDocument} : ${lang.no}"),
-//a voir avec l'expiration des documents
-                            // Text(
-                            //   lang.expiryDate +
-                            //       " : " +
-                            //       lang.formatDate(listDocument[index].expiryDate),
-                            // ),
-                          ],
+                        leading: CircleAvatar(
+                          child: Text("${(index + 1)}"),
                         ),
+                        title: Text("${snapshot.data![index].name}"),
+                        subtitle: Text("${isRequired} , ${isOriginal}"),
                         trailing: IconButton(
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) => AlertDialog(
-                                title: Text(lang.confirm),
-                                content: Text(lang.confirmDelete),
-                                actions: <Widget>[
-                                  TextButton(
-                                    child: Text(lang.no.toUpperCase()),
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(false),
-                                  ),
-                                  TextButton(
-                                      child: Text(lang.yes.toUpperCase()),
-                                      onPressed: () async {
-                                        var list = snapshot.data!;
-                                        list.removeAt(index);
-                                        //          .remove(snapshot.data![index]);
-                                        _listDocumentsStream.add(list);
-                                        print(list.length);
-                                        if (list.isEmpty) {
-                                          await showSnackBar2(
-                                              context, lang.noDocument);
-                                        }
-                                        widget.onChanged(
-                                            _listDocumentsStream.value);
-
-                                        Navigator.of(context).pop(true);
-                                      })
-                                ],
-                              ),
-                            );
-                          },
+                          onPressed: () =>
+                              deleteDocument(snapshot.data![index], index),
                           icon: Icon(
                             Icons.delete,
                           ),
@@ -146,4 +96,34 @@ class _DocumentsTableState extends BasicState<DocumentsTable>
   @override
   // TODO: implement subjects
   List<Subject> get subjects => [];
+
+  deleteDocument(DocumentSpecInput documentSpecInput, int index) {
+    WidgetMixin.showDialog2(
+      context,
+      label: lang.confirm,
+      content: Text(lang.confirmDelete),
+      actions: <Widget>[
+        TextButton(
+          child: Text(lang.no.toUpperCase()),
+          onPressed: () => Navigator.of(context).pop(false),
+        ),
+        TextButton(
+          child: Text(lang.yes.toUpperCase()),
+          onPressed: () async {
+            var list = _listDocumentsStream.value;
+            list.removeAt(index);
+
+            _listDocumentsStream.add(list);
+            print(list.length);
+            if (list.isEmpty) {
+              await showSnackBar2(context, lang.noDocument);
+            }
+            widget.onChanged(_listDocumentsStream.value);
+
+            Navigator.of(context).pop(true);
+          },
+        )
+      ],
+    );
+  }
 }

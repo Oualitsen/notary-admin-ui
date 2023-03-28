@@ -5,8 +5,9 @@ import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/pages/archiving/add_archive_page.dart';
 import 'package:notary_admin/src/pages/printed_docs/printed_doc_view.dart';
 import 'package:notary_admin/src/services/files/files_archive_service.dart';
+import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
-import 'package:notary_admin/src/utils/widget_utils_new.dart';
+import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget.dart';
 import 'package:notary_model/model/files_archive.dart';
 import 'package:rxdart/subjects.dart';
 import '../../services/admin/printed_docs_service.dart';
@@ -28,7 +29,7 @@ class FilesArchiveTableWidget extends StatefulWidget {
 }
 
 class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
-    with WidgetUtilsMixin, WidgetUtilsFile {
+    with WidgetUtilsMixin {
   final archiveService = GetIt.instance.get<FilesArchiveService>();
   final tableKey = GlobalKey<LazyPaginatedDataTableState>();
   List<DataColumn> columns = [];
@@ -42,6 +43,15 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
     if (!initialized) {
       items = [lang.editName, lang.editContent, lang.print, lang.delete];
       dropDownValueStream.add(items.first);
+      columns = [
+        DataColumn(label: Text(lang.createdFileSpec)),
+        DataColumn(label: Text(lang.filesNumber)),
+        DataColumn(label: Text(lang.fileSpec)),
+        DataColumn(label: Text(lang.customer)),
+        DataColumn(label: Text(lang.template)),
+        DataColumn(label: Text(lang.listDocumentsFileSpec)),
+        DataColumn(label: Text(lang.delete)),
+      ];
       initialized = true;
     }
   }
@@ -49,15 +59,6 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
   @override
   Widget build(BuildContext context) {
     init();
-    columns = [
-      DataColumn(label: Text(lang.createdFileSpec)),
-      DataColumn(label: Text(lang.filesNumber)),
-      DataColumn(label: Text(lang.fileSpec)),
-      DataColumn(label: Text(lang.customer)),
-      DataColumn(label: Text(lang.template)),
-      DataColumn(label: Text(lang.listDocumentsFileSpec)),
-      DataColumn(label: Text(lang.delete)),
-    ];
     return WidgetUtils.wrapRoute((context, type) => Scaffold(
           appBar: AppBar(
             title: Text("${lang.monthName(widget.startDate)}"),
@@ -158,34 +159,15 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
 
   customerDetails(FilesArchive data) async {
     try {
-      //   var customersList = await archiveService.getFilesCustomers(data.id);
-      showDialog(
-          context: context,
-          builder: (BuildContext context) => AlertDialog(
-                title: Container(
-                    height: 50,
-                    child:
-                        Wrap(alignment: WrapAlignment.spaceBetween, children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(lang.customerList),
-                      ),
-                      Tooltip(
-                        message: lang.cancel,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: InkWell(
-                            child: Icon(Icons.cancel),
-                            onTap: () => Navigator.of(context).pop(false),
-                          ),
-                        ),
-                      ),
-                    ])),
-                content: ListCustomers(
-                  listCustomers: data.customers,
-                  width: 300,
-                ),
-              ));
+      WidgetMixin.showDialog2(
+        context,
+        label: lang.customerList,
+        content: WidgetMixin.ListCustomers(
+          context,
+          listCustomers: data.customers,
+          width: 300,
+        ),
+      );
     } catch (error, stacktrace) {
       showServerError(context, error: error);
       print(stacktrace);
@@ -193,86 +175,59 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
   }
 
   deleteFiles(FilesArchive data) {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-              title: Text(lang.confirm),
-              content: Text(lang.confirmDelete),
-              actions: <Widget>[
-                TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(false);
-                    },
-                    child: Text(lang.no.toUpperCase())),
-                TextButton(
-                    onPressed: () async {
-                      try {
-                        await archiveService.delete(data.id);
-                      } catch (error, stacktrace) {
-                        showServerError(context, error: error);
-                        print(stacktrace);
-                      }
-                      Navigator.of(context).pop(true);
-                      tableKey.currentState?.refreshPage();
-                      await showSnackBar2(context, lang.delete);
-                    },
-                    child: Text(lang.yes.toUpperCase())),
-              ],
-            ));
+    WidgetMixin.showDialog2(
+      context,
+      label: lang.confirm,
+      content: Text(lang.confirmDelete),
+      actions: <Widget>[
+        TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+            child: Text(lang.no.toUpperCase())),
+        TextButton(
+            onPressed: () async {
+              try {
+                await archiveService.delete(data.id);
+              } catch (error, stacktrace) {
+                showServerError(context, error: error);
+                print(stacktrace);
+              }
+              Navigator.of(context).pop(true);
+              tableKey.currentState?.refreshPage();
+              await showSnackBar2(context, lang.delete);
+            },
+            child: Text(lang.yes.toUpperCase())),
+      ],
+    );
   }
 
   void documentList(FilesArchive data) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Container(
-          height: 50,
-          child: Wrap(alignment: WrapAlignment.spaceBetween, children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(lang.listDocumentsFileSpec),
-            ),
-            Tooltip(
-              message: lang.cancel,
-              child: InkWell(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(
-                    Icons.cancel,
-                    size: 26,
-                  ),
-                ),
-                onTap: () => Navigator.of(context).pop(false),
-              ),
-            ),
-          ]),
-        ),
-        content: Container(
-          height: 400,
-          width: 400,
-          child: data.specification.documents.length == 0
-              ? ListTile(title: Text(lang.noDocument.toUpperCase()))
-              : ListView.builder(
-                  itemCount: data.specification.documents.length,
-                  itemBuilder: (context, int index) {
-                    var isRequired =
-                        data.specification.documents[index].optional
-                            ? lang.isNotRequired
-                            : lang.isNotRequired;
-                    var isOriginal =
-                        data.specification.documents[index].original
-                            ? lang.isOriginal
-                            : lang.isNotOriginal;
-                    return ListTile(
-                      leading: CircleAvatar(
-                        child: Text("${(index + 1)}"),
-                      ),
-                      title:
-                          Text("${data.specification.documents[index].name}"),
-                      subtitle: Text("${isRequired} , ${isOriginal}"),
-                    );
-                  }),
-        ),
+    WidgetMixin.showDialog2(
+      context,
+      label: lang.listDocumentsFileSpec,
+      content: Container(
+        height: 400,
+        width: 400,
+        child: data.specification.documents.length == 0
+            ? ListTile(title: Text(lang.noDocument.toUpperCase()))
+            : ListView.builder(
+                itemCount: data.specification.documents.length,
+                itemBuilder: (context, int index) {
+                  var isRequired = data.specification.documents[index].optional
+                      ? lang.isNotRequired
+                      : lang.isNotRequired;
+                  var isOriginal = data.specification.documents[index].original
+                      ? lang.isOriginal
+                      : lang.isNotOriginal;
+                  return ListTile(
+                    leading: CircleAvatar(
+                      child: Text("${(index + 1)}"),
+                    ),
+                    title: Text("${data.specification.documents[index].name}"),
+                    subtitle: Text("${isRequired} , ${isOriginal}"),
+                  );
+                }),
       ),
     );
   }

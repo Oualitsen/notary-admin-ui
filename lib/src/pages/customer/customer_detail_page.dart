@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get_it/get_it.dart';
+import 'package:http_error_handler/error_handler.dart';
 import 'package:notary_admin/src/pages/customer/add_customer_page.dart';
+import 'package:notary_admin/src/services/admin/customer_service.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/customer.dart';
+import 'package:notary_model/model/files.dart';
 import 'package:rxdart/src/subjects/subject.dart';
+import 'package:rxdart/subjects.dart';
 
 class CustomerDetailsPage extends StatefulWidget {
   final Customer customer;
@@ -19,11 +24,14 @@ class _CustomerDetailsPageState extends BasicState<CustomerDetailsPage>
     with WidgetUtilsMixin {
   late Customer customer;
   late List<Tab> myTabs;
+  final customerFilesStream = BehaviorSubject<List<Files>>();
+  final service = GetIt.instance.get<CustomerService>();
   bool initialized = false;
   void init() {
     if (initialized) return;
     initialized = true;
     customer = widget.customer;
+    getFiles(customer.id);
     myTabs = [
       Tab(
         text: lang.general,
@@ -33,12 +41,17 @@ class _CustomerDetailsPageState extends BasicState<CustomerDetailsPage>
         text: lang.idCardInfo,
         height: 50,
       ),
+      Tab(
+        text: lang.fileList,
+        height: 50,
+      ),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
     init();
+
     return WidgetUtils.wrapRoute(
       (context, type) => DefaultTabController(
         length: myTabs.length,
@@ -125,7 +138,27 @@ class _CustomerDetailsPageState extends BasicState<CustomerDetailsPage>
                       Container(child: Text("Error")),
                 ),
               ),
-            ])
+            ]),
+            StreamBuilder<List<Files>>(
+              initialData: customerFilesStream.valueOrNull,
+              stream: customerFilesStream,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return SizedBox.shrink();
+                }
+                return ListView.builder(
+                  itemCount: snapshot.data?.length ?? 0,
+                  itemBuilder: (context, index) => ListTile(
+                    leading: CircleAvatar(child: Text("${(index + 1)}")),
+                    title: Text("${snapshot.data![index].number}"),
+                    trailing: Icon(Icons.arrow_forward),
+                    onTap: () {
+                      /** needs to be done */
+                    },
+                  ),
+                );
+              },
+            ),
           ]),
         ),
       ),
@@ -137,4 +170,15 @@ class _CustomerDetailsPageState extends BasicState<CustomerDetailsPage>
 
   @override
   List<Subject> get subjects => [];
+
+  getFiles(String id) async {
+    try {
+      var res = await service.getFilesByCustomerId(id);
+      customerFilesStream.add(res);
+    } catch (error, stacktrace) {
+      print(stacktrace);
+      showServerError(context, error: error);
+      throw (error);
+    }
+  }
 }

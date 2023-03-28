@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:notary_model/model/customer.dart';
 import 'package:notary_model/model/customer_input.dart';
+import 'package:notary_model/model/files.dart';
 import 'package:retrofit/http.dart';
 part 'customer_service.g.dart';
 
@@ -22,4 +23,7 @@ abstract class CustomerService {
 
   @DELETE("/admin/customers/{id}")
   Future<void> deleteCustomer(@Path("id") String id);
+
+  @GET("/admin/customers/files/{id}")
+  Future<List<Files>> getFilesByCustomerId(@Path("id") String id);
 }

@@ -6,6 +6,7 @@ import 'package:notary_admin/src/pages/assistant/assistant_detail_page.dart';
 import 'package:notary_admin/src/pages/assistant/assistant_details_input.dart';
 import 'package:notary_admin/src/services/assistant/admin_assistant_service.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
+import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_admin/src/widgets/password_input.dart';
@@ -96,22 +97,20 @@ class AssistantTableWidgetState extends BasicState<AssistantTableWidget>
   @override
   List<Subject> get subjects => [];
   void deleteConfirmation(String assistantId) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text(lang.confirm),
-        content: Text(lang.confirmDelete),
-        actions: <Widget>[
-          TextButton(
-            child: Text(lang.no.toUpperCase()),
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          TextButton(
-            child: Text(lang.yes.toUpperCase()),
-            onPressed: (() => delete(assistantId)),
-          ),
-        ],
-      ),
+    WidgetMixin.showDialog2(
+      context,
+      label: lang.confirm,
+      content: Text(lang.confirmDelete),
+      actions: <Widget>[
+        TextButton(
+          child: Text(lang.no.toUpperCase()),
+          onPressed: () => Navigator.of(context).pop(false),
+        ),
+        TextButton(
+          child: Text(lang.yes.toUpperCase()),
+          onPressed: (() => delete(assistantId)),
+        ),
+      ],
     );
   }
 
@@ -131,23 +130,20 @@ class AssistantTableWidgetState extends BasicState<AssistantTableWidget>
   }
 
   void editAssistant(BuildContext context, Admin assistant) async {
-    return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text(lang.addSteps),
-            content: Container(
-              height: 200,
-              child: AssistantDetailsInput(
-                key: assistantKey,
-                assistant: assistant,
-              ),
-            ),
-            actions: <Widget>[
-              getButtons(onSave: () => saveAssistant(assistant)),
-            ],
-          );
-        });
+    return WidgetMixin.showDialog2(
+      context,
+      label: lang.addSteps,
+      content: Container(
+        height: 200,
+        child: AssistantDetailsInput(
+          key: assistantKey,
+          assistant: assistant,
+        ),
+      ),
+      actions: <Widget>[
+        getButtons(onSave: () => saveAssistant(assistant)),
+      ],
+    );
   }
 
   void saveAssistant(Admin assistant) async {
@@ -178,50 +174,31 @@ class AssistantTableWidgetState extends BasicState<AssistantTableWidget>
   }
 
   void resetPassword(Admin assistant) {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Column(
-              children: [
-                Text(lang.resetPassword.toUpperCase()),
-                Container(
-                  alignment: Alignment.center,
-                  padding: EdgeInsets.all(10),
-                  width: 400,
-                  height: 50,
-                  child: Text(
-                    "${assistant.lastName} ${assistant.firstName}",
-                  ),
-                ),
-              ],
-            ),
-            content: Container(
-              height: 150,
-              width: 400,
-              child: Column(
-                children: [
-                  Form(
-                    key: _formKeyNewPassword,
-                    child: PasswordInput(
-                      controller: newPwdCtr,
-                      label: Text(lang.newPassword),
-                      validator: (text) {
-                        return ValidationUtils.requiredField(text, context);
-                      },
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  getButtons(
-                    onSave: () => setPasswordAssistant(assistant),
-                    saveLabel: lang.submit.toUpperCase(),
-                    cancelLabel: lang.cancel.toUpperCase(),
-                  ),
-                ],
-              ),
-            ),
-          );
-        });
+    WidgetMixin.showDialog2(
+      context,
+      label: lang.resetPassword.toUpperCase(),
+      content: Container(
+        height: 100,
+        width: 400,
+        child: Form(
+          key: _formKeyNewPassword,
+          child: PasswordInput(
+            controller: newPwdCtr,
+            label: Text(lang.newPassword),
+            validator: (text) {
+              return ValidationUtils.requiredField(text, context);
+            },
+          ),
+        ),
+      ),
+      actions: <Widget>[
+        getButtons(
+          onSave: () => setPasswordAssistant(assistant),
+          saveLabel: lang.submit.toUpperCase(),
+          skipCancel: true,
+        ),
+      ],
+    );
   }
 
   setPasswordAssistant(Admin assistant) async {
