@@ -5,17 +5,17 @@ import 'package:notary_model/model/document_spec_input.dart';
 import 'package:rxdart/rxdart.dart';
 import '../../../widgets/mixins/button_utils_mixin.dart';
 
-class DocumentsTable extends StatefulWidget {
+class DocumentsWidget extends StatefulWidget {
   final List<DocumentSpecInput> listDocument;
-  final Function(List<DocumentSpecInput> listDoc) onChanged;
-  const DocumentsTable(
-      {super.key, required this.listDocument, required this.onChanged});
+  final Function(List<DocumentSpecInput> listDoc)? onChanged;
+  const DocumentsWidget(
+      {super.key, required this.listDocument, this.onChanged});
 
   @override
-  State<DocumentsTable> createState() => _DocumentsTableState();
+  State<DocumentsWidget> createState() => _DocumentsWidgetState();
 }
 
-class _DocumentsTableState extends BasicState<DocumentsTable>
+class _DocumentsWidgetState extends BasicState<DocumentsWidget>
     with WidgetUtilsMixin {
   final columnSpacing = 30.0;
   bool initialized = false;
@@ -53,19 +53,24 @@ class _DocumentsTableState extends BasicState<DocumentsTable>
                       var isOriginal = snapshot.data![index].original
                           ? lang.isOriginal
                           : lang.isNotOriginal;
+                      var isDoubleSide = snapshot.data![index].doubleSided
+                          ? lang.isDoubleSided
+                          : lang.isNotDoubleSided;
+
                       return ListTile(
                         leading: CircleAvatar(
                           child: Text("${(index + 1)}"),
                         ),
                         title: Text("${snapshot.data![index].name}"),
-                        subtitle: Text("${isRequired} , ${isOriginal}"),
-                        trailing: IconButton(
-                          onPressed: () =>
-                              deleteDocument(snapshot.data![index], index),
-                          icon: Icon(
-                            Icons.delete,
-                          ),
-                        ),
+                        subtitle: Text(
+                            "${isRequired} , ${isOriginal} , ${isDoubleSide}"),
+                        trailing: widget.onChanged != null
+                            ? TextButton(
+                                onPressed: () async => await deleteDocument(
+                                    snapshot.data![index], index),
+                                child: Text(lang.delete),
+                              )
+                            : null,
                       );
                     },
                   );
@@ -90,40 +95,36 @@ class _DocumentsTableState extends BasicState<DocumentsTable>
   }
 
   @override
-  // TODO: implement notifiers
   List<ChangeNotifier> get notifiers => [];
 
   @override
-  // TODO: implement subjects
   List<Subject> get subjects => [];
 
-  deleteDocument(DocumentSpecInput documentSpecInput, int index) {
-    WidgetMixin.showDialog2(
-      context,
-      label: lang.confirm,
-      content: Text(lang.confirmDelete),
-      actions: <Widget>[
-        TextButton(
-          child: Text(lang.no.toUpperCase()),
-          onPressed: () => Navigator.of(context).pop(false),
-        ),
-        TextButton(
-          child: Text(lang.yes.toUpperCase()),
-          onPressed: () async {
-            var list = _listDocumentsStream.value;
-            list.removeAt(index);
-
-            _listDocumentsStream.add(list);
-            print(list.length);
-            if (list.isEmpty) {
-              await showSnackBar2(context, lang.noDocument);
-            }
-            widget.onChanged(_listDocumentsStream.value);
-
-            Navigator.of(context).pop(true);
-          },
-        )
-      ],
+  Future deleteDocument(DocumentSpecInput documentSpecInput, int index) {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.confirm),
+        content: Text(lang.confirmDelete),
+        actions: <Widget>[
+          TextButton(
+            child: Text(lang.no.toUpperCase()),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TextButton(
+            child: Text(lang.yes.toUpperCase()),
+            onPressed: () async {
+              var list = _listDocumentsStream.value;
+              list.removeAt(index);
+              _listDocumentsStream.add(list);
+              if (widget.onChanged != null) {
+                widget.onChanged!(_listDocumentsStream.value);
+              }
+              Navigator.of(context).pop(true);
+            },
+          )
+        ],
+      ),
     );
   }
 }

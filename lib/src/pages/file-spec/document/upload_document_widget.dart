@@ -62,7 +62,7 @@ class _UploadDocumentsWidgetState extends BasicState<UploadDocumentsWidget> {
                   return ListTile(
                     leading: CircleAvatar(child: Text("${(index + 1)}")),
                     title: Text(
-                      " ${widget.filesSpec.documents[index].name} ",
+                      " ${pathDocumentsStream.value[index].nameDocument} ",
                       maxLines: 50,
                     ),
                     subtitle: Wrap(

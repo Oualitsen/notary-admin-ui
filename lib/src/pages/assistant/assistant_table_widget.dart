@@ -97,20 +97,22 @@ class AssistantTableWidgetState extends BasicState<AssistantTableWidget>
   @override
   List<Subject> get subjects => [];
   void deleteConfirmation(String assistantId) {
-    WidgetMixin.showDialog2(
-      context,
-      label: lang.confirm,
-      content: Text(lang.confirmDelete),
-      actions: <Widget>[
-        TextButton(
-          child: Text(lang.no.toUpperCase()),
-          onPressed: () => Navigator.of(context).pop(false),
-        ),
-        TextButton(
-          child: Text(lang.yes.toUpperCase()),
-          onPressed: (() => delete(assistantId)),
-        ),
-      ],
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.confirm),
+        content: Text(lang.confirmDelete),
+        actions: <Widget>[
+          TextButton(
+            child: Text(lang.no.toUpperCase()),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TextButton(
+            child: Text(lang.yes.toUpperCase()),
+            onPressed: (() => delete(assistantId)),
+          ),
+        ],
+      ),
     );
   }
 

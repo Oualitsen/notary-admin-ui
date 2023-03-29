@@ -11,6 +11,7 @@ import 'package:notary_admin/src/services/admin/template_document_service.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
 import 'package:notary_admin/src/services/files/files_service.dart';
 import 'package:notary_admin/src/services/upload_service.dart';
+import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget.dart';
@@ -104,18 +105,17 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                             SizedBox(
                               height: 20,
                             ),
-                            TextFormField(
-                                readOnly: true,
+                            wrapInIgnorePointer(
+                              child: TextFormField(
                                 controller: _selectFileSpecCtrl,
                                 decoration: getDecoration(lang.selectFileSpec,
                                     true, lang.selectFileSpec),
-                                onTap: selectFileSpec,
-                                validator: (String? value) {
-                                  if (value == null || value.isEmpty) {
-                                    return lang.requiredField;
-                                  }
-                                  return null;
-                                }),
+                                validator: (text) =>
+                                    ValidationUtils.requiredField(
+                                        text, context),
+                              ),
+                              onTap: selectFileSpec,
+                            ),
                             SizedBox(
                               height: 20,
                             ),
@@ -278,16 +278,10 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                               if (snapshot.hasData == false) {
                                 return SizedBox.shrink();
                               }
-                              return ButtonBar(
-                                children: [
-                                  ElevatedButton(
-                                      onPressed: previous,
-                                      child: Text(lang.previous)),
-                                  ElevatedButton(
-                                      onPressed:
-                                          snapshot.data! ? continued : null,
-                                      child: Text(lang.submit.toUpperCase())),
-                                ],
+                              return getButtons(
+                                onSave: snapshot.data! ? continued : null,
+                                saveLabel: lang.next,
+                                cancelLabel: lang.previous,
                               );
                             }),
                       ],
@@ -438,18 +432,17 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
         );
         var files = await serviceFiles.saveFiles(input);
 
-        if (_pathDocumentsStream.value.isNotEmpty &&
-            additionalDocumentsStream.value.isNotEmpty) {
+        if (_pathDocumentsStream.value.isNotEmpty) {
           await WidgetMixin.uploadFiles(
               context, files, _pathDocumentsStream.value);
+        }
+        if (additionalDocumentsStream.value.isNotEmpty) {
           await WidgetMixin.uploadAdditionalData(
               context, files, additionalDocumentsStream.value);
-          await showSnackBar2(context, lang.createdsuccssfully);
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => ListFilesCustomer()));
-        } else {
-          showSnackBar2(context, "error");
         }
+        await showSnackBar2(context, lang.createdsuccssfully);
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => ListFilesCustomer()));
       }
     } catch (error, stackTrace) {
       print(stackTrace);

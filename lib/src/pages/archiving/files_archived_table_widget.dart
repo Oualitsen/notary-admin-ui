@@ -175,30 +175,32 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
   }
 
   deleteFiles(FilesArchive data) {
-    WidgetMixin.showDialog2(
-      context,
-      label: lang.confirm,
-      content: Text(lang.confirmDelete),
-      actions: <Widget>[
-        TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: Text(lang.no.toUpperCase())),
-        TextButton(
-            onPressed: () async {
-              try {
-                await archiveService.delete(data.id);
-              } catch (error, stacktrace) {
-                showServerError(context, error: error);
-                print(stacktrace);
-              }
-              Navigator.of(context).pop(true);
-              tableKey.currentState?.refreshPage();
-              await showSnackBar2(context, lang.delete);
-            },
-            child: Text(lang.yes.toUpperCase())),
-      ],
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.confirm),
+        content: Text(lang.confirmDelete),
+        actions: <Widget>[
+          TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: Text(lang.no.toUpperCase())),
+          TextButton(
+              onPressed: () async {
+                try {
+                  await archiveService.delete(data.id);
+                } catch (error, stacktrace) {
+                  showServerError(context, error: error);
+                  print(stacktrace);
+                }
+                Navigator.of(context).pop(true);
+                tableKey.currentState?.refreshPage();
+                await showSnackBar2(context, lang.delete);
+              },
+              child: Text(lang.yes.toUpperCase())),
+        ],
+      ),
     );
   }
 

@@ -302,7 +302,7 @@ class _WidgetDocumentPickedState extends BasicState<WidgetDocumentPicked>
               MaterialPageRoute(
                   builder: (BuildContext) => ListFilesCustomer()));
         } else {
-          await showSnackBar2(context, lang.noDocument);
+          showSnackBar2(context, lang.noDocument);
         }
       } else {
         if (pathDocumentsUpdateStream.value.isNotEmpty) {
@@ -318,7 +318,7 @@ class _WidgetDocumentPickedState extends BasicState<WidgetDocumentPicked>
               MaterialPageRoute(
                   builder: (BuildContext) => ListFilesCustomer()));
         } else {
-          await showSnackBar2(context, lang.noDocument);
+          showSnackBar2(context, lang.noDocument);
         }
       }
     } catch (error, stackTrace) {
@@ -345,7 +345,7 @@ class _WidgetDocumentPickedState extends BasicState<WidgetDocumentPicked>
               MaterialPageRoute(
                   builder: (BuildContext) => ListFilesCustomer()));
         } else {
-          await showSnackBar2(context, lang.noDocument);
+          showSnackBar2(context, lang.noDocument);
         }
       } else {
         if (pathDocumentsUpdateStream.value.isNotEmpty) {
@@ -360,7 +360,7 @@ class _WidgetDocumentPickedState extends BasicState<WidgetDocumentPicked>
               MaterialPageRoute(
                   builder: (BuildContext) => ListFilesCustomer()));
         } else {
-          await showSnackBar2(context, lang.noDocument);
+          showSnackBar2(context, lang.noDocument);
         }
       }
     } catch (error, stackTrace) {
@@ -410,36 +410,38 @@ class _WidgetDocumentPickedState extends BasicState<WidgetDocumentPicked>
   List<Subject> get subjects => throw UnimplementedError();
 
   delete(PathsDocuments pathsDocuments, int index) {
-    WidgetMixin.showDialog2(
-      context,
-      label: lang.confirm,
-      content: Text(lang.confirmDelete),
-      actions: [
-        TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: Text(lang.no.toUpperCase())),
-        TextButton(
-            onPressed: () {
-              var list = pathDocumentsStream.value;
-              list.removeAt(index);
-              list.insert(
-                  index,
-                  addPathDocument(
-                    files.specification.documents[index].id,
-                    null,
-                    false,
-                    '',
-                    '',
-                    null,
-                  ));
-              pathDocumentsStream.add(list);
-              allUploaded(false);
-              Navigator.of(context).pop(true);
-            },
-            child: Text(lang.confirm.toUpperCase())),
-      ],
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.confirm),
+        content: Text(lang.confirmDelete),
+        actions: [
+          TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: Text(lang.no.toUpperCase())),
+          TextButton(
+              onPressed: () {
+                var list = pathDocumentsStream.value;
+                list.removeAt(index);
+                list.insert(
+                    index,
+                    addPathDocument(
+                      files.specification.documents[index].id,
+                      null,
+                      false,
+                      '',
+                      '',
+                      null,
+                    ));
+                pathDocumentsStream.add(list);
+                allUploaded(false);
+                Navigator.of(context).pop(true);
+              },
+              child: Text(lang.confirm.toUpperCase())),
+        ],
+      ),
     );
   }
 }

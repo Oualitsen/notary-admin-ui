@@ -129,12 +129,15 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
             var isOriginal = data.documents[index].original
                 ? lang.isOriginal
                 : lang.isNotOriginal;
+            var isDoubleSide = data.documents[index].doubleSided
+                ? lang.isDoubleSided
+                : lang.isNotDoubleSided;
             return ListTile(
               leading: CircleAvatar(
                 child: Text("${(index + 1)}"),
               ),
               title: Text("${data.documents[index].name}"),
-              subtitle: Text("${isRequired} , ${isOriginal}"),
+              subtitle: Text("${isRequired} , ${isOriginal} , ${isDoubleSide}"),
             );
           },
         ),
@@ -163,30 +166,32 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
   }
 
   deleteFileSpec(FilesSpec data) {
-    WidgetMixin.showDialog2(
-      context,
-      label: lang.confirm,
-      content: Text(lang.confirmDelete),
-      actions: <Widget>[
-        TextButton(
-          child: Text(lang.no.toUpperCase()),
-          onPressed: () => Navigator.of(context).pop(false),
-        ),
-        TextButton(
-          child: Text(lang.yes.toUpperCase()),
-          onPressed: () async {
-            try {
-              await service.deleteFileSpec(data.id);
-              Navigator.of(context).pop(true);
-              tableKey.currentState?.refreshPage();
-              await showSnackBar2(context, lang.delete);
-            } catch (error, stacktrace) {
-              showServerError(context, error: error);
-              print(stacktrace);
-            }
-          },
-        ),
-      ],
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.confirm),
+        content: Text(lang.confirmDelete),
+        actions: <Widget>[
+          TextButton(
+            child: Text(lang.no.toUpperCase()),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TextButton(
+            child: Text(lang.yes.toUpperCase()),
+            onPressed: () async {
+              try {
+                await service.deleteFileSpec(data.id);
+                Navigator.of(context).pop(true);
+                tableKey.currentState?.refreshPage();
+                await showSnackBar2(context, lang.delete);
+              } catch (error, stacktrace) {
+                showServerError(context, error: error);
+                print(stacktrace);
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 }

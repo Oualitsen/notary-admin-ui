@@ -5,14 +5,18 @@ import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:notary_admin/src/pages/customer/customer_selection_page.dart';
-import 'package:notary_admin/src/pages/file-spec/document/replace_document_widget.dart';
 import 'package:notary_admin/src/pages/templates/upload_template.dart';
 import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
+import 'package:notary_admin/src/services/admin/template_document_service.dart';
+import 'package:notary_admin/src/services/files/file_spec_service.dart';
 import 'package:notary_admin/src/services/files/files_archive_service.dart';
+import 'package:notary_admin/src/services/upload_service.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget.dart';
+import 'package:notary_admin/src/widgets/basic_state.dart';
+import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/customer.dart';
 import 'package:notary_model/model/files_archive.dart';
 import 'package:notary_model/model/files_archive_input.dart';
@@ -20,11 +24,6 @@ import 'package:notary_model/model/files_spec.dart';
 import 'package:notary_model/model/selection_type.dart';
 import 'package:notary_model/model/steps.dart';
 import 'package:rxdart/rxdart.dart';
-import '../../services/admin/template_document_service.dart';
-import '../../services/files/file_spec_service.dart';
-import '../../services/upload_service.dart';
-import '../../widgets/basic_state.dart';
-import '../../widgets/mixins/button_utils_mixin.dart';
 
 class AddArchivePage extends StatefulWidget {
   final DateTime? initDate;
@@ -91,7 +90,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
                 },
                 steps: <Step>[
                   Step(
-                    title: Text(lang.selectFileSpec.toUpperCase()),
+                    title: Text(lang.general.toUpperCase()),
                     content: Form(
                         key: _selectFileSpecKey,
                         child: Column(
@@ -234,7 +233,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
                   Step(
                     title: Row(
                       children: [
-                        Text(lang.addFiles.toUpperCase()),
+                        Text(lang.selectTemplate.toUpperCase()),
                         SizedBox(
                           width: 20,
                         ),
@@ -284,8 +283,9 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
                                       onPressed: previous,
                                       child: Text(lang.previous)),
                                   ElevatedButton(
-                                      onPressed: snapshot.data! ? save : null,
-                                      child: Text(lang.submit.toUpperCase())),
+                                      onPressed:
+                                          snapshot.data! ? continued : null,
+                                      child: Text(lang.next)),
                                 ],
                               );
                             }),
@@ -293,6 +293,34 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
                     ),
                     isActive: activeState == 3,
                     state: getState(3),
+                  ),
+                  Step(
+                    title: Row(
+                      children: [
+                        Text(lang.additionalDocuments.toUpperCase()),
+                        SizedBox(
+                          width: 20,
+                        ),
+                        StreamBuilder<int>(
+                            stream: _currentStepStream,
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData == false) {
+                                return SizedBox.shrink();
+                              }
+                              return ButtonBar(children: [
+                                ElevatedButton(
+                                  onPressed: snapshot.data == 4
+                                      ? uploadTemplate
+                                      : null,
+                                  child: Icon(Icons.add_outlined),
+                                ),
+                              ]);
+                            }),
+                      ],
+                    ),
+                    content: Container(height: 100),
+                    isActive: activeState == 4,
+                    state: getState(4),
                   ),
                 ],
               );
@@ -328,6 +356,11 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
         break;
 
       case 2:
+        if (_pathDocumentsStream.value.isNotEmpty) {
+          _currentStepStream.add(_currentStepStream.value + 1);
+        }
+        break;
+      case 3:
         if (_pathDocumentsStream.value.isNotEmpty) {
           _currentStepStream.add(_currentStepStream.value + 1);
         }

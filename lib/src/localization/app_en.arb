@@ -274,7 +274,6 @@
   "fileSpec": "Files specification",
   "createdFileSpec": "Creation date",
   "addFileSpec": "Add a specification files",
-  "nameFileSpec": "Specification folder name",
   "listDocumentsFileSpec": "Documents",
   "originalDocument": "Original document",
   "requiredDocument": "Required Document",
@@ -331,9 +330,9 @@
   "isNotOriginal": "Copy",
   "currentStep": "Current step",
   "isDoubleSided": "Double-sided",
+  "isNotDoubleSided": "Front-side only",
   "addArchive": "Add an archive",
   "completeTemplate": "Complete template",
   "noTemplateInstance": "No Document Generated",
   "additionalDocuments": "Additional documents"
-
 }
