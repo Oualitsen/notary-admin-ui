@@ -2,11 +2,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
-import 'package:notary_model/model/files_spec.dart';
+import 'package:notary_model/model/parts_spec.dart';
 import 'package:rxdart/rxdart.dart';
 
 class UploadDocumentsWidget extends StatefulWidget {
-  final FilesSpec filesSpec;
+  final PartsSpec partsSpec;
   final double width;
   final double height;
   final Function(List<PathsDocuments> pathDocuments) onNext;
@@ -15,7 +15,7 @@ class UploadDocumentsWidget extends StatefulWidget {
     this.height = 200,
     this.width = double.infinity,
     required this.onNext,
-    required this.filesSpec,
+    required this.partsSpec,
   });
 
   @override
@@ -31,7 +31,7 @@ class _UploadDocumentsWidgetState extends BasicState<UploadDocumentsWidget> {
     if (initialized) return;
     initialized = true;
 
-    var list = widget.filesSpec.documents
+    var list = widget.partsSpec.documentSpec
         .map(
           (e) => PathsDocuments(
             idDocument: e.id,
@@ -62,7 +62,7 @@ class _UploadDocumentsWidgetState extends BasicState<UploadDocumentsWidget> {
                   return ListTile(
                     leading: CircleAvatar(child: Text("${(index + 1)}")),
                     title: Text(
-                      " ${widget.filesSpec.documents[index].name} ",
+                      " ${pathDocumentsStream.value[index].nameDocument} ",
                       maxLines: 50,
                     ),
                     subtitle: Wrap(
@@ -127,11 +127,11 @@ class _UploadDocumentsWidgetState extends BasicState<UploadDocumentsWidget> {
                 TextButton(
                     onPressed: () {
                       var pathDoc = PathsDocuments(
-                        idDocument: widget.filesSpec.documents[index].id,
+                        idDocument: widget.partsSpec.documentSpec[index].id,
                         document: null,
                         selected: false,
                         namePickedDocument: "",
-                        nameDocument: widget.filesSpec.documents[index].name,
+                        nameDocument: widget.partsSpec.documentSpec[index].name,
                         path: null,
                       );
                       var list = pathDocumentsStream.value;
@@ -159,11 +159,11 @@ class _UploadDocumentsWidgetState extends BasicState<UploadDocumentsWidget> {
 
       if (pickedBytes != null || pickedPath != null) {
         var pathDoc = PathsDocuments(
-          idDocument: widget.filesSpec.documents[index].id,
+          idDocument: widget.partsSpec.documentSpec[index].id,
           document: pickedBytes,
           selected: true,
           namePickedDocument: namePickedFile,
-          nameDocument: widget.filesSpec.documents[index].name,
+          nameDocument: widget.partsSpec.documentSpec[index].name,
           path: pickedPath,
         );
         var list = pathDocumentsStream.value;

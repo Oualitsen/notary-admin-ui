@@ -11,7 +11,7 @@ mixin WidgetUtilsMixin<T extends StatefulWidget> on BasicState<T> {
 
   Widget getButtons({
     Function()? onCancel,
-    required Function() onSave,
+    required Function()? onSave,
     String? saveLabel,
     String? cancelLabel,
     Stream<bool>? progressStream,

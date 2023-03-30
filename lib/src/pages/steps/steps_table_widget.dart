@@ -88,43 +88,47 @@ class _StepsTableWidgetState extends BasicState<StepsTableWidget>
   List<Subject> get subjects => [];
 
   deleteSteps(String id) {
-    WidgetMixin.showDialog2(
-      context,
-      label: lang.confirm,
-      content: Text(lang.confirmDelete),
-      actions: <Widget>[
-        TextButton(
-          child: Text(lang.no.toUpperCase()),
-          onPressed: () => Navigator.of(context).pop(false),
-        ),
-        TextButton(
-            child: Text(lang.yes.toUpperCase()),
-            onPressed: () async {
-              try {
-                await service.delete(id);
-                Navigator.of(context).pop(true);
-                widget.tableKey?.currentState?.refreshPage();
-                await showSnackBar2(context, lang.delete);
-              } catch (error, stacktrace) {
-                showServerError(context, error: error);
-                print(stacktrace);
-              }
-            }),
-      ],
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.confirm),
+        content: Text(lang.confirmDelete),
+        actions: <Widget>[
+          TextButton(
+            child: Text(lang.no.toUpperCase()),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TextButton(
+              child: Text(lang.yes.toUpperCase()),
+              onPressed: () async {
+                try {
+                  await service.delete(id);
+                  Navigator.of(context).pop(true);
+                  widget.tableKey?.currentState?.refreshPage();
+                  await showSnackBar2(context, lang.delete);
+                } catch (error, stacktrace) {
+                  showServerError(context, error: error);
+                  print(stacktrace);
+                }
+              }),
+        ],
+      ),
     );
   }
 
   editSteps(Steps data, BuildContext context) async {
-    return WidgetMixin.showDialog2(
-      context,
-      label: lang.addSteps,
-      content: AddStepWidget(
-        step: data,
-        key: stepKey,
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.addSteps),
+        content: AddStepWidget(
+          step: data,
+          key: stepKey,
+        ),
+        actions: <Widget>[
+          getButtons(onSave: saveStep),
+        ],
       ),
-      actions: <Widget>[
-        getButtons(onSave: saveStep),
-      ],
     );
   }
 

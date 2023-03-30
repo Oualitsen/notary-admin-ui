@@ -33,7 +33,8 @@ class _ReplaceDocumentWidgetState extends BasicState<ReplaceDocumentWidget>
   void init() {
     if (initialized) return;
     initialized = true;
-    var pathDocumentsList = widget.files.specification.documents.map((e) {
+    var pathDocumentsList =
+        widget.files.specification.partsSpecs[0].documentSpec.map((e) {
       return UpdateDocuments(
           pathDocument: PathsDocuments(
         idDocument: e.id,
@@ -68,7 +69,7 @@ class _ReplaceDocumentWidgetState extends BasicState<ReplaceDocumentWidget>
                     return ListTile(
                       leading: CircleAvatar(child: Text("${(index + 1)}")),
                       title: Text(
-                        " ${widget.files.specification.documents[index].name} ",
+                        " ${widget.files.specification.partsSpecs[0].documentSpec[index].name} ",
                         softWrap: true,
                       ),
                       subtitle: Wrap(
@@ -148,11 +149,13 @@ class _ReplaceDocumentWidgetState extends BasicState<ReplaceDocumentWidget>
         var list = updateDocumentsStream.value;
         if (updateDocumentsStream.value.asMap().containsKey(index)) {
           var pathDoc = PathsDocuments(
-            idDocument: widget.files.specification.documents[index].id,
+            idDocument:
+                widget.files.specification.partsSpecs[0].documentSpec[index].id,
             document: pickedBytes,
             selected: true,
             namePickedDocument: namePickedFile,
-            nameDocument: widget.files.specification.documents[index].name,
+            nameDocument: widget
+                .files.specification.partsSpecs[0].documentSpec[index].name,
             path: pickedPath,
           );
           var updatePathDoc = UpdateDocuments(

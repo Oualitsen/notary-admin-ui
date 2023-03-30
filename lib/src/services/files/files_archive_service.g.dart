@@ -182,7 +182,7 @@ class _FilesArchiveService implements FilesArchiveService {
     )
             .compose(
               _dio.options,
-              '/admin/archive/archive-date',
+              '/admin/archive/date',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -212,35 +212,12 @@ class _FilesArchiveService implements FilesArchiveService {
     )
         .compose(
           _dio.options,
-          '/admin/archive/archive-date/count',
+          '/admin/archive/date/count',
           queryParameters: queryParameters,
           data: _data,
         )
         .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
     final value = _result.data!;
-    return value;
-  }
-
-  @override
-  Future<PrintedDoc> getPrintedDocsById(archiveId) async {
-    const _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<PrintedDoc>(Options(
-      method: 'GET',
-      headers: _headers,
-      extra: _extra,
-    )
-            .compose(
-              _dio.options,
-              '/admin/archive/printed-doc/${archiveId}',
-              queryParameters: queryParameters,
-              data: _data,
-            )
-            .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
-    final value = PrintedDoc.fromJson(_result.data!);
     return value;
   }
 

@@ -69,14 +69,15 @@
     "isOriginal",
     "isNotOriginal",
     "currentStep",
-
     "isDoubleSided",
-
+    "isNotDoubleSided",
     "addArchive",
     "completeTemplate",
     "noTemplateInstance",
-    "additionalDocuments"
-
+    "additionalDocuments",
+    "addDocumentsSpec",
+    "part",
+    "listPart"
   ],
 
   "fr": [
@@ -149,13 +150,14 @@
     "isOriginal",
     "isNotOriginal",
     "currentStep",
-
     "isDoubleSided",
-
+    "isNotDoubleSided",
     "addArchive",
     "completeTemplate",
     "noTemplateInstance",
-    "additionalDocuments"
-
+    "additionalDocuments",
+    "addDocumentsSpec",
+    "part",
+    "listPart"
   ]
 }

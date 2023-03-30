@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:notary_admin/src/pages/archiving/add_archive_page.dart';
-import 'package:notary_admin/src/pages/archiving/files_archived_list.dart';
 import 'package:notary_admin/src/pages/archiving/files_archived_table_widget.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';

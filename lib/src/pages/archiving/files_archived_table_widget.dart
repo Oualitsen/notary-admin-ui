@@ -72,7 +72,9 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
                                 AddArchivePage(
                                   initDate: DateTime.fromMillisecondsSinceEpoch(
                                       widget.startDate),
-                                ));
+                                )).listen((_) {
+                              tableKey.currentState?.refreshPage();
+                            });
                           }
                         : null,
                 child: Text(lang.addFiles),
@@ -122,8 +124,7 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
           onPressed: () => customerDetails(data),
           child: Text(lang.customerList))),
       DataCell(
-        TextButton(
-            child: Text(lang.print), onPressed: (() => onPrint(data.id))),
+        TextButton(child: Text(lang.print), onPressed: null),
       ),
       DataCell(
         TextButton(
@@ -146,17 +147,6 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
   @override
   List<Subject> get subjects => [];
 
-  void onPrint(String id) async {
-    try {
-      var doc = await archiveService.getPrintedDocsById(id);
-      push(context, PrintedDocViewHtml(title: doc.name, text: doc.htmlData));
-    } catch (error, stacktrace) {
-      showServerError(context, error: error);
-      print(stacktrace);
-      throw (error);
-    }
-  }
-
   customerDetails(FilesArchive data) async {
     try {
       WidgetMixin.showDialog2(
@@ -175,30 +165,32 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
   }
 
   deleteFiles(FilesArchive data) {
-    WidgetMixin.showDialog2(
-      context,
-      label: lang.confirm,
-      content: Text(lang.confirmDelete),
-      actions: <Widget>[
-        TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: Text(lang.no.toUpperCase())),
-        TextButton(
-            onPressed: () async {
-              try {
-                await archiveService.delete(data.id);
-              } catch (error, stacktrace) {
-                showServerError(context, error: error);
-                print(stacktrace);
-              }
-              Navigator.of(context).pop(true);
-              tableKey.currentState?.refreshPage();
-              await showSnackBar2(context, lang.delete);
-            },
-            child: Text(lang.yes.toUpperCase())),
-      ],
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.confirm),
+        content: Text(lang.confirmDelete),
+        actions: <Widget>[
+          TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: Text(lang.no.toUpperCase())),
+          TextButton(
+              onPressed: () async {
+                try {
+                  await archiveService.delete(data.id);
+                } catch (error, stacktrace) {
+                  showServerError(context, error: error);
+                  print(stacktrace);
+                }
+                Navigator.of(context).pop(true);
+                tableKey.currentState?.refreshPage();
+                await showSnackBar2(context, lang.delete);
+              },
+              child: Text(lang.yes.toUpperCase())),
+        ],
+      ),
     );
   }
 
@@ -209,25 +201,32 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
       content: Container(
         height: 400,
         width: 400,
-        child: data.specification.documents.length == 0
-            ? ListTile(title: Text(lang.noDocument.toUpperCase()))
-            : ListView.builder(
-                itemCount: data.specification.documents.length,
-                itemBuilder: (context, int index) {
-                  var isRequired = data.specification.documents[index].optional
-                      ? lang.isNotRequired
-                      : lang.isNotRequired;
-                  var isOriginal = data.specification.documents[index].original
-                      ? lang.isOriginal
-                      : lang.isNotOriginal;
-                  return ListTile(
-                    leading: CircleAvatar(
-                      child: Text("${(index + 1)}"),
-                    ),
-                    title: Text("${data.specification.documents[index].name}"),
-                    subtitle: Text("${isRequired} , ${isOriginal}"),
-                  );
-                }),
+        child: Text("To Be Done Archived Files"),
+        //data.specification.documents.length == 0
+        //  ? ListTile(title: Text(lang.noDocument.toUpperCase()))
+        // : ListView.builder(
+        //     itemCount: data.specification.documents.length,
+        //     itemBuilder: (context, int index) {
+        //       var isRequired = data.specification.documents[index].optional
+        //           ? lang.isNotRequired
+        //           : lang.isNotRequired;
+        //       var isOriginal = data.specification.documents[index].original
+        //           ? lang.isOriginal
+        //           : lang.isNotOriginal;
+        //       var isDoubleSide =
+        //           data.specification.documents[index].doubleSided
+        //               ? lang.isDoubleSided
+        //               : lang.isNotDoubleSided;
+
+        //       return ListTile(
+        //         leading: CircleAvatar(
+        //           child: Text("${(index + 1)}"),
+        //         ),
+        //         title: Text("${data.specification.documents[index].name}"),
+        //         subtitle:
+        //             Text("${isRequired} , ${isOriginal} , ${isDoubleSide}"),
+        //       );
+        //     }),
       ),
     );
   }

@@ -14,7 +14,6 @@ import 'package:notary_model/model/files.dart';
 import 'package:notary_model/model/steps.dart';
 import 'package:rxdart/subjects.dart';
 
-
 class FilesTableWidget extends StatefulWidget {
   final GlobalKey? tableKey;
 
@@ -82,7 +81,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
     return filesService.getFilesAll(
         pageIndex: page.pageIndex, pageSize: page.pageSize);
   }
- 
+
   Future<int> getTotal() {
     return filesService.getFilesCount();
   }
@@ -93,11 +92,12 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
       DataCell(Text(data.number)),
       DataCell(Text(data.specification.name)),
       DataCell(
-        TextButton(
-          onPressed: (() => updateCurrentStep(data)),
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
           child: Text(data.currentStep.name),
         ),
         showEditIcon: true,
+        onTap: (() => updateCurrentStep(data)),
       ),
       DataCell(TextButton(
           onPressed: () => customerDetails(data),
@@ -108,10 +108,12 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
             onPressed: (() => onPrint(data.printedDocId))),
       ),
       DataCell(
-          TextButton(
-              onPressed: () => updateDocumentFolderCustomer(data),
-              child: Text(lang.listDocumentsFileSpec)),
-          showEditIcon: true),
+        Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: Text(lang.listDocumentsFileSpec)),
+        showEditIcon: true,
+        onTap: () => updateDocumentFolderCustomer(data),
+      ),
       DataCell(TextButton(
           onPressed: () => deleteFiles(data), child: Text(lang.delete))),
       DataCell(TextButton(
@@ -160,34 +162,36 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
     );
   }
 
-  Future<void> confirmStep(String id, Steps newStep) async {
-    return WidgetMixin.showDialog2(
-      context,
-      label: lang.confirm,
-      content: Text(lang.confirmChangingState),
-      actions: <Widget>[
-        TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: Text(lang.no.toUpperCase())),
-        TextButton(
-            onPressed: () async {
-              try {
-                progressSubject.add(true);
-                await filesService.updateCurrentStep(id, newStep);
-                tableKey.currentState?.refreshPage();
-                Navigator.of(context).pop(true);
-                await showSnackBar2(context, lang.updatedSuccessfully);
-              } catch (error, stacktrace) {
-                showServerError(context, error: error);
-                print(stacktrace);
-              } finally {
-                progressSubject.add(false);
-              }
-            },
-            child: Text(lang.yes.toUpperCase())),
-      ],
+  Future confirmStep(String id, Steps newStep) async {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.confirm),
+        content: Text(lang.confirmChangingState),
+        actions: <Widget>[
+          TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: Text(lang.no.toUpperCase())),
+          TextButton(
+              onPressed: () async {
+                try {
+                  progressSubject.add(true);
+                  await filesService.updateCurrentStep(id, newStep);
+                  tableKey.currentState?.refreshPage();
+                  Navigator.of(context).pop(true);
+                  await showSnackBar2(context, lang.updatedSuccessfully);
+                } catch (error, stacktrace) {
+                  showServerError(context, error: error);
+                  print(stacktrace);
+                } finally {
+                  progressSubject.add(false);
+                }
+              },
+              child: Text(lang.yes.toUpperCase())),
+        ],
+      ),
     );
   }
 
@@ -232,52 +236,56 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   }
 
   archiveFiles(Files data) {
-    WidgetMixin.showDialog2(
-      context,
-      label: lang.confirm,
-      content: Text(lang.confirmArchiveFiles),
-      actions: <Widget>[
-        TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: Text(lang.no.toUpperCase())),
-        TextButton(
-            onPressed: () async {
-              await archive(data);
-              Navigator.of(context).pop(true);
-              tableKey.currentState?.refreshPage();
-            },
-            child: Text(lang.yes.toUpperCase())),
-      ],
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.confirm),
+        content: Text(lang.confirmArchiveFiles),
+        actions: <Widget>[
+          TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: Text(lang.no.toUpperCase())),
+          TextButton(
+              onPressed: () async {
+                await archive(data);
+                Navigator.of(context).pop(true);
+                tableKey.currentState?.refreshPage();
+              },
+              child: Text(lang.yes.toUpperCase())),
+        ],
+      ),
     );
   }
 
   deleteFiles(Files data) {
-    WidgetMixin.showDialog2(
-      context,
-      label: lang.confirm,
-      content: Text(lang.confirmDelete),
-      actions: <Widget>[
-        TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: Text(lang.no.toUpperCase())),
-        TextButton(
-            onPressed: () async {
-              try {
-                await filesService.deleteFile(data.id);
-              } catch (error, stacktrace) {
-                showServerError(context, error: error);
-                print(stacktrace);
-              }
-              Navigator.of(context).pop(true);
-              tableKey.currentState?.refreshPage();
-              await showSnackBar2(context, lang.delete);
-            },
-            child: Text(lang.yes.toUpperCase())),
-      ],
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.confirm),
+        content: Text(lang.confirmDelete),
+        actions: <Widget>[
+          TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: Text(lang.no.toUpperCase())),
+          TextButton(
+              onPressed: () async {
+                try {
+                  await filesService.deleteFile(data.id);
+                } catch (error, stacktrace) {
+                  showServerError(context, error: error);
+                  print(stacktrace);
+                }
+                Navigator.of(context).pop(true);
+                tableKey.currentState?.refreshPage();
+                await showSnackBar2(context, lang.delete);
+              },
+              child: Text(lang.yes.toUpperCase())),
+        ],
+      ),
     );
   }
 
