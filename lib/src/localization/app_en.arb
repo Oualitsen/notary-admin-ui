@@ -334,5 +334,8 @@
   "addArchive": "Add an archive",
   "completeTemplate": "Complete template",
   "noTemplateInstance": "No Document Generated",
-  "additionalDocuments": "Additional documents"
+  "additionalDocuments": "Additional documents",
+  "addDocumentsSpec": "Add documents",
+  "part": "Part",
+  "listPart": "Parts"
 }

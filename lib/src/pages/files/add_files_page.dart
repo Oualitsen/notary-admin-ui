@@ -211,7 +211,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                               return SizedBox(
                                 height: 200,
                                 child: UploadDocumentsWidget(
-                                  filesSpec: snapshot.data!,
+                                  partsSpec: snapshot.data!.partsSpecs[0],
                                   onNext: (pathDocuments) =>
                                       _pathDocumentsStream.add(pathDocuments),
                                 ),
@@ -423,7 +423,6 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
         var input = FilesInput(
           id: null,
           number: _numberFileCtrl.text,
-          imageIds: [],
           customerIds: listCustomersIds,
           uploadedFiles: [],
           specification: _filesSpecStream.value,

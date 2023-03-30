@@ -10,6 +10,7 @@ import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_model/model/document_spec_input.dart';
 import 'package:notary_model/model/files_spec.dart';
+import 'package:notary_model/model/parts_spec.dart';
 import 'package:notary_model/model/step_input.dart';
 import 'package:rxdart/rxdart.dart';
 import '../../widgets/mixins/button_utils_mixin.dart';
@@ -72,7 +73,7 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
       DataCell(
         TextButton(
           onPressed: () => documentList(context, data),
-          child: Text(lang.listDocumentsFileSpec),
+          child: Text(lang.listPart),
         ),
       ),
       DataCell(
@@ -116,28 +117,18 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
   void documentList(BuildContext context, FilesSpec data) {
     WidgetMixin.showDialog2(
       context,
-      label: lang.listDocumentsFileSpec,
+      label: lang.listPart,
       content: Container(
         height: 400,
         width: 400,
         child: ListView.builder(
-          itemCount: data.documents.length,
-          itemBuilder: (context, int index) {
-            var isRequired = data.documents[index].optional
-                ? lang.isNotRequired
-                : lang.isNotRequired;
-            var isOriginal = data.documents[index].original
-                ? lang.isOriginal
-                : lang.isNotOriginal;
-            var isDoubleSide = data.documents[index].doubleSided
-                ? lang.isDoubleSided
-                : lang.isNotDoubleSided;
+          itemCount: data.partsSpecs.length,
+          itemBuilder: (context, index) {
             return ListTile(
-              leading: CircleAvatar(
-                child: Text("${(index + 1)}"),
-              ),
-              title: Text("${data.documents[index].name}"),
-              subtitle: Text("${isRequired} , ${isOriginal} , ${isDoubleSide}"),
+              leading: CircleAvatar(child: Text("${(index + 1)}")),
+              title: Text("${data.partsSpecs[index].name}"),
+              trailing: Icon(Icons.arrow_forward),
+              onTap: (() => showDocuments(data.partsSpecs[index])),
             );
           },
         ),
@@ -191,6 +182,38 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
             },
           ),
         ],
+      ),
+    );
+  }
+
+  showDocuments(PartsSpec data) {
+    WidgetMixin.showDialog2(
+      context,
+      label: lang.listDocumentsFileSpec,
+      content: Container(
+        height: 250,
+        width: 300,
+        child: ListView.builder(
+          itemCount: data.documentSpec.length,
+          itemBuilder: (context, int index) {
+            var isRequired = data.documentSpec[index].optional
+                ? lang.isNotRequired
+                : lang.isNotRequired;
+            var isOriginal = data.documentSpec[index].original
+                ? lang.isOriginal
+                : lang.isNotOriginal;
+            var isDoubleSide = data.documentSpec[index].doubleSided
+                ? lang.isDoubleSided
+                : lang.isNotDoubleSided;
+            return ListTile(
+              leading: CircleAvatar(
+                child: Text("${(index + 1)}"),
+              ),
+              title: Text("${data.documentSpec[index].name}"),
+              subtitle: Text("${isRequired} , ${isOriginal} , ${isDoubleSide}"),
+            );
+          },
+        ),
       ),
     );
   }

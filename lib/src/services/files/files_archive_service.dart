@@ -1,14 +1,6 @@
-import 'dart:typed_data';
-
 import 'package:dio/dio.dart';
-import 'package:notary_model/model/customer.dart';
-import 'package:notary_model/model/documents.dart';
-import 'package:notary_model/model/files.dart';
 import 'package:notary_model/model/files_archive.dart';
 import 'package:notary_model/model/files_archive_input.dart';
-import 'package:notary_model/model/files_input.dart';
-import 'package:notary_model/model/printed_doc.dart';
-import 'package:notary_model/model/steps.dart';
 import 'package:retrofit/retrofit.dart';
 
 part 'files_archive_service.g.dart';
@@ -23,6 +15,10 @@ abstract class FilesArchiveService {
   @POST("/admin/archive")
   Future<FilesArchive> saveFilesArchive(@Body() FilesArchiveInput input);
 
+  // @POST("/admin/archive/upload/document/{id}")
+  // Future<FilesArchive> uploadScannedDocument(
+  //     @Path("id") String id, @Query("data") MultipartFile data);
+
   @GET("/admin/archive/{id}")
   Future<FilesArchive> getFileArchiveById(@Path("id") String id);
 
@@ -35,16 +31,11 @@ abstract class FilesArchiveService {
   @DELETE("/admin/archive/{id}")
   Future<void> delete(@Path("id") String id);
 
-  @GET("/admin/archive/archive-date")
+  @GET("/admin/archive/date")
   Future<List<FilesArchive>> getFilesArchiveByDate(
       @Query("startDate") int startDate, @Query("endDate") int endDate);
 
-  @GET("/admin/archive/archive-date/count")
+  @GET("/admin/archive/date/count")
   Future<int> getCountFilesArchiveByDate(
       @Query("startDate") int startDate, @Query("endDate") int endDate);
-
-  @GET("/admin/archive/printed-doc/{archiveId}")
-  Future<PrintedDoc> getPrintedDocsById(
-    @Path("archiveId") String archiveId,
-  );
 }
