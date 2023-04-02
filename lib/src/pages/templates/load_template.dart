@@ -91,30 +91,32 @@ class _LoadTemplatePageState extends BasicState<LoadTemplatePage>
 
   Future<String?> showTextInputDialog(
       BuildContext context, TemplateDocument file) async {
-    return WidgetMixin.showDialog2<String>(
-      context,
-      label: lang.editFileName,
-      content: Form(
-        key: fileNameKey,
-        child: TextFormField(
-          controller: templateNameCrtl,
-          autofocus: true,
-          textInputAction: TextInputAction.next,
-          validator: (text) {
-            return ValidationUtils.requiredField(text, context);
-          },
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.editFileName),
+        content: Form(
+          key: fileNameKey,
+          child: TextFormField(
+            controller: templateNameCrtl,
+            autofocus: true,
+            textInputAction: TextInputAction.next,
+            validator: (text) {
+              return ValidationUtils.requiredField(text, context);
+            },
+          ),
         ),
+        actions: <Widget>[
+          getButtons(
+            onSave: () {
+              if (fileNameKey.currentState?.validate() ?? false) {
+                Navigator.of(context).pop(templateNameCrtl.text);
+                templateNameCrtl.clear();
+              }
+            },
+          )
+        ],
       ),
-      actions: <Widget>[
-        getButtons(
-          onSave: () {
-            if (fileNameKey.currentState?.validate() ?? false) {
-              Navigator.of(context).pop(templateNameCrtl.text);
-              templateNameCrtl.clear();
-            }
-          },
-        )
-      ],
     );
   }
 

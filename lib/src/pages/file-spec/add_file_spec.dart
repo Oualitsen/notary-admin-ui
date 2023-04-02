@@ -74,7 +74,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
     return WidgetUtils.wrapRoute(
       (context, type) => Scaffold(
         appBar: AppBar(
-          title: Text(lang.addFileSpec),
+          title: Text(lang.addPart),
         ),
         body: StreamBuilder<int>(
           stream: _currentStepStream,

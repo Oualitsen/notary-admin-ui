@@ -77,7 +77,8 @@
     "additionalDocuments",
     "addDocumentsSpec",
     "part",
-    "listPart"
+    "listPart",
+    "addPart"
   ],
 
   "fr": [
@@ -158,6 +159,7 @@
     "additionalDocuments",
     "addDocumentsSpec",
     "part",
-    "listPart"
+    "listPart",
+    "addPart"
   ]
 }

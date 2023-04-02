@@ -2,27 +2,24 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
+import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
+import 'package:notary_model/model/document_spec.dart';
 import 'package:notary_model/model/parts_spec.dart';
 import 'package:rxdart/rxdart.dart';
 
 class UploadDocumentsWidget extends StatefulWidget {
-  final PartsSpec partsSpec;
-  final double width;
-  final double height;
-  final Function(List<PathsDocuments> pathDocuments) onNext;
+  final List<PathsDocuments> pathDocuments;
   UploadDocumentsWidget({
     super.key,
-    this.height = 200,
-    this.width = double.infinity,
-    required this.onNext,
-    required this.partsSpec,
+    required this.pathDocuments,
   });
 
   @override
   State<UploadDocumentsWidget> createState() => _UploadDocumentsWidgetState();
 }
 
-class _UploadDocumentsWidgetState extends BasicState<UploadDocumentsWidget> {
+class _UploadDocumentsWidgetState extends BasicState<UploadDocumentsWidget>
+    with WidgetUtilsMixin {
   final pathDocumentsStream = BehaviorSubject.seeded(<PathsDocuments>[]);
   bool isAllUploaded = false;
   bool initialized = false;
@@ -31,85 +28,85 @@ class _UploadDocumentsWidgetState extends BasicState<UploadDocumentsWidget> {
     if (initialized) return;
     initialized = true;
 
-    var list = widget.partsSpec.documentSpec
-        .map(
-          (e) => PathsDocuments(
-            idDocument: e.id,
-            document: null,
-            selected: false,
-            namePickedDocument: null,
-            path: null,
-            nameDocument: e.name,
-          ),
-        )
-        .toList();
+    var list = widget.pathDocuments;
+
     pathDocumentsStream.add(list);
   }
 
   @override
   Widget build(BuildContext context) {
     init();
-    return StreamBuilder<List<PathsDocuments>>(
-        stream: pathDocumentsStream,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) return SizedBox.shrink();
-          return Container(
-            height: widget.height,
-            width: widget.width,
-            child: ListView.builder(
-                itemCount: pathDocumentsStream.value.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return ListTile(
-                    leading: CircleAvatar(child: Text("${(index + 1)}")),
-                    title: Text(
-                      " ${pathDocumentsStream.value[index].nameDocument} ",
-                      maxLines: 50,
-                    ),
-                    subtitle: Wrap(
-                      children: [
-                        pathDocumentsStream.value[index].selected == true
-                            ? Text(
-                                pathDocumentsStream
-                                    .value[index].namePickedDocument!,
-                                softWrap: true,
-                              )
-                            : Text(lang.noUpload),
-                        StreamBuilder<double>(
-                            stream: pathDocumentsStream.value[index].progress,
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) {
-                                return SizedBox.shrink();
-                              }
-                              return Wrap(
-                                children: [
-                                  SizedBox(width: 5),
-                                  Text("${snapshot.data} %"),
-                                ],
-                              );
-                            }),
-                      ],
-                    ),
-                    trailing: Wrap(
-                      direction: Axis.horizontal,
-                      alignment: WrapAlignment.end,
-                      spacing: 10,
-                      children: [
-                        pathDocumentsStream.value[index].selected == true
-                            ? OutlinedButton(
-                                onPressed: () => _delete(index),
-                                child: Text(lang.delete),
-                              )
-                            : SizedBox.shrink(),
-                        ElevatedButton(
-                          child: Text(lang.uploadFile),
-                          onPressed: () => pickFile(index),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
-          );
-        });
+    return Scaffold(
+      appBar: AppBar(title: Text("${lang.listDocumentsFileSpec}")),
+      body: StreamBuilder<List<PathsDocuments>>(
+          stream: pathDocumentsStream,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return SizedBox.shrink();
+            return Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                      itemCount: pathDocumentsStream.value.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return ListTile(
+                          leading: CircleAvatar(child: Text("${(index + 1)}")),
+                          title: Text(
+                            " ${pathDocumentsStream.value[index].nameDocument} ",
+                            maxLines: 50,
+                          ),
+                          subtitle: Wrap(
+                            children: [
+                              pathDocumentsStream.value[index].selected == true
+                                  ? Text(
+                                      pathDocumentsStream
+                                          .value[index].namePickedDocument!,
+                                      softWrap: true,
+                                    )
+                                  : Text(lang.noUpload),
+                              StreamBuilder<double>(
+                                  stream:
+                                      pathDocumentsStream.value[index].progress,
+                                  builder: (context, snapshot) {
+                                    if (!snapshot.hasData) {
+                                      return SizedBox.shrink();
+                                    }
+                                    return Wrap(
+                                      children: [
+                                        SizedBox(width: 5),
+                                        Text("${snapshot.data} %"),
+                                      ],
+                                    );
+                                  }),
+                            ],
+                          ),
+                          trailing: Wrap(
+                            direction: Axis.horizontal,
+                            alignment: WrapAlignment.end,
+                            spacing: 10,
+                            children: [
+                              pathDocumentsStream.value[index].selected == true
+                                  ? OutlinedButton(
+                                      onPressed: () => _delete(index),
+                                      child: Text(lang.delete),
+                                    )
+                                  : SizedBox.shrink(),
+                              ElevatedButton(
+                                child: Text(lang.uploadFile),
+                                onPressed: () => pickFile(index),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: getButtons(onSave: onSave),
+                )
+              ],
+            );
+          }),
+    );
   }
 
   _delete(int index) {
@@ -127,19 +124,18 @@ class _UploadDocumentsWidgetState extends BasicState<UploadDocumentsWidget> {
                 TextButton(
                     onPressed: () {
                       var pathDoc = PathsDocuments(
-                        idDocument: widget.partsSpec.documentSpec[index].id,
+                        idParts: widget.pathDocuments[index].idParts,
+                        idDocument: widget.pathDocuments[index].idDocument,
                         document: null,
                         selected: false,
-                        namePickedDocument: "",
-                        nameDocument: widget.partsSpec.documentSpec[index].name,
+                        namePickedDocument: null,
+                        nameDocument: widget.pathDocuments[index].nameDocument,
                         path: null,
                       );
                       var list = pathDocumentsStream.value;
                       list.removeAt(index);
                       list.insert(index, pathDoc);
                       pathDocumentsStream.add(list);
-                      allUploaded();
-
                       Navigator.of(context).pop(true);
                     },
                     child: Text(lang.confirm.toUpperCase())),
@@ -159,39 +155,37 @@ class _UploadDocumentsWidgetState extends BasicState<UploadDocumentsWidget> {
 
       if (pickedBytes != null || pickedPath != null) {
         var pathDoc = PathsDocuments(
-          idDocument: widget.partsSpec.documentSpec[index].id,
+          idParts: widget.pathDocuments[index].idParts,
+          idDocument: widget.pathDocuments[index].idDocument,
           document: pickedBytes,
           selected: true,
           namePickedDocument: namePickedFile,
-          nameDocument: widget.partsSpec.documentSpec[index].name,
+          nameDocument: widget.pathDocuments[index].nameDocument,
           path: pickedPath,
         );
         var list = pathDocumentsStream.value;
         list.removeAt(index);
         list.insert(index, pathDoc);
         pathDocumentsStream.add(list);
-        allUploaded();
       }
     }
   }
 
-  void allUploaded() {
-    for (var pathDoc in pathDocumentsStream.value) {
-      if (!pathDoc.selected) {
-        isAllUploaded = false;
-        widget.onNext([]);
-        return;
-      }
-    }
-    isAllUploaded = true;
-    widget.onNext(pathDocumentsStream.value);
+  onSave() {
+    Navigator.of(context).pop(
+      pathDocumentsStream.value,
+    );
   }
 
+  @override
   List<ChangeNotifier> get notifiers => [];
+
+  @override
   List<Subject> get subjects => [];
 }
 
 class PathsDocuments {
+  final String idParts;
   final String idDocument;
   final String nameDocument;
   final String? namePickedDocument;
@@ -202,6 +196,7 @@ class PathsDocuments {
 
   PathsDocuments(
       {this.namePickedDocument,
+      required this.idParts,
       required this.nameDocument,
       this.document,
       required this.idDocument,
