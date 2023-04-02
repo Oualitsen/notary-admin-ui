@@ -1,5 +1,6 @@
 import 'package:notary_admin/src/pages/assistant/list_assistant_page.dart';
 import 'package:notary_admin/src/pages/customer/list_customer_page.dart';
+import 'package:notary_admin/src/pages/files/download_file.dart';
 import 'package:notary_admin/src/pages/files/list_files_customer.dart';
 import 'package:notary_admin/src/pages/login_page.dart';
 import 'package:notary_admin/src/pages/printed_docs/printed_docs_page.dart';
@@ -116,7 +117,12 @@ Widget createDrawer(BuildContext context) {
       DrawerMenuItem(
         title: (lang.search),
         icon: Icons.search,
-        onTap: () {},
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => DowloadFile()),
+          );
+        },
       ),
       DrawerMenuItem(
         title: (lang.archives),
