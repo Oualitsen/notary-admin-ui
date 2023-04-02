@@ -4,6 +4,7 @@ import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/pages/file-spec/document/replace_document_widget.dart';
+import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget.dart';
 import 'package:notary_admin/src/pages/printed_docs/printed_doc_view.dart';
 import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
 import 'package:notary_admin/src/services/files/files_service.dart';
@@ -112,7 +113,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
             padding: const EdgeInsets.only(right: 8.0),
             child: Text(lang.listDocumentsFileSpec)),
         showEditIcon: true,
-        onTap: () => updateDocumentFolderCustomer(data),
+        onTap: () async => await updateDocumentFolderCustomer(data),
       ),
       DataCell(TextButton(
           onPressed: () => deleteFiles(data), child: Text(lang.delete))),
@@ -293,7 +294,69 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
     return WidgetMixin.showDialog2(
       context,
       label: lang.listDocumentsFileSpec,
-      content: ReplaceDocumentWidget(files: file),
+      content: Container(
+        height: 200,
+        width: 400,
+        child: ListView.builder(
+          itemCount: file.specification.partsSpecs.length,
+          itemBuilder: (context, index) {
+            var element = file.specification.partsSpecs[index];
+            var uploaded = file.uploadedFiles
+                .where((e) => e.partSpecId == element.id)
+                .toList()
+                .length;
+            return ListTile(
+              leading: CircleAvatar(child: Text("${(index + 1)}")),
+              title: Text("${element.name}"),
+              trailing: Wrap(
+                spacing: 5,
+                children: [
+                  Text("${uploaded} / ${element.documentSpec.length}"),
+                  Icon(Icons.edit),
+                ],
+              ),
+              onTap: (() {
+                Navigator.of(context).pop();
+                var listPathDocuments =
+                    file.specification.partsSpecs[index].documentSpec
+                        .map((e) => PathsDocuments(
+                              idParts: element.id,
+                              idDocument: e.id,
+                              document: null,
+                              selected: isUploaded(file, e.id),
+                              namePickedDocument: null,
+                              path: null,
+                              nameDocument: e.name,
+                            ))
+                        .toList();
+
+                Navigator.of(context)
+                    .push(
+                  MaterialPageRoute(
+                    builder: (context) => ReplaceDocumentWidget(
+                      pathDocumentsList: listPathDocuments,
+                      files: file,
+                    ),
+                  ),
+                )
+                    .then((value) {
+                  tableKey.currentState?.refreshPage();
+                });
+              }),
+            );
+          },
+        ),
+      ),
     );
+  }
+
+  bool isUploaded(Files file, String docSpecId) {
+    var isUploaded = false;
+    for (var doc in file.uploadedFiles) {
+      if (doc.docSpecId == docSpecId) {
+        isUploaded = true;
+      }
+    }
+    return isUploaded;
   }
 }

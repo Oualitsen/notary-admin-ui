@@ -52,15 +52,14 @@ class WidgetMixin {
   static uploadFiles(BuildContext context, Files finalFiles,
       List<PathsDocuments> _pathDocuments) async {
     final serviceUploadDocument = GetIt.instance.get<UploadService>();
-    var uri =
-        "/admin/files/upload/${finalFiles.id}/${finalFiles.specification.id}/";
+    var uri = "/admin/files/upload/${finalFiles.id}/";
     try {
       if (_pathDocuments.isNotEmpty) {
         if (kIsWeb) {
           for (var pathDoc in _pathDocuments) {
             if (pathDoc.selected) {
               await serviceUploadDocument.upload(
-                uri + "${pathDoc.idDocument}",
+                uri + "${pathDoc.idParts}/${pathDoc.idDocument}",
                 pathDoc.document!,
                 pathDoc.nameDocument,
                 callBack: (percentage) {
@@ -73,7 +72,7 @@ class WidgetMixin {
           for (var pathDoc in _pathDocuments) {
             if (pathDoc.selected) {
               await serviceUploadDocument.uploadFileDynamic(
-                uri + "${pathDoc.idDocument}",
+                uri + "${pathDoc.idParts}/${pathDoc.idDocument}",
                 pathDoc.path!,
                 callBack: (percentage) {
                   pathDoc.progress.add(percentage);

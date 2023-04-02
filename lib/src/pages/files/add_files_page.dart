@@ -5,6 +5,7 @@ import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:notary_admin/src/pages/customer/customer_selection_page.dart';
+import 'package:notary_admin/src/pages/file-spec/document/upload_parts_documents.dart';
 import 'package:notary_admin/src/pages/templates/form_and_view_html.dart';
 import 'package:notary_admin/src/pages/templates/upload_template.dart';
 import 'package:notary_admin/src/services/admin/template_document_service.dart';
@@ -208,13 +209,11 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                                 return SizedBox.shrink();
                               }
 
-                              return SizedBox(
-                                height: 200,
-                                child: UploadDocumentsWidget(
-                                  partsSpec: snapshot.data!.partsSpecs[0],
-                                  onNext: (pathDocuments) =>
-                                      _pathDocumentsStream.add(pathDocuments),
-                                ),
+                              return UploadPartsDocumentsWidget(
+                                filesSpec: snapshot.data!,
+                                onNext: (pathDocumentList) {
+                                  _pathDocumentsStream.add(pathDocumentList);
+                                },
                               );
                             }),
                         SizedBox(
@@ -280,6 +279,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                               }
                               return getButtons(
                                 onSave: snapshot.data! ? continued : null,
+                                onCancel: previous,
                                 saveLabel: lang.next,
                                 cancelLabel: lang.previous,
                               );
@@ -337,7 +337,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                         getButtons(
                             onSave: save,
                             onCancel: previous,
-                            saveLabel: lang.next,
+                            saveLabel: lang.submit,
                             cancelLabel: lang.previous)
                       ],
                     ),
@@ -384,11 +384,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
         break;
       case 2:
         {
-          if (_pathDocumentsStream.value.isNotEmpty) {
-            _currentStepStream.add(_currentStepStream.value + 1);
-          } else {
-            showSnackBar2(context, lang.noDocument);
-          }
+          _currentStepStream.add(_currentStepStream.value + 1);
         }
         break;
       case 3:
@@ -484,7 +480,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
 
   generateForm() async {
     try {
-      var finalList = [];
+      var finalList = <String>[];
       var list = await serviceTemplateDocument
           .formGenerating(_filesSpecStream.value.templateId);
       for (var res in list) {
