@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:notary_admin/src/pages/steps/add_step_widget.dart';
 import 'package:notary_admin/src/services/admin/steps_service.dart';
+import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/steps.dart';
@@ -23,6 +25,7 @@ class _StepsSelectionState extends BasicState<StepsSelection>
   final service = GetIt.instance.get<StepsService>();
   final listKey = GlobalKey<InfiniteScrollListViewState>();
   final selectedStepsStream = BehaviorSubject.seeded(<Steps>[]);
+  final stepsKey = GlobalKey<AddStepWidgetState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +34,14 @@ class _StepsSelectionState extends BasicState<StepsSelection>
         actions: [
           ElevatedButton(
               onPressed: () {
-                push(context, AddStepWidget());
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text(lang.addSteps),
+                    content: AddStepWidget(key: stepsKey),
+                    actions: [getButtons(onSave: onSave)],
+                  ),
+                );
               },
               child: Text(lang.addSteps))
         ],
@@ -52,6 +62,7 @@ class _StepsSelectionState extends BasicState<StepsSelection>
       initialData: selectedStepsStream.value,
       builder: (context, snapshot) {
         return InfiniteScrollListView<Steps>(
+          key: listKey,
           elementBuilder:
               (BuildContext context, element, int index, animation) {
             final selectedSteps = snapshot.data!;
@@ -116,5 +127,20 @@ class _StepsSelectionState extends BasicState<StepsSelection>
 
   void save() {
     Navigator.of(context).pop(selectedStepsStream.value);
+  }
+
+  onSave() async {
+    var input = stepsKey.currentState?.read();
+    if (input != null) {
+      try {
+        var res = await service.saveStep(input);
+        Navigator.of(context).pop();
+        listKey.currentState?.reload();
+      } catch (error, stacktrace) {
+        print(stacktrace);
+        showServerError(context, error: error);
+        throw error;
+      }
+    }
   }
 }

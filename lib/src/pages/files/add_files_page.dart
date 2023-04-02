@@ -5,12 +5,14 @@ import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:notary_admin/src/pages/customer/customer_selection_page.dart';
+import 'package:notary_admin/src/pages/file-spec/document/upload_parts_documents.dart';
 import 'package:notary_admin/src/pages/templates/form_and_view_html.dart';
 import 'package:notary_admin/src/pages/templates/upload_template.dart';
 import 'package:notary_admin/src/services/admin/template_document_service.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
 import 'package:notary_admin/src/services/files/files_service.dart';
 import 'package:notary_admin/src/services/upload_service.dart';
+import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget.dart';
@@ -104,18 +106,17 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                             SizedBox(
                               height: 20,
                             ),
-                            TextFormField(
-                                readOnly: true,
+                            wrapInIgnorePointer(
+                              child: TextFormField(
                                 controller: _selectFileSpecCtrl,
                                 decoration: getDecoration(lang.selectFileSpec,
                                     true, lang.selectFileSpec),
-                                onTap: selectFileSpec,
-                                validator: (String? value) {
-                                  if (value == null || value.isEmpty) {
-                                    return lang.requiredField;
-                                  }
-                                  return null;
-                                }),
+                                validator: (text) =>
+                                    ValidationUtils.requiredField(
+                                        text, context),
+                              ),
+                              onTap: selectFileSpec,
+                            ),
                             SizedBox(
                               height: 20,
                             ),
@@ -208,13 +209,11 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                                 return SizedBox.shrink();
                               }
 
-                              return SizedBox(
-                                height: 200,
-                                child: UploadDocumentsWidget(
-                                  filesSpec: snapshot.data!,
-                                  onNext: (pathDocuments) =>
-                                      _pathDocumentsStream.add(pathDocuments),
-                                ),
+                              return UploadPartsDocumentsWidget(
+                                filesSpec: snapshot.data!,
+                                onNext: (pathDocumentList) {
+                                  _pathDocumentsStream.add(pathDocumentList);
+                                },
                               );
                             }),
                         SizedBox(
@@ -278,16 +277,11 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                               if (snapshot.hasData == false) {
                                 return SizedBox.shrink();
                               }
-                              return ButtonBar(
-                                children: [
-                                  ElevatedButton(
-                                      onPressed: previous,
-                                      child: Text(lang.previous)),
-                                  ElevatedButton(
-                                      onPressed:
-                                          snapshot.data! ? continued : null,
-                                      child: Text(lang.submit.toUpperCase())),
-                                ],
+                              return getButtons(
+                                onSave: snapshot.data! ? continued : null,
+                                onCancel: previous,
+                                saveLabel: lang.next,
+                                cancelLabel: lang.previous,
                               );
                             }),
                       ],
@@ -343,7 +337,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                         getButtons(
                             onSave: save,
                             onCancel: previous,
-                            saveLabel: lang.next,
+                            saveLabel: lang.submit,
                             cancelLabel: lang.previous)
                       ],
                     ),
@@ -390,11 +384,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
         break;
       case 2:
         {
-          if (_pathDocumentsStream.value.isNotEmpty) {
-            _currentStepStream.add(_currentStepStream.value + 1);
-          } else {
-            showSnackBar2(context, lang.noDocument);
-          }
+          _currentStepStream.add(_currentStepStream.value + 1);
         }
         break;
       case 3:
@@ -429,7 +419,6 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
         var input = FilesInput(
           id: null,
           number: _numberFileCtrl.text,
-          imageIds: [],
           customerIds: listCustomersIds,
           uploadedFiles: [],
           specification: _filesSpecStream.value,
@@ -438,18 +427,17 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
         );
         var files = await serviceFiles.saveFiles(input);
 
-        if (_pathDocumentsStream.value.isNotEmpty &&
-            additionalDocumentsStream.value.isNotEmpty) {
+        if (_pathDocumentsStream.value.isNotEmpty) {
           await WidgetMixin.uploadFiles(
               context, files, _pathDocumentsStream.value);
+        }
+        if (additionalDocumentsStream.value.isNotEmpty) {
           await WidgetMixin.uploadAdditionalData(
               context, files, additionalDocumentsStream.value);
-          await showSnackBar2(context, lang.createdsuccssfully);
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => ListFilesCustomer()));
-        } else {
-          showSnackBar2(context, "error");
         }
+        await showSnackBar2(context, lang.createdsuccssfully);
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => ListFilesCustomer()));
       }
     } catch (error, stackTrace) {
       print(stackTrace);
@@ -492,7 +480,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
 
   generateForm() async {
     try {
-      var finalList = [];
+      var finalList = <String>[];
       var list = await serviceTemplateDocument
           .formGenerating(_filesSpecStream.value.templateId);
       for (var res in list) {

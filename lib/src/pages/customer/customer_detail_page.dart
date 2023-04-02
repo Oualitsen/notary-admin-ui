@@ -9,7 +9,6 @@ import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/customer.dart';
 import 'package:notary_model/model/files.dart';
-import 'package:rxdart/src/subjects/subject.dart';
 import 'package:rxdart/subjects.dart';
 
 class CustomerDetailsPage extends StatefulWidget {
@@ -59,6 +58,19 @@ class _CustomerDetailsPageState extends BasicState<CustomerDetailsPage>
           appBar: AppBar(
             title: Text("${customer.firstName} ${customer.lastName}"),
             bottom: TabBar(tabs: myTabs),
+            actions: [
+              Padding(
+                padding: EdgeInsets.all(8),
+                child: ElevatedButton.icon(
+                  onPressed: (() => push(
+                        context,
+                        AddCustomerPage(customer: customer),
+                      )),
+                  label: Text(lang.edit),
+                  icon: Icon(Icons.edit),
+                ),
+              ),
+            ],
           ),
           body: TabBarView(children: [
             Container(

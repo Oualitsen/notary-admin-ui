@@ -4,6 +4,7 @@ import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/pages/file-spec/document/replace_document_widget.dart';
+import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget.dart';
 import 'package:notary_admin/src/pages/printed_docs/printed_doc_view.dart';
 import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
 import 'package:notary_admin/src/services/files/files_service.dart';
@@ -13,7 +14,6 @@ import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/files.dart';
 import 'package:notary_model/model/steps.dart';
 import 'package:rxdart/subjects.dart';
-
 
 class FilesTableWidget extends StatefulWidget {
   final GlobalKey? tableKey;
@@ -82,7 +82,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
     return filesService.getFilesAll(
         pageIndex: page.pageIndex, pageSize: page.pageSize);
   }
- 
+
   Future<int> getTotal() {
     return filesService.getFilesCount();
   }
@@ -93,11 +93,12 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
       DataCell(Text(data.number)),
       DataCell(Text(data.specification.name)),
       DataCell(
-        TextButton(
-          onPressed: (() => updateCurrentStep(data)),
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
           child: Text(data.currentStep.name),
         ),
         showEditIcon: true,
+        onTap: (() => updateCurrentStep(data)),
       ),
       DataCell(TextButton(
           onPressed: () => customerDetails(data),
@@ -108,10 +109,12 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
             onPressed: (() => onPrint(data.printedDocId))),
       ),
       DataCell(
-          TextButton(
-              onPressed: () => updateDocumentFolderCustomer(data),
-              child: Text(lang.listDocumentsFileSpec)),
-          showEditIcon: true),
+        Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: Text(lang.listDocumentsFileSpec)),
+        showEditIcon: true,
+        onTap: () async => await updateDocumentFolderCustomer(data),
+      ),
       DataCell(TextButton(
           onPressed: () => deleteFiles(data), child: Text(lang.delete))),
       DataCell(TextButton(
@@ -160,34 +163,36 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
     );
   }
 
-  Future<void> confirmStep(String id, Steps newStep) async {
-    return WidgetMixin.showDialog2(
-      context,
-      label: lang.confirm,
-      content: Text(lang.confirmChangingState),
-      actions: <Widget>[
-        TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: Text(lang.no.toUpperCase())),
-        TextButton(
-            onPressed: () async {
-              try {
-                progressSubject.add(true);
-                await filesService.updateCurrentStep(id, newStep);
-                tableKey.currentState?.refreshPage();
-                Navigator.of(context).pop(true);
-                await showSnackBar2(context, lang.updatedSuccessfully);
-              } catch (error, stacktrace) {
-                showServerError(context, error: error);
-                print(stacktrace);
-              } finally {
-                progressSubject.add(false);
-              }
-            },
-            child: Text(lang.yes.toUpperCase())),
-      ],
+  Future confirmStep(String id, Steps newStep) async {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.confirm),
+        content: Text(lang.confirmChangingState),
+        actions: <Widget>[
+          TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: Text(lang.no.toUpperCase())),
+          TextButton(
+              onPressed: () async {
+                try {
+                  progressSubject.add(true);
+                  await filesService.updateCurrentStep(id, newStep);
+                  tableKey.currentState?.refreshPage();
+                  Navigator.of(context).pop(true);
+                  await showSnackBar2(context, lang.updatedSuccessfully);
+                } catch (error, stacktrace) {
+                  showServerError(context, error: error);
+                  print(stacktrace);
+                } finally {
+                  progressSubject.add(false);
+                }
+              },
+              child: Text(lang.yes.toUpperCase())),
+        ],
+      ),
     );
   }
 
@@ -232,52 +237,56 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   }
 
   archiveFiles(Files data) {
-    WidgetMixin.showDialog2(
-      context,
-      label: lang.confirm,
-      content: Text(lang.confirmArchiveFiles),
-      actions: <Widget>[
-        TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: Text(lang.no.toUpperCase())),
-        TextButton(
-            onPressed: () async {
-              await archive(data);
-              Navigator.of(context).pop(true);
-              tableKey.currentState?.refreshPage();
-            },
-            child: Text(lang.yes.toUpperCase())),
-      ],
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.confirm),
+        content: Text(lang.confirmArchiveFiles),
+        actions: <Widget>[
+          TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: Text(lang.no.toUpperCase())),
+          TextButton(
+              onPressed: () async {
+                await archive(data);
+                Navigator.of(context).pop(true);
+                tableKey.currentState?.refreshPage();
+              },
+              child: Text(lang.yes.toUpperCase())),
+        ],
+      ),
     );
   }
 
   deleteFiles(Files data) {
-    WidgetMixin.showDialog2(
-      context,
-      label: lang.confirm,
-      content: Text(lang.confirmDelete),
-      actions: <Widget>[
-        TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: Text(lang.no.toUpperCase())),
-        TextButton(
-            onPressed: () async {
-              try {
-                await filesService.deleteFile(data.id);
-              } catch (error, stacktrace) {
-                showServerError(context, error: error);
-                print(stacktrace);
-              }
-              Navigator.of(context).pop(true);
-              tableKey.currentState?.refreshPage();
-              await showSnackBar2(context, lang.delete);
-            },
-            child: Text(lang.yes.toUpperCase())),
-      ],
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.confirm),
+        content: Text(lang.confirmDelete),
+        actions: <Widget>[
+          TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: Text(lang.no.toUpperCase())),
+          TextButton(
+              onPressed: () async {
+                try {
+                  await filesService.deleteFile(data.id);
+                } catch (error, stacktrace) {
+                  showServerError(context, error: error);
+                  print(stacktrace);
+                }
+                Navigator.of(context).pop(true);
+                tableKey.currentState?.refreshPage();
+                await showSnackBar2(context, lang.delete);
+              },
+              child: Text(lang.yes.toUpperCase())),
+        ],
+      ),
     );
   }
 
@@ -285,7 +294,69 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
     return WidgetMixin.showDialog2(
       context,
       label: lang.listDocumentsFileSpec,
-      content: ReplaceDocumentWidget(files: file),
+      content: Container(
+        height: 200,
+        width: 400,
+        child: ListView.builder(
+          itemCount: file.specification.partsSpecs.length,
+          itemBuilder: (context, index) {
+            var element = file.specification.partsSpecs[index];
+            var uploaded = file.uploadedFiles
+                .where((e) => e.partSpecId == element.id)
+                .toList()
+                .length;
+            return ListTile(
+              leading: CircleAvatar(child: Text("${(index + 1)}")),
+              title: Text("${element.name}"),
+              trailing: Wrap(
+                spacing: 5,
+                children: [
+                  Text("${uploaded} / ${element.documentSpec.length}"),
+                  Icon(Icons.edit),
+                ],
+              ),
+              onTap: (() {
+                Navigator.of(context).pop();
+                var listPathDocuments =
+                    file.specification.partsSpecs[index].documentSpec
+                        .map((e) => PathsDocuments(
+                              idParts: element.id,
+                              idDocument: e.id,
+                              document: null,
+                              selected: isUploaded(file, e.id),
+                              namePickedDocument: null,
+                              path: null,
+                              nameDocument: e.name,
+                            ))
+                        .toList();
+
+                Navigator.of(context)
+                    .push(
+                  MaterialPageRoute(
+                    builder: (context) => ReplaceDocumentWidget(
+                      pathDocumentsList: listPathDocuments,
+                      files: file,
+                    ),
+                  ),
+                )
+                    .then((value) {
+                  tableKey.currentState?.refreshPage();
+                });
+              }),
+            );
+          },
+        ),
+      ),
     );
+  }
+
+  bool isUploaded(Files file, String docSpecId) {
+    var isUploaded = false;
+    for (var doc in file.uploadedFiles) {
+      if (doc.docSpecId == docSpecId) {
+        isUploaded = true;
+      }
+    }
+    return isUploaded;
   }
 }
