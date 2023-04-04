@@ -8,6 +8,7 @@ import 'package:notary_admin/src/pages/customer/customer_selection_page.dart';
 import 'package:notary_admin/src/pages/templates/upload_template.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
 import 'package:notary_admin/src/services/files/files_archive_service.dart';
+import 'package:notary_admin/src/services/files/files_service.dart';
 import 'package:notary_admin/src/services/upload_service.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_admin/src/utils/widget_mixin_new.dart';
@@ -15,6 +16,7 @@ import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/customer.dart';
+import 'package:notary_model/model/files.dart';
 import 'package:notary_model/model/files_archive.dart';
 import 'package:notary_model/model/files_archive_input.dart';
 import 'package:notary_model/model/files_spec.dart';
@@ -23,7 +25,8 @@ import 'package:rxdart/rxdart.dart';
 
 class AddArchivePage extends StatefulWidget {
   final DateTime? initDate;
-  const AddArchivePage({this.initDate, super.key});
+  final Files? files;
+  const AddArchivePage({this.initDate, this.files, super.key});
   @override
   State<AddArchivePage> createState() => _AddArchivePageState();
 }
@@ -32,8 +35,9 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
     with WidgetUtilsMixin {
   int currentStep = 0;
   //services
-  final serviceFileSpec = GetIt.instance.get<FileSpecService>();
-  final serviceFiles = GetIt.instance.get<FilesArchiveService>();
+  final fileSpecService = GetIt.instance.get<FileSpecService>();
+  final archiveFilesService = GetIt.instance.get<FilesArchiveService>();
+  final filesService = GetIt.instance.get<FilesService>();
   final uploadService = GetIt.instance.get<UploadService>();
 
   //Stream
@@ -51,14 +55,23 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
   final archvingDateCtrl = TextEditingController();
   //var
   bool initialized = false;
-
+  List<DocumentsInfo> documentsInfolist = <DocumentsInfo>[];
   late FilesArchive archive;
-  void init() {
+  void init() async {
     if (initialized) return;
     initialized = true;
     if (widget.initDate != null) {
       selectedDay.add(widget.initDate!);
       archvingDateCtrl.text = lang.formatDateDate(widget.initDate!);
+    }
+    if (widget.files != null) {
+      var files = widget.files!;
+      _filesSpecStream.add(files.specification);
+      _selectFileSpecCtrl.text = files.specification.name;
+      _numberFileCtrl.text = files.number;
+      var customers = await getCustomers(files.id);
+      _listcustomerStream.add(customers);
+      archvingDateCtrl.text = lang.formatDateDate(selectedDay.value);
     }
   }
 
@@ -187,6 +200,26 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
                     isActive: activeState == 1,
                     state: getState(1),
                   ),
+                  if (widget.files != null)
+                    Step(
+                      title: Text(lang.listDocumentsFileSpec.toUpperCase()),
+                      content: Column(
+                        children: [
+                          SizedBox(
+                            height: 200,
+                            child: getDocuments(),
+                          ),
+                          getButtons(
+                            onSave: continued,
+                            onCancel: previous,
+                            cancelLabel: lang.previous,
+                            saveLabel: lang.next,
+                          ),
+                        ],
+                      ),
+                      isActive: activeState == 1,
+                      state: getState(1),
+                    ),
                   Step(
                     title: Row(
                       children: [
@@ -194,8 +227,9 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
                         SizedBox(width: 20),
                         ButtonBar(children: [
                           ElevatedButton(
-                            onPressed:
-                                snapshot.data == 2 ? uploadTemplate : null,
+                            onPressed: widget.files != null
+                                ? (snapshot.data == 3 ? uploadTemplate : null)
+                                : (snapshot.data == 2 ? uploadTemplate : null),
                             child: Icon(Icons.add_outlined),
                           ),
                         ]),
@@ -265,8 +299,10 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
                         );
                       },
                     ),
-                    isActive: activeState == 2,
-                    state: getState(2),
+                    isActive: widget.files != null
+                        ? activeState == 3
+                        : activeState == 2,
+                    state: widget.files != null ? getState(3) : getState(2),
                   ),
                 ],
               );
@@ -302,8 +338,8 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
         break;
 
       case 2:
-        if (scannedDocumentsStream.value.isNotEmpty) {
-          save();
+        if (widget.files != null) {
+          _currentStepStream.add(_currentStepStream.value + 1);
         }
         break;
     }
@@ -319,7 +355,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
   }
 
   Future<List<FilesSpec>> getFilesSpec(int index) {
-    var result = serviceFileSpec.getFileSpecs(pageIndex: index, pageSize: 10);
+    var result = fileSpecService.getFileSpecs(pageIndex: index, pageSize: 10);
     return result;
   }
 
@@ -328,15 +364,22 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
       progressSubject.add(true);
       if (_selectFileSpecKey.currentState!.validate() &&
           _listcustomerStream.value.isNotEmpty) {
+        var uploadedList = <String>[];
+        if (widget.files != null) {
+          uploadedList = documentsInfolist.map((e) => e.id).toList();
+        }
         var input = FilesArchiveInput(
             id: null,
             number: _numberFileCtrl.text,
             specification: _filesSpecStream.value,
             customers: _listcustomerStream.value,
-            uploadedFiles: [],
+            uploadedFiles: uploadedList,
             archvingDate: selectedDay.value.millisecondsSinceEpoch);
 
-        archive = await serviceFiles.saveFilesArchive(input);
+        archive = await archiveFilesService.saveFilesArchive(input);
+        if (widget.files != null) {
+          await filesService.archiveFiles(widget.files!.id);
+        }
         if (scannedDocumentsStream.value.isNotEmpty) {
           await uploadScannedDocuments(archive.id);
           await showSnackBar2(context, lang.createdsuccssfully);
@@ -492,4 +535,50 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
     list.remove(data);
     scannedDocumentsStream.add(list);
   }
+
+  Future<List<Customer>> getCustomers(String filesId) {
+    try {
+      return filesService.getFilesCustomers(filesId);
+    } catch (error, stacktrace) {
+      print(stacktrace);
+      showServerError(context, error: error);
+      throw error;
+    }
+  }
+
+  Widget getDocuments() {
+    documentsInfolist = [];
+    for (var part in widget.files!.specification.partsSpecs) {
+      for (var doc in part.documentSpec) {
+        for (var uploaded in widget.files!.uploadedFiles) {
+          if (uploaded.partSpecId == part.id && uploaded.docSpecId == doc.id) {
+            documentsInfolist.add(DocumentsInfo(
+                name: "${part.name} - ${doc.name}", id: uploaded.savedFileId));
+          }
+        }
+      }
+    }
+    for (var i = 0; i < widget.files!.additionalDocumentIds.length; i++) {
+      documentsInfolist.add(DocumentsInfo(
+          name: "${lang.additionalDocuments} ${(i + 1)}",
+          id: widget.files!.additionalDocumentIds[i]));
+    }
+
+    return ListView.builder(
+      itemCount: documentsInfolist.length,
+      itemBuilder: (context, index) {
+        return ListTile(
+          leading: CircleAvatar(child: Text("${(index + 1)}")),
+          title: Text("${documentsInfolist[index].name}"),
+        );
+      },
+    );
+  }
+}
+
+class DocumentsInfo {
+  final String name;
+  final String id;
+
+  DocumentsInfo({required this.name, required this.id});
 }

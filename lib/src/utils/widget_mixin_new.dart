@@ -8,8 +8,6 @@ import 'package:notary_admin/src/services/upload_service.dart';
 import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget.dart';
 import 'package:notary_admin/src/widgets/mixins/lang.dart';
 import 'package:notary_model/model/customer.dart';
-import 'package:notary_model/model/files.dart';
-import 'package:notary_model/model/files_spec.dart';
 
 class WidgetMixin {
   static Future<T?> showDialog2<T>(
@@ -23,7 +21,7 @@ class WidgetMixin {
         context: context,
         builder: (BuildContext context) => AlertDialog(
               title: Container(
-                height: 50,
+                height: 40,
                 child: Wrap(
                   alignment: WrapAlignment.spaceBetween,
                   children: [
@@ -49,10 +47,10 @@ class WidgetMixin {
             ));
   }
 
-  static uploadFiles(BuildContext context, Files finalFiles,
+  static uploadFiles(BuildContext context, String filesId,
       List<PathsDocuments> _pathDocuments) async {
     final serviceUploadDocument = GetIt.instance.get<UploadService>();
-    var uri = "/admin/files/upload/${finalFiles.id}/";
+    var uri = "/admin/files/upload/${filesId}/";
     try {
       if (_pathDocuments.isNotEmpty) {
         if (kIsWeb) {
@@ -61,7 +59,7 @@ class WidgetMixin {
               await serviceUploadDocument.upload(
                 uri + "${pathDoc.idParts}/${pathDoc.idDocument}",
                 pathDoc.document!,
-                pathDoc.nameDocument,
+                pathDoc.namePickedDocument!,
                 callBack: (percentage) {
                   pathDoc.progress.add(percentage);
                 },
@@ -125,10 +123,10 @@ class WidgetMixin {
     );
   }
 
-  static uploadAdditionalData(BuildContext context, Files files,
+  static uploadAdditionalData(BuildContext context, String filesId,
       List<UploadData> additionalFiles) async {
     final serviceUploadDocument = GetIt.instance.get<UploadService>();
-    var uri = "/admin/files/upload/additional/${files.id}";
+    var uri = "/admin/files/upload/additional/${filesId}";
     try {
       if (additionalFiles.isNotEmpty) {
         if (kIsWeb) {

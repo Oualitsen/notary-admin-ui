@@ -117,12 +117,7 @@ Widget createDrawer(BuildContext context) {
       DrawerMenuItem(
         title: (lang.search),
         icon: Icons.search,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => DowloadFile()),
-          );
-        },
+        onTap: () {},
       ),
       DrawerMenuItem(
         title: (lang.archives),

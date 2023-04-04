@@ -55,7 +55,7 @@ class _LoadTemplatePageState extends BasicState<LoadTemplatePage>
             child: AlertVerticalWidget.createDanger(
                 lang.noAccessRightError.toUpperCase())),
         child: Scaffold(
-          appBar: AppBar(title: Text(lang.fileList)),
+          appBar: AppBar(title: Text(lang.template)),
           floatingActionButton: ElevatedButton(
             onPressed: loadFiles,
             child: Text(lang.addFiles),

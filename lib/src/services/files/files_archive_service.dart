@@ -15,9 +15,8 @@ abstract class FilesArchiveService {
   @POST("/admin/archive")
   Future<FilesArchive> saveFilesArchive(@Body() FilesArchiveInput input);
 
-  // @POST("/admin/archive/upload/document/{id}")
-  // Future<FilesArchive> uploadScannedDocument(
-  //     @Path("id") String id, @Query("data") MultipartFile data);
+  @GET("/admin/archive/documents/{archiveId}")
+  Future<List<String>> getDocumentsName(@Path("archiveId") String archiveId);
 
   @GET("/admin/archive/{id}")
   Future<FilesArchive> getFileArchiveById(@Path("id") String id);

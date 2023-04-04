@@ -44,7 +44,7 @@ abstract class FilesService {
       @Path("filesId") String filesId, @Body() Steps newStep);
 
   @PUT("/admin/files/archive/{id}")
-  Future<FilesArchive> archiveFiles(@Path("id") String id);
+  Future archiveFiles(@Path("id") String id);
 
   @GET("/admin/files/archive")
   Future<List<FilesArchive>> getArchived(
