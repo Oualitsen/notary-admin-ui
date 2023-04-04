@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
+import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
+import 'package:notary_admin/src/init.dart';
 import 'package:notary_admin/src/pages/archiving/add_archive_page.dart';
-import 'package:notary_admin/src/pages/printed_docs/printed_doc_view.dart';
 import 'package:notary_admin/src/services/files/files_archive_service.dart';
 import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
-import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget.dart';
 import 'package:notary_model/model/files_archive.dart';
 import 'package:rxdart/subjects.dart';
-import '../../services/admin/printed_docs_service.dart';
 import '../../widgets/basic_state.dart';
+import 'package:universal_html/html.dart' as html;
 import '../../widgets/mixins/button_utils_mixin.dart';
 
 class FilesArchiveTableWidget extends StatefulWidget {
@@ -48,7 +48,6 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
         DataColumn(label: Text(lang.filesNumber)),
         DataColumn(label: Text(lang.fileSpec)),
         DataColumn(label: Text(lang.customer)),
-        DataColumn(label: Text(lang.template)),
         DataColumn(label: Text(lang.listDocumentsFileSpec)),
         DataColumn(label: Text(lang.delete)),
       ];
@@ -124,9 +123,6 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
           onPressed: () => customerDetails(data),
           child: Text(lang.customerList))),
       DataCell(
-        TextButton(child: Text(lang.print), onPressed: null),
-      ),
-      DataCell(
         TextButton(
             onPressed: () => documentList(data),
             child: Text(lang.listDocumentsFileSpec)),
@@ -199,35 +195,40 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
       context,
       label: lang.listDocumentsFileSpec,
       content: Container(
-        height: 400,
+        height: 300,
         width: 400,
-        child: Text("To Be Done Archived Files"),
-        //data.specification.documents.length == 0
-        //  ? ListTile(title: Text(lang.noDocument.toUpperCase()))
-        // : ListView.builder(
-        //     itemCount: data.specification.documents.length,
-        //     itemBuilder: (context, int index) {
-        //       var isRequired = data.specification.documents[index].optional
-        //           ? lang.isNotRequired
-        //           : lang.isNotRequired;
-        //       var isOriginal = data.specification.documents[index].original
-        //           ? lang.isOriginal
-        //           : lang.isNotOriginal;
-        //       var isDoubleSide =
-        //           data.specification.documents[index].doubleSided
-        //               ? lang.isDoubleSided
-        //               : lang.isNotDoubleSided;
-
-        //       return ListTile(
-        //         leading: CircleAvatar(
-        //           child: Text("${(index + 1)}"),
-        //         ),
-        //         title: Text("${data.specification.documents[index].name}"),
-        //         subtitle:
-        //             Text("${isRequired} , ${isOriginal} , ${isDoubleSide}"),
-        //       );
-        //     }),
+        child: InfiniteScrollListView<String>(
+          elementBuilder: (context, element, index, animation) {
+            return ListTile(
+              leading: CircleAvatar(child: Text("${(index + 1)}")),
+              title: Text("$element"),
+              trailing: Icon(Icons.download),
+              onTap: () => downloadDocument(data.uploadedFiles[index]),
+            );
+          },
+          pageLoader: ((index) => getDataDocuments(index, data)),
+        ),
       ),
     );
+  }
+
+  Future<List<String>> getDataDocuments(int index, FilesArchive data) async {
+    try {
+      if (index == 0) {
+        var docNames = await archiveService.getDocumentsName(data.id);
+        return Future.value(docNames);
+      }
+      return Future.value(<String>[]);
+    } catch (error, stacktrace) {
+      print(stacktrace);
+      showServerError(context, error: error);
+      throw error;
+    }
+  }
+
+  downloadDocument(String documentId) {
+    html.AnchorElement anchor = new html.AnchorElement(
+        href: "${getUrlBase()}/admin/grid/content/${documentId}");
+    anchor.click();
   }
 }

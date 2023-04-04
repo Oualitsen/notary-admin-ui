@@ -11,10 +11,10 @@ import 'package:rxdart/subjects.dart';
 
 class ReplaceDocumentWidget extends StatefulWidget {
   final List<PathsDocuments> pathDocumentsList;
-  final Files files;
+  final String filesId;
   const ReplaceDocumentWidget({
     super.key,
-    required this.files,
+    required this.filesId,
     required this.pathDocumentsList,
   });
 
@@ -178,7 +178,7 @@ class _ReplaceDocumentWidgetState extends BasicState<ReplaceDocumentWidget>
       if (updateDocumentsStream.value.isNotEmpty) {
         await WidgetMixin.uploadFiles(
           context,
-          widget.files,
+          widget.filesId,
           updateDocumentsStream.value
               .where((element) => element.updated)
               .map((e) => e.pathDocument)

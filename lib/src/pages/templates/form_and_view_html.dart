@@ -38,16 +38,9 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
   late List<String> listFormField;
   late String text;
   var textFormCtrlList = <TextEditingController>[];
-  String toPrint = """
-   <script>
-      function display() {
-         window.print();
-      }
-   </script>
-""";
   @override
   void initState() {
-    text = toPrint + widget.text;
+    text = widget.text;
     listFormField = widget.listFormField;
     textFormCtrlList =
         List.generate(listFormField.length, (i) => TextEditingController());

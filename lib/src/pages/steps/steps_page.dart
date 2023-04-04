@@ -27,7 +27,7 @@ class _StepsPageState extends BasicState<StepsPage> with WidgetUtilsMixin {
   Widget build(BuildContext context) {
     return WidgetUtils.wrapRoute((context, type) => Scaffold(
           appBar: AppBar(
-            title: Text(lang.stepGroup),
+            title: Text(lang.steps),
           ),
           floatingActionButton: ElevatedButton(
             onPressed: () {

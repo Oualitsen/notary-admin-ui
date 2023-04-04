@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
+import 'package:notary_admin/src/pages/archiving/add_archive_page.dart';
 import 'package:notary_admin/src/pages/file-spec/document/replace_document_widget.dart';
 import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget.dart';
 import 'package:notary_admin/src/pages/printed_docs/printed_doc_view.dart';
@@ -139,9 +140,18 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
         child: InfiniteScrollListView(
           elementBuilder: (context, element, index, animation) {
             return ListTile(
-              leading: CircleAvatar(
-                child: Text("${(index + 1)}"),
-              ),
+              leading: element.id == data.currentStep.id
+                  ? CircleAvatar(
+                      backgroundColor: Colors.lightBlue,
+                      child: Text(
+                        "${(index + 1)}",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    )
+                  : CircleAvatar(child: Text("${(index + 1)}")),
               title: Text("${element.name}"),
               subtitle: element.id == data.currentStep.id
                   ? Text("${lang.currentStep}")
@@ -206,18 +216,6 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
     }
   }
 
-  Future<void> archive(Files data) async {
-    try {
-      await filesService.archiveFiles(data.id);
-      tableKey.currentState?.refreshPage();
-      showSnackBar2(context, lang.savedSuccessfully);
-      return Future.value();
-    } catch (error, stacktrace) {
-      showServerError(context, error: error);
-      print(stacktrace);
-    }
-  }
-
   customerDetails(Files data) async {
     try {
       var customersList = await filesService.getFilesCustomers(data.id);
@@ -237,27 +235,15 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   }
 
   archiveFiles(Files data) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(lang.confirm),
-        content: Text(lang.confirmArchiveFiles),
-        actions: <Widget>[
-          TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              child: Text(lang.no.toUpperCase())),
-          TextButton(
-              onPressed: () async {
-                await archive(data);
-                Navigator.of(context).pop(true);
-                tableKey.currentState?.refreshPage();
-              },
-              child: Text(lang.yes.toUpperCase())),
-        ],
-      ),
-    );
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute(
+            builder: (context) => AddArchivePage(
+              files: data,
+            ),
+          ),
+        )
+        .then((_) => tableKey.currentState?.refreshPage());
   }
 
   deleteFiles(Files data) {
@@ -335,7 +321,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
                   MaterialPageRoute(
                     builder: (context) => ReplaceDocumentWidget(
                       pathDocumentsList: listPathDocuments,
-                      files: file,
+                      filesId: file.id,
                     ),
                   ),
                 )

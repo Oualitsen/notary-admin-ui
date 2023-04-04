@@ -293,12 +293,8 @@
   "selectTemplate": "Select template",
   "noCreatedDocumentprint": "Document not created",
   "deletedSuccessfully": "Deleted Successfully",
-  "stepGroups": "Step groups",
-  "stepGroup": "Step group",
   "step": "Step",
   "steps": "Steps",
-  "stepGroupDetails": "Step group details",
-  "addStepGroup": "Add step group",
   "stepsEmptyError": "Step group cannot be created without steps",
   "noSteps": "Steps not created",
   "estimationTime": "Estimated time",
@@ -338,5 +334,7 @@
   "addDocumentsSpec": "Add documents",
   "part": "Part",
   "listPart": "Parts",
-  "addPart": "Add part"
+  "addPart": "Add part",
+  "nextYear": "Next Year",
+  "previousYear": "Previous year"
 }

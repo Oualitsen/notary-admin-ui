@@ -429,11 +429,11 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
 
         if (_pathDocumentsStream.value.isNotEmpty) {
           await WidgetMixin.uploadFiles(
-              context, files, _pathDocumentsStream.value);
+              context, files.id, _pathDocumentsStream.value);
         }
         if (additionalDocumentsStream.value.isNotEmpty) {
           await WidgetMixin.uploadAdditionalData(
-              context, files, additionalDocumentsStream.value);
+              context, files.id, additionalDocumentsStream.value);
         }
         await showSnackBar2(context, lang.createdsuccssfully);
         Navigator.push(context,

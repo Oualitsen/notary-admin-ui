@@ -27,17 +27,10 @@ class _PrintedDocViewHtmlState extends BasicState<PrintedDocViewHtml>
   late String text;
   final templateNameCrtl = TextEditingController();
   final _htmlDocument = BehaviorSubject.seeded('');
-  var toPrint = """
-   <script>
-      function display() {
-         window.print();
-      }
-   </script>
-""";
 
   @override
   void initState() {
-    text = toPrint + widget.text;
+    text = widget.text;
 
     _htmlDocument.where((event) => controllerWeb != null).listen((value) {
       controllerWeb!.loadContent(value, SourceType.html);
