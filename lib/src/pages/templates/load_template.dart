@@ -230,8 +230,10 @@ class _LoadTemplatePageState extends BasicState<LoadTemplatePage>
             )
             .then((value) => key.currentState?.reload());
       }
-    } catch (e) {
-      print("[ERROR]${e.toString}");
+    } catch (error, stacktrace) {
+      showServerError(context, error: error);
+      print(stacktrace);
+      throw error;
     }
   }
 }

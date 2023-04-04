@@ -76,7 +76,9 @@
     "listPart",
     "addPart",
     "nextYear",
-    "previousYear"
+    "previousYear",
+    "archivingDate",
+    "download"
   ],
 
   "fr": [
@@ -156,6 +158,8 @@
     "listPart",
     "addPart",
     "nextYear",
-    "previousYear"
+    "previousYear",
+    "archivingDate",
+    "download"
   ]
 }

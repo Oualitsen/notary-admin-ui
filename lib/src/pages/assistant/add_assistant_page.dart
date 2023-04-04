@@ -122,8 +122,6 @@ class _AddAssistantPageState extends BasicState<AddAssistantPage>
           if (credentials != null) {
             assistantCredentials = credentials;
             save();
-          } else {
-            print("@@@@@@@@@@@@@ error");
           }
         }
         break;
@@ -152,9 +150,9 @@ class _AddAssistantPageState extends BasicState<AddAssistantPage>
       var res = await service.saveAssistant(input);
       await showSnackBar2(context, lang.updatedSuccessfully);
       Navigator.of(context).pop(res);
-    } catch (error, stackTrace) {
+    } catch (error, stacktrace) {
       showServerError(context, error: error);
-      print("@@@@@@@@@@@@@@@@@@@ \n $stackTrace");
+      print(stacktrace);
       throw error;
     } finally {
       progressSubject.add(false);

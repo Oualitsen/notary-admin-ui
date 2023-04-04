@@ -278,7 +278,7 @@
   "originalDocument": "Original document",
   "requiredDocument": "Required Document",
   "noDocument": "No documents yet",
-  "filesNumber": "File code",
+  "filesNumber": "Files code",
   "formToHtml": "Form generating",
   "dataForDocument": "Data for document",
   "listFilesCustomer": "Files",
@@ -336,5 +336,7 @@
   "listPart": "Parts",
   "addPart": "Add part",
   "nextYear": "Next Year",
-  "previousYear": "Previous year"
+  "previousYear": "Previous year",
+  "archivingDate": "Archiving date",
+  "download": "Download"
 }

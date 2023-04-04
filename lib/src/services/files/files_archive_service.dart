@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:notary_model/model/files_archive.dart';
 import 'package:notary_model/model/files_archive_input.dart';
 import 'package:retrofit/retrofit.dart';
@@ -37,4 +38,8 @@ abstract class FilesArchiveService {
   @GET("/admin/archive/date/count")
   Future<int> getCountFilesArchiveByDate(
       @Query("startDate") int startDate, @Query("endDate") int endDate);
+
+  @GET("/admin/archive/pdf/images/ids/{pdfId}")
+  Future<List<String>> getPdfImages(@Path("pdfId") String pdfId);
+
 }

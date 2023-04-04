@@ -105,7 +105,6 @@ class _FormConvertMapState extends BasicState<FormConvertMap>
       for (int index = 0; index < listFormField.length; index++)
         map[listFormField[index]] = _controller[index].text;
       showSnackBar2(context, lang.ok);
-      print(map);
       return map;
     }
   }

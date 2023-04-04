@@ -68,7 +68,6 @@ class _AddDocumentState extends BasicState<AddDocument> with WidgetUtilsMixin {
                           title: Text(lang.isRequired),
                           value: _isRequiredDocumentStream.value,
                           onChanged: (value) {
-                            print(value);
                             if (value != null) {
                               _isRequiredDocumentStream.add(value);
                             }
@@ -83,7 +82,6 @@ class _AddDocumentState extends BasicState<AddDocument> with WidgetUtilsMixin {
                           title: Text(lang.isDoubleSided),
                           value: _isDoubleSidedStream.value,
                           onChanged: (value) {
-                            print(value);
                             if (value != null) {
                               _isDoubleSidedStream.add(value);
                             }
