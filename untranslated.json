@@ -78,7 +78,14 @@
     "nextYear",
     "previousYear",
     "archivingDate",
-    "download"
+    "download",
+    "directoryDialog",
+    "noDirectoryPath",
+    "permissionDenied",
+    "permissionText",
+    "openSettings",
+    "rotateLeft",
+    "rotateRight"
   ],
 
   "fr": [
@@ -160,6 +167,13 @@
     "nextYear",
     "previousYear",
     "archivingDate",
-    "download"
+    "download",
+    "directoryDialog",
+    "noDirectoryPath",
+    "permissionDenied",
+    "permissionText",
+    "openSettings",
+    "rotateLeft",
+    "rotateRight"
   ]
 }

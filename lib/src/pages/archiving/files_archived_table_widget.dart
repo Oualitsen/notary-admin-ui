@@ -1,8 +1,12 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
+import 'package:notary_admin/src/db_services/token_db_service.dart';
 import 'package:notary_admin/src/init.dart';
 import 'package:notary_admin/src/pages/archiving/add_archive_page.dart';
 import 'package:notary_admin/src/pages/pdf/pdf_images.dart';
@@ -12,6 +16,7 @@ import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_model/model/files_archive.dart';
 import 'package:rxdart/subjects.dart';
 import '../../widgets/basic_state.dart';
+import 'package:http/http.dart' as http;
 import 'package:universal_html/html.dart' as html;
 import '../../widgets/mixins/button_utils_mixin.dart';
 
@@ -33,6 +38,7 @@ class FilesArchiveTableWidget extends StatefulWidget {
 
 class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
     with WidgetUtilsMixin {
+  final tokenService = GetIt.instance.get<TokenDbService>();
   final archiveService = GetIt.instance.get<FilesArchiveService>();
   final tableKey = GlobalKey<LazyPaginatedDataTableState>();
   List<DataColumn> columns = [];
@@ -239,9 +245,23 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
         showServerError(context, error: error);
       }
     } else {
-      html.AnchorElement anchor = new html.AnchorElement(
-          href: "${getUrlBase()}/admin/grid/content/pdf/${name}");
-      anchor.click();
+      String? authToken = await tokenService.getToken();
+      final response = await http.get(
+        Uri.parse("${getUrlBase()}/admin/grid/content/${id}"),
+        headers: {"Authorization": "Bearer $authToken"},
+      );
+      final bytes = response.bodyBytes;
+
+      if (kIsWeb) {
+        final content = base64Encode(bytes);
+        final anchor = html.AnchorElement(
+            href:
+                "data:application/octet-stream;charset=utf-16le;base64,$content")
+          ..setAttribute("download", name)
+          ..click();
+      } else {
+        //@TODO
+      }
     }
   }
 }

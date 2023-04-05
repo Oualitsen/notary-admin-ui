@@ -338,5 +338,12 @@
   "nextYear": "Next Year",
   "previousYear": "Previous year",
   "archivingDate": "Archiving date",
-  "download": "Download"
+  "download": "Download",
+  "directoryDialog": "Select a directory to save your files",
+  "noDirectoryPath": "Could not get external storage directory",
+  "permissionDenied": "Permission Denied",
+  "permissionText": "Please grant the permission manually through the device settings",
+  "openSettings": "Open settings",
+  "rotateLeft":"Rotate Left",
+  "rotateRight":"Rotate Right"
 }

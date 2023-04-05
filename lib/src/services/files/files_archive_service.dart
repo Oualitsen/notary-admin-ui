@@ -42,4 +42,7 @@ abstract class FilesArchiveService {
   @GET("/admin/archive/pdf/images/ids/{pdfId}")
   Future<List<String>> getPdfImages(@Path("pdfId") String pdfId);
 
+  @POST("/admin/archive/rotate/{imageId}")
+  Future<void> rotateImage(
+      @Path("imageId") String imageId, @Query("angle") double angle);
 }
