@@ -13,7 +13,7 @@ import 'package:rxdart/src/subjects/subject.dart';
 class HtmlEditorPrintedDoc extends StatefulWidget {
   HtmlEditorPrintedDoc({Key? key, required this.template}) : super(key: key);
 
-  PrintedDoc template;
+  final PrintedDoc template;
   @override
   _HtmlEditorPrintedDocState createState() => _HtmlEditorPrintedDocState();
 }

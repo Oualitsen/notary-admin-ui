@@ -4,7 +4,6 @@ import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/customer.dart';
 import 'package:notary_model/model/gender.dart';
-import 'package:rxdart/src/subjects/subject.dart';
 import 'package:rxdart/subjects.dart';
 
 class CustomerGeneralForm extends StatefulWidget {

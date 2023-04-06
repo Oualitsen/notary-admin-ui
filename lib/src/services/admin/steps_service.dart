@@ -1,6 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:notary_model/model/step_group.dart';
-import 'package:notary_model/model/step_group_input.dart';
 import 'package:notary_model/model/step_input.dart';
 import 'package:notary_model/model/steps.dart';
 import 'package:retrofit/http.dart';

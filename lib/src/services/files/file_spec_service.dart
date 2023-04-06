@@ -2,7 +2,6 @@ import 'package:notary_model/model/files_spec.dart';
 import 'package:notary_model/model/files_spec_input.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:dio/dio.dart';
-import 'package:dio/dio.dart';
 part 'file_spec_service.g.dart';
 
 @RestApi()

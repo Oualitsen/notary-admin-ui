@@ -4,7 +4,6 @@ import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/files_spec.dart';
-
 import 'package:rxdart/subjects.dart';
 
 class UploadPartsDocumentsWidget extends StatefulWidget {

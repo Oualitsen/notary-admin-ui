@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
-import 'package:notary_admin/src/pages/assistant/assistant_detail_page.dart';
 import 'package:notary_admin/src/pages/assistant/assistant_details_input.dart';
 import 'package:notary_admin/src/services/assistant/admin_assistant_service.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
@@ -11,7 +10,6 @@ import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_admin/src/widgets/password_input.dart';
 import 'package:notary_model/model/admin.dart';
-import 'package:notary_model/model/assistant.dart';
 import 'package:notary_model/model/assistant_input.dart';
 import 'package:rxdart/src/subjects/subject.dart';
 

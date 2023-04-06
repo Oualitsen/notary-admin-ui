@@ -76,7 +76,16 @@
     "listPart",
     "addPart",
     "nextYear",
-    "previousYear"
+    "previousYear",
+    "archivingDate",
+    "download",
+    "directoryDialog",
+    "noDirectoryPath",
+    "permissionDenied",
+    "permissionText",
+    "openSettings",
+    "rotateLeft",
+    "rotateRight"
   ],
 
   "fr": [
@@ -156,6 +165,15 @@
     "listPart",
     "addPart",
     "nextYear",
-    "previousYear"
+    "previousYear",
+    "archivingDate",
+    "download",
+    "directoryDialog",
+    "noDirectoryPath",
+    "permissionDenied",
+    "permissionText",
+    "openSettings",
+    "rotateLeft",
+    "rotateRight"
   ]
 }

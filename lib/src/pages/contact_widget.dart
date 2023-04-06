@@ -4,7 +4,6 @@ import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/contact.dart';
 import 'package:flutter/material.dart';
-
 import 'package:rxdart/subjects.dart';
 
 class ContactsInputPage2 extends StatefulWidget {

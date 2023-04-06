@@ -525,8 +525,10 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
         list.add(data);
         additionalDocumentsStream.add(list);
       }
-    } catch (e) {
-      print("[ERROR]${e.toString}");
+    } catch (error, stacktrace) {
+      showServerError(context, error: error);
+      print(stacktrace);
+      throw error;
     }
   }
 }

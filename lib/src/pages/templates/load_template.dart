@@ -4,9 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
-import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/widgets/widget_roles.dart';
-import 'package:notary_admin/src/pages/templates/form_and_view_html.dart';
 import 'package:notary_admin/src/pages/templates/html_editor_template.dart';
 import 'package:notary_admin/src/pages/templates/upload_template.dart';
 import 'package:notary_admin/src/services/admin/template_document_service.dart';
@@ -176,31 +174,6 @@ class _LoadTemplatePageState extends BasicState<LoadTemplatePage>
           print(stackTrace);
           showServerError(context, error: error);
         }
-
-        //form generating
-        //   try {
-        //     var finalList = [];
-        //     var list = await service.formGenerating(template.id);
-        //     for (var res in list) {
-        //       //res =
-        //       finalList.add(res.replaceAll(" ", "_"));
-        //     }
-        //     var data = await service.replacements(template.id);
-        //     //  print(data);
-        //     Navigator.push(
-        //       context,
-        //       MaterialPageRoute(
-        //         builder: (context) => FormAndViewHtml(
-        //           listFormField: finalList,
-        //           text: data,
-        //         ),
-        //       ),
-        //     ).then((value) => key.currentState?.reload());
-        //     ;
-        //   } catch (error, stackTrace) {
-        //     print(stackTrace);
-        //     showServerError(context, error: error);
-        //   }
       }
     }
   }
@@ -230,8 +203,10 @@ class _LoadTemplatePageState extends BasicState<LoadTemplatePage>
             )
             .then((value) => key.currentState?.reload());
       }
-    } catch (e) {
-      print("[ERROR]${e.toString}");
+    } catch (error, stacktrace) {
+      showServerError(context, error: error);
+      print(stacktrace);
+      throw error;
     }
   }
 }

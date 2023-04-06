@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -126,8 +124,10 @@ class _UploadTemplatePageState extends BasicState<UploadTemplatePage>
         list.add(data);
         uploadDataStream.add(list);
       }
-    } catch (e) {
-      print("[ERROR]${e.toString}");
+    } catch (error, stacktrace) {
+      showServerError(context, error: error);
+      print(stacktrace);
+      throw error;
     }
   }
 
@@ -138,7 +138,7 @@ class _UploadTemplatePageState extends BasicState<UploadTemplatePage>
     }).doOnDone(() {
       progressSubject.add(false);
     }).listen((event) async {
-      await showSnackBar2(context, lang.createdsuccssfully);
+      showSnackBar2(context, lang.createdsuccssfully);
       Navigator.of(context).pop();
     });
   }

@@ -427,7 +427,6 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
     return InfiniteScrollListView(
         elementBuilder: ((context, element, index, animation) {
           return ListTile(
-            leading: Text("${lang.formatDate(element.creationDate)}"),
             title: Text("${element.name}"),
             onTap: () {
               _selectFileSpecCtrl.text = element.name;
@@ -482,8 +481,6 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
   }
 
   Stream<dynamic> upload(String uri, UploadData data) {
-    print("@@@@@@@@@@@@@@@@@@@@@@@@ called");
-
     try {
       if (kIsWeb && data.data != null) {
         return uploadService

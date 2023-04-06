@@ -278,7 +278,7 @@
   "originalDocument": "Original document",
   "requiredDocument": "Required Document",
   "noDocument": "No documents yet",
-  "filesNumber": "File code",
+  "filesNumber": "Files code",
   "formToHtml": "Form generating",
   "dataForDocument": "Data for document",
   "listFilesCustomer": "Files",
@@ -336,5 +336,14 @@
   "listPart": "Parts",
   "addPart": "Add part",
   "nextYear": "Next Year",
-  "previousYear": "Previous year"
+  "previousYear": "Previous year",
+  "archivingDate": "Archiving date",
+  "download": "Download",
+  "directoryDialog": "Select a directory to save your files",
+  "noDirectoryPath": "Could not get external storage directory",
+  "permissionDenied": "Permission Denied",
+  "permissionText": "Please grant the permission manually through the device settings",
+  "openSettings": "Open settings",
+  "rotateLeft":"Rotate Left",
+  "rotateRight":"Rotate Right"
 }

@@ -6,7 +6,6 @@ import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
-import 'package:notary_model/model/files.dart';
 import 'package:rxdart/subjects.dart';
 
 class ReplaceDocumentWidget extends StatefulWidget {

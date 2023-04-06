@@ -39,6 +39,8 @@ dependencies:
   device_preview: ^1.1.0
   month_year_picker: ^0.2.0+3
   horizontal_data_table: ^4.1.4
+  fluttertoast: ^8.0.8
+  flutter_downloader: ^1.10.2
   # firebase
   firebase_messaging: ^14.2.0
   lazy_paginated_data_table: ^0.0.7
@@ -64,6 +66,7 @@ dependencies:
   popup_card: ^0.1.0
   archive: ^3.3.6
   jsaver: ^1.2.0
+  permission_handler: ^10.2.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
