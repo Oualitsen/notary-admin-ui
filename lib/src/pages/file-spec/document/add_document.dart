@@ -27,7 +27,7 @@ class _AddDocumentState extends BasicState<AddDocument> with WidgetUtilsMixin {
   Widget build(BuildContext context) {
     return WidgetUtils.wrapRoute((context, type) => Scaffold(
           appBar: AppBar(
-            title: Text(lang.addFileSpec),
+            title: Text(lang.addDocumentsSpec),
           ),
           body: Form(
             key: key,

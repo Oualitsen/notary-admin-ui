@@ -90,37 +90,27 @@ class WidgetMixin {
   static Widget ListCustomers(BuildContext context,
       {required List<Customer> listCustomers, double? width}) {
     var lang = getLang(context);
+
     return SizedBox(
-      height: 200,
-      width: width,
-      child: listCustomers.isNotEmpty
-          ? ListView.builder(
-              scrollDirection: Axis.vertical,
-              itemCount: listCustomers.length,
-              itemBuilder: (BuildContext context, int index) {
-                var customer = listCustomers[index];
-                return ListTile(
-                  leading: CircleAvatar(
-                      child: Text(
-                          "${customer.lastName[0].toUpperCase()}${customer.firstName[0].toUpperCase()}")),
-                  title: Text("${customer.lastName} ${customer.firstName}"),
-                  subtitle:
-                      Text("${lang.idCard} : ${customer.idCard.idCardId}"),
-                  trailing: Icon(Icons.arrow_forward),
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          CustomerDetailsPage(customer: customer),
-                    ),
-                  ),
-                );
-              })
-          : Padding(
-              padding: const EdgeInsets.all(5),
-              child: Text(lang.noCustomer.toUpperCase()),
-            ),
-    );
+        width: width,
+        child: Column(
+          children: listCustomers.map((customer) {
+            return ListTile(
+              leading: CircleAvatar(
+                  child: Text(
+                      "${customer.lastName[0].toUpperCase()}${customer.firstName[0].toUpperCase()}")),
+              title: Text("${customer.lastName} ${customer.firstName}"),
+              subtitle: Text("${lang.idCard} : ${customer.idCard.idCardId}"),
+              trailing: Icon(Icons.arrow_forward),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CustomerDetailsPage(customer: customer),
+                ),
+              ),
+            );
+          }).toList(),
+        ));
   }
 
   static uploadAdditionalData(BuildContext context, String filesId,

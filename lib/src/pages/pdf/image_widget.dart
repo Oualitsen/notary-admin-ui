@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:notary_admin/src/init.dart';
-import 'package:notary_admin/src/services/files/files_archive_service.dart';
+import 'package:notary_admin/src/services/files/pdf_service.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:rxdart/subjects.dart';
@@ -24,7 +24,7 @@ class ImageWidget extends StatefulWidget {
 
 class _ImageWidgetState extends BasicState<ImageWidget> with WidgetUtilsMixin {
   final rotationAngleStream = BehaviorSubject<double>.seeded(0.0);
-  final archiveService = GetIt.instance.get<FilesArchiveService>();
+  final pdfService = GetIt.instance.get<PdfService>();
   late String url;
   @override
   void initState() {
@@ -61,6 +61,7 @@ class _ImageWidgetState extends BasicState<ImageWidget> with WidgetUtilsMixin {
                   if (!snapshot.hasData) {
                     return SizedBox.shrink();
                   }
+
                   return Transform.rotate(
                     angle: snapshot.data!,
                     child: Image.network(
@@ -78,8 +79,8 @@ class _ImageWidgetState extends BasicState<ImageWidget> with WidgetUtilsMixin {
     );
   }
 
-  String getImageUrl(String id, [bool disableCache = true]) {
-    return "${getUrlBase()}/admin/grid/content/${id}${disableCache ? ('?date=' + DateTime.now().millisecondsSinceEpoch.toString()) : ''}";
+  String getImageUrl(String imageId, [bool disableCache = true]) {
+    return "${getUrlBase()}/admin/pdf/image/${imageId}${disableCache ? ('?date=' + DateTime.now().millisecondsSinceEpoch.toString()) : ''}";
   }
 
   @override
@@ -95,8 +96,7 @@ class _ImageWidgetState extends BasicState<ImageWidget> with WidgetUtilsMixin {
     rotationAngleStream.add(angle);
     widget.onAngleChanged(angle);
     try {
-      await archiveService.rotateImage(
-          widget.imageId, rotationAngleStream.value);
+      await pdfService.rotateImage(widget.imageId, rotationAngleStream.value);
     } catch (error, stacktrace) {
       print(stacktrace);
       showServerError(context, error: error);

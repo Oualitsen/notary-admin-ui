@@ -37,7 +37,6 @@ class PdfImages extends StatefulWidget {
 class _PdfImagesState extends BasicState<PdfImages> with WidgetUtilsMixin {
   final archiveService = GetIt.instance.get<FilesArchiveService>();
   final tokenService = GetIt.instance.get<TokenDbService>();
-  final uri = "${getUrlBase()}/admin/grid/content";
 
   late List<ImageRotationInfo> imageRotationInfo;
   bool initialize = false;
@@ -63,7 +62,6 @@ class _PdfImagesState extends BasicState<PdfImages> with WidgetUtilsMixin {
                   icon: Icon(Icons.download),
                   onPressed: (() => downloadPdf(widget.id)),
                   label: Text(lang.download)),
-              
             ],
           ),
           body: StreamBuilder<String>(
@@ -103,8 +101,10 @@ class _PdfImagesState extends BasicState<PdfImages> with WidgetUtilsMixin {
 
   Future<void> downloadPdf(String id) async {
     String? authToken = await tokenService.getToken();
+    final uri = "${getUrlBase()}/admin/pdf/create";
+
     final response = await http.post(
-      Uri.parse("$uri/pdf/${widget.name}"),
+      Uri.parse("$uri/${widget.name}"),
       headers: {
         "Authorization": "Bearer $authToken",
         HttpHeaders.contentTypeHeader: 'application/json',
@@ -173,8 +173,6 @@ class _PdfImagesState extends BasicState<PdfImages> with WidgetUtilsMixin {
 
   @override
   List<Subject> get subjects => [];
-
-  
 }
 
 class ImageRotationInfo {

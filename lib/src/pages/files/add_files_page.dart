@@ -320,18 +320,25 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                               if (snapshot.hasData == false) {
                                 return SizedBox.shrink();
                               }
-
-                              return Container(
-                                height: 200,
-                                child: ListView.builder(
-                                  itemCount: snapshot.data!.length,
-                                  itemBuilder: (context, index) {
-                                    return ListTile(
-                                      title:
-                                          Text("${snapshot.data![index].name}"),
-                                    );
-                                  },
-                                ),
+                              var index = -1;
+                              return Column(
+                                children: snapshot.data!.map((data) {
+                                  index++;
+                                  return ListTile(
+                                    leading: CircleAvatar(
+                                        child: Text("${(index + 1)}")),
+                                    title: Text("${data.name}"),
+                                    trailing: IconButton(
+                                      icon: Icon(Icons.delete),
+                                      onPressed: () {
+                                        var list =
+                                            additionalDocumentsStream.value;
+                                        list.remove(data);
+                                        additionalDocumentsStream.add(list);
+                                      },
+                                    ),
+                                  );
+                                }).toList(),
                               );
                             }),
                         getButtons(

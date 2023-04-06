@@ -27,7 +27,7 @@ class AddPartsSpecPageState extends BasicState<AddPartsSpecPage>
     return WidgetUtils.wrapRoute(
       (context, type) => Scaffold(
         appBar: AppBar(
-          title: Text(lang.addFileSpec),
+          title: Text(lang.addPart),
         ),
         body: SingleChildScrollView(
           child: Column(
@@ -45,6 +45,20 @@ class AddPartsSpecPageState extends BasicState<AddPartsSpecPage>
                   ),
                 ),
               ),
+              StreamBuilder<List<DocumentSpecInput>>(
+                  stream: _listDocumentsInputStream,
+                  initialData: _listDocumentsInputStream.value,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return SizedBox.shrink();
+                    }
+                    return DocumentsWidget(
+                      listDocument: snapshot.data!,
+                      onChanged: (List<DocumentSpecInput> listDoc) {
+                        _listDocumentsInputStream.add(listDoc);
+                      },
+                    );
+                  }),
               ElevatedButton(
                 onPressed: () => Navigator.push<DocumentSpecInput>(
                   context,
@@ -58,31 +72,8 @@ class AddPartsSpecPageState extends BasicState<AddPartsSpecPage>
                 }),
                 child: Text(lang.addDocumentsSpec),
               ),
-              StreamBuilder<List<DocumentSpecInput>>(
-                  stream: _listDocumentsInputStream,
-                  initialData: _listDocumentsInputStream.value,
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return SizedBox.shrink();
-                    }
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        DocumentsWidget(
-                          listDocument: snapshot.data!,
-                          onChanged: (List<DocumentSpecInput> listDoc) {
-                            _listDocumentsInputStream.add(listDoc);
-                          },
-                        ),
-                      ],
-                    );
-                  }),
-              getButtons(
-                onSave: ((key.currentState?.validate() ?? false) &&
-                        _listDocumentsInputStream.value.isNotEmpty)
-                    ? onSave
-                    : null,
-              ),
+              SizedBox(height: 16),
+              getButtons(onSave: onSave),
             ],
           ),
         ),
@@ -104,6 +95,8 @@ class AddPartsSpecPageState extends BasicState<AddPartsSpecPage>
           documentSpecInputs: _listDocumentsInputStream.value,
           name: partsNameCtrl.text);
       Navigator.of(context).pop(partsSpecInput);
+    } else if (_listDocumentsInputStream.value.isEmpty) {
+      showSnackBar2(context, lang.noDocument);
     }
   }
 }

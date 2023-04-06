@@ -15,9 +15,6 @@ abstract class FilesArchiveService {
   @POST("/admin/archive")
   Future<FilesArchive> saveFilesArchive(@Body() FilesArchiveInput input);
 
-  @GET("/admin/archive/documents/{archiveId}")
-  Future<List<String>> getDocumentsName(@Path("archiveId") String archiveId);
-
   @GET("/admin/archive/{id}")
   Future<FilesArchive> getFileArchiveById(@Path("id") String id);
 
@@ -38,10 +35,6 @@ abstract class FilesArchiveService {
   Future<int> getCountFilesArchiveByDate(
       @Query("startDate") int startDate, @Query("endDate") int endDate);
 
-  @GET("/admin/archive/pdf/images/ids/{pdfId}")
-  Future<List<String>> getPdfImages(@Path("pdfId") String pdfId);
-
-  @POST("/admin/archive/rotate/{imageId}")
-  Future<void> rotateImage(
-      @Path("imageId") String imageId, @Query("angle") double angle);
+  @GET("/admin/archive/documents/{archiveId}")
+  Future<List<String>> getDocumentsName(@Path("archiveId") String archiveId);
 }
