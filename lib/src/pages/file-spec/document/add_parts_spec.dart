@@ -1,9 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/animation/animation_controller.dart';
-import 'package:flutter/src/foundation/change_notifier.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/ticker_provider.dart';
 import 'package:notary_admin/src/pages/file-spec/document/add_document.dart';
 import 'package:notary_admin/src/pages/file-spec/document/document_table_widget.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
@@ -12,7 +7,6 @@ import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/document_spec_input.dart';
 import 'package:notary_model/model/parts_spec_input.dart';
-import 'package:rxdart/src/subjects/subject.dart';
 import 'package:rxdart/subjects.dart';
 
 class AddPartsSpecPage extends StatefulWidget {

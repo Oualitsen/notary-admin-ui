@@ -11,7 +11,6 @@ import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
-import 'package:notary_model/model/document_spec_input.dart';
 import 'package:notary_model/model/files_spec.dart';
 import 'package:notary_model/model/files_spec_input.dart';
 import 'package:notary_model/model/parts_spec_input.dart';
@@ -19,9 +18,6 @@ import 'package:notary_model/model/selection_type.dart';
 import 'package:notary_model/model/steps.dart';
 import 'package:notary_model/model/template_document.dart';
 import 'package:rxdart/rxdart.dart';
-
-import 'document/add_document.dart';
-import 'document/document_table_widget.dart';
 
 class AddFileSpec extends StatefulWidget {
   final FilesSpec? fileSpec;

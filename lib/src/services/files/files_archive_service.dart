@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:notary_model/model/files_archive.dart';
 import 'package:notary_model/model/files_archive_input.dart';
 import 'package:retrofit/retrofit.dart';

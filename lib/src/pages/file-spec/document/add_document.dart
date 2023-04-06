@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:http_error_handler/error_handler.dart';
+import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
+import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/document_spec_input.dart';
 import 'package:rxdart/rxdart.dart';
-import '../../../utils/validation_utils.dart';
-import '../../../widgets/mixins/button_utils_mixin.dart';
 
 class AddDocument extends StatefulWidget {
   const AddDocument({

@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_it/get_it.dart';
-import 'package:http_error_handler/error_handler.dart';
 import 'package:notary_admin/src/db_services/token_db_service.dart';
 import 'package:notary_admin/src/init.dart';
 import 'package:notary_admin/src/pages/pdf/image_widget.dart';

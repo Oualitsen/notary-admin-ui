@@ -8,12 +8,11 @@ import 'package:notary_admin/src/services/admin/steps_service.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
 import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
+import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/document_spec_input.dart';
 import 'package:notary_model/model/files_spec.dart';
 import 'package:notary_model/model/parts_spec.dart';
-import 'package:notary_model/model/step_input.dart';
 import 'package:rxdart/rxdart.dart';
-import '../../widgets/mixins/button_utils_mixin.dart';
 
 class FileSpecTable extends StatefulWidget {
   const FileSpecTable({super.key});

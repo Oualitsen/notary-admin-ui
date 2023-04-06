@@ -3,8 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
-import 'package:notary_model/model/document_spec.dart';
-import 'package:notary_model/model/parts_spec.dart';
 import 'package:rxdart/rxdart.dart';
 
 class UploadDocumentsWidget extends StatefulWidget {
