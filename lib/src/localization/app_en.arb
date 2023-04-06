@@ -277,7 +277,7 @@
   "listDocumentsFileSpec": "Documents",
   "originalDocument": "Original document",
   "requiredDocument": "Required Document",
-  "noDocument": "No documents yet",
+  "noDocument": "Please, add at least one document",
   "filesNumber": "Files code",
   "formToHtml": "Form generating",
   "dataForDocument": "Data for document",
@@ -344,6 +344,6 @@
   "permissionDenied": "Permission Denied",
   "permissionText": "Please grant the permission manually through the device settings",
   "openSettings": "Open settings",
-  "rotateLeft":"Rotate Left",
-  "rotateRight":"Rotate Right"
+  "rotateLeft": "Rotate Left",
+  "rotateRight": "Rotate Right"
 }

@@ -36,7 +36,7 @@ class _ListCustomerPageState extends BasicState<ListCustomerPage>
               MaterialPageRoute(builder: (context) => AddCustomerPage()),
             ).then((value) {
               if (value != null) {
-                tableKey.currentState?.add(value);
+                tableKey.currentState?.refreshPage();
               }
             });
           },

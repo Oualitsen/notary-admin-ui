@@ -30,51 +30,42 @@ class _DocumentsWidgetState extends BasicState<DocumentsWidget>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.maxFinite,
-      height: 200,
-      alignment: Alignment.topLeft,
-      child: StreamBuilder<List<DocumentSpecInput>>(
-          stream: _listDocumentsStream,
-          initialData: _listDocumentsStream.value,
-          builder: (context, snapshot) {
-            if (snapshot.hasData == false) {
-              return SizedBox.shrink();
-            }
-            return snapshot.data!.isEmpty
-                ? ListTile(title: Text(lang.noDocument.toUpperCase()))
-                : ListView.builder(
-                    itemCount: snapshot.data!.length,
-                    itemBuilder: (context, int index) {
-                      var isRequired = snapshot.data![index].optional
-                          ? lang.isNotRequired
-                          : lang.isNotRequired;
-                      var isOriginal = snapshot.data![index].original
-                          ? lang.isOriginal
-                          : lang.isNotOriginal;
-                      var isDoubleSide = snapshot.data![index].doubleSided
-                          ? lang.isDoubleSided
-                          : lang.isNotDoubleSided;
-
-                      return ListTile(
-                        leading: CircleAvatar(
-                          child: Text("${(index + 1)}"),
-                        ),
-                        title: Text("${snapshot.data![index].name}"),
-                        subtitle: Text(
-                            "${isRequired} , ${isOriginal} , ${isDoubleSide}"),
-                        trailing: widget.onChanged != null
-                            ? TextButton(
-                                onPressed: () async => await deleteDocument(
-                                    snapshot.data![index], index),
-                                child: Text(lang.delete),
-                              )
-                            : null,
-                      );
-                    },
-                  );
-          }),
-    );
+    return StreamBuilder<List<DocumentSpecInput>>(
+        stream: _listDocumentsStream,
+        initialData: _listDocumentsStream.value,
+        builder: (context, snapshot) {
+          if (snapshot.hasData == false) {
+            return SizedBox.shrink();
+          }
+          var index = -1;
+          return Column(
+            children: snapshot.data!.map((docSpec) {
+              index++;
+              var isRequired =
+                  docSpec.optional ? lang.isNotRequired : lang.isNotRequired;
+              var isOriginal =
+                  docSpec.original ? lang.isOriginal : lang.isNotOriginal;
+              var isDoubleSide = docSpec.doubleSided
+                  ? lang.isDoubleSided
+                  : lang.isNotDoubleSided;
+              return ListTile(
+                leading: CircleAvatar(
+                  child: Text("${(index + 1)}"),
+                ),
+                title: Text("${docSpec.name}"),
+                subtitle:
+                    Text("${isRequired} , ${isOriginal} , ${isDoubleSide}"),
+                trailing: widget.onChanged != null
+                    ? TextButton(
+                        onPressed: () async =>
+                            await deleteDocument(docSpec, index),
+                        child: Text(lang.delete),
+                      )
+                    : null,
+              );
+            }).toList(),
+          );
+        });
   }
 
   Future<List<DocumentSpecInput>> getData(int page) {

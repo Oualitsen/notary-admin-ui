@@ -189,27 +189,24 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                         if (snapshot.hasData == false) {
                           return SizedBox.shrink();
                         }
+                        var index = -1;
                         return Column(
                           children: [
-                            SizedBox(
-                                height: 200,
-                                child: ListView.builder(
-                                  itemCount: snapshot.data!.length,
-                                  itemBuilder: (context, index) {
-                                    var currentStep = snapshot.data![index];
-                                    return ListTile(
-                                      leading: CircleAvatar(
-                                          child: Text("${(index + 1)}")),
-                                      title: Text("${currentStep.name}"),
-                                      trailing: TextButton.icon(
-                                          onPressed: () {
-                                            deleteStep(index);
-                                          },
-                                          icon: Icon(Icons.delete),
-                                          label: Text(lang.delete)),
-                                    );
-                                  },
-                                )),
+                            Column(
+                                children: snapshot.data!.map((step) {
+                              index++;
+                              return ListTile(
+                                leading:
+                                    CircleAvatar(child: Text("${(index + 1)}")),
+                                title: Text("${step.name}"),
+                                trailing: TextButton.icon(
+                                    onPressed: () {
+                                      deleteStep(index);
+                                    },
+                                    icon: Icon(Icons.delete),
+                                    label: Text(lang.delete)),
+                              );
+                            }).toList()),
                             SizedBox(height: 16),
                             ButtonBar(
                               alignment: MainAxisAlignment.end,
@@ -268,26 +265,27 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                         if (!snapshot.hasData) {
                           return SizedBox.shrink();
                         }
+                        var index = -1;
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Container(
-                              height: 200,
-                              child: ListView.builder(
-                                itemCount: partsSpecInputStream.value.length,
-                                itemBuilder: (context, index) {
-                                  var part = partsSpecInputStream.value[index];
-                                  return ListTile(
-                                    leading: CircleAvatar(
-                                        child: Text("${(index + 1)}")),
-                                    title: Text("${part.name}"),
-                                    trailing: IconButton(
-                                      icon: Icon(Icons.delete),
-                                      onPressed: () => null,
-                                    ),
-                                  );
-                                },
-                              ),
+                            Column(
+                              children: partsSpecInputStream.value.map((part) {
+                                index++;
+                                return ListTile(
+                                  leading: CircleAvatar(
+                                      child: Text("${(index + 1)}")),
+                                  title: Text("${part.name}"),
+                                  trailing: IconButton(
+                                    icon: Icon(Icons.delete),
+                                    onPressed: () {
+                                      var list = partsSpecInputStream.value;
+                                      list.removeAt(index);
+                                      partsSpecInputStream.add(list);
+                                    },
+                                  ),
+                                );
+                              }).toList(),
                             ),
                             SizedBox(height: 16),
                             ButtonBar(

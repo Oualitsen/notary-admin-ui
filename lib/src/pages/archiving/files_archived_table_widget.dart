@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -11,11 +12,13 @@ import 'package:notary_admin/src/init.dart';
 import 'package:notary_admin/src/pages/archiving/add_archive_page.dart';
 import 'package:notary_admin/src/pages/pdf/pdf_images.dart';
 import 'package:notary_admin/src/services/files/files_archive_service.dart';
+import 'package:notary_admin/src/services/files/pdf_service.dart';
 import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/files_archive.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:http/http.dart' as http;
 import 'package:universal_html/html.dart' as html;
@@ -40,6 +43,7 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
     with WidgetUtilsMixin {
   final tokenService = GetIt.instance.get<TokenDbService>();
   final archiveService = GetIt.instance.get<FilesArchiveService>();
+  final pdfService = GetIt.instance.get<PdfService>();
   final tableKey = GlobalKey<LazyPaginatedDataTableState>();
   List<DataColumn> columns = [];
   bool initialized = false;
@@ -211,7 +215,9 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
             return ListTile(
               leading: CircleAvatar(child: Text("${(index + 1)}")),
               title: Text("$element"),
-              trailing: Icon(Icons.download),
+              trailing: element.endsWith("pdf")
+                  ? Icon(Icons.picture_as_pdf)
+                  : Icon(Icons.download),
               onTap: () => downloadDocument(element, data.uploadedFiles[index]),
             );
           },
@@ -238,16 +244,17 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
   downloadDocument(String name, String id) async {
     if (name.endsWith(".pdf")) {
       try {
-        var imageIds = await archiveService.getPdfImages(id);
+        var imageIds = await pdfService.getPdfImages(id);
         push(context, PdfImages(name: name, id: id, imageIds: imageIds));
       } catch (error, stacktrace) {
         print(stacktrace);
         showServerError(context, error: error);
+        throw error;
       }
     } else {
       String? authToken = await tokenService.getToken();
       final response = await http.get(
-        Uri.parse("${getUrlBase()}/admin/grid/content/${id}"),
+        Uri.parse("${getUrlBase()}/admin/grid/download/${id}"),
         headers: {"Authorization": "Bearer $authToken"},
       );
       final bytes = response.bodyBytes;
@@ -260,8 +267,34 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
           ..setAttribute("download", name)
           ..click();
       } else {
-        //@TODO
+        saveBytesToFile(bytes);
       }
+    }
+  }
+
+  Future<void> saveBytesToFile(List<int> bytes) async {
+    var status = await Permission.storage.request();
+    if (status.isGranted) {
+      await FilePicker.platform.getDirectoryPath(
+        dialogTitle: lang.directoryDialog,
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(lang.permissionDenied),
+          content: Text(lang.permissionText),
+          actions: [
+            getButtons(
+              saveLabel: lang.openSettings,
+              onSave: () {
+                openAppSettings();
+                Navigator.of(context).pop();
+              },
+            )
+          ],
+        ),
+      );
     }
   }
 }

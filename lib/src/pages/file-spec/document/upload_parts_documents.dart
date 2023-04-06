@@ -48,49 +48,45 @@ class _UploadPartsDocumentsWidgetState
   @override
   Widget build(BuildContext context) {
     init();
+    var index = -1;
     return SingleChildScrollView(
-      child: Container(
-        height: 200,
-        child: ListView.builder(
-          itemCount: widget.filesSpec.partsSpecs.length,
-          itemBuilder: (context, index) {
-            return StreamBuilder<List<PartsDocument>>(
-                stream: uploadsStream,
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) return SizedBox.shrink();
-                  return ListTile(
-                      leading: CircleAvatar(child: Text("${(index + 1)}")),
-                      trailing: Text(
-                          "${snapshot.data![index].uploaded} / ${snapshot.data![index].maxUpload}"),
-                      title: Container(
-                        alignment: Alignment.centerLeft,
-                        child:
-                            Text("${widget.filesSpec.partsSpecs[index].name}"),
-                      ),
-                      onTap: (() => push<List<PathsDocuments>>(
-                            context,
-                            UploadDocumentsWidget(
-                              pathDocuments:
-                                  snapshot.data![index].pathsDocuments,
-                            ),
-                          ).listen((pathDocuments) {
-                            var list = uploadsStream.value;
-                            list.insert(
-                                index,
-                                PartsDocument(
-                                    maxUpload: list[index].maxUpload,
-                                    uploaded: pathDocuments
-                                        .where((element) => element.selected)
-                                        .toList()
-                                        .length,
-                                    pathsDocuments: pathDocuments));
-                            list.removeAt((index + 1));
-                            uploadsStream.add(list);
-                            change();
-                          })));
-                });
-          },
-        ),
+      child: Column(
+        children: widget.filesSpec.partsSpecs.map((e) {
+          index++;
+          return StreamBuilder<List<PartsDocument>>(
+              stream: uploadsStream,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return SizedBox.shrink();
+                return ListTile(
+                    leading: CircleAvatar(child: Text("${(index + 1)}")),
+                    trailing: Text(
+                        "${snapshot.data![index].uploaded} / ${snapshot.data![index].maxUpload}"),
+                    title: Container(
+                      alignment: Alignment.centerLeft,
+                      child: Text("${widget.filesSpec.partsSpecs[index].name}"),
+                    ),
+                    onTap: (() => push<List<PathsDocuments>>(
+                          context,
+                          UploadDocumentsWidget(
+                            pathDocuments: snapshot.data![index].pathsDocuments,
+                          ),
+                        ).listen((pathDocuments) {
+                          var list = uploadsStream.value;
+                          list.insert(
+                              index,
+                              PartsDocument(
+                                  maxUpload: list[index].maxUpload,
+                                  uploaded: pathDocuments
+                                      .where((element) => element.selected)
+                                      .toList()
+                                      .length,
+                                  pathsDocuments: pathDocuments));
+                          list.removeAt((index + 1));
+                          uploadsStream.add(list);
+                          change();
+                        })));
+              });
+        }).toList(),
       ),
     );
   }

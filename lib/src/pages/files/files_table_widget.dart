@@ -56,8 +56,8 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
       DataColumn(label: Text(lang.customer)),
       DataColumn(label: Text(lang.template)),
       DataColumn(label: Text(lang.listDocumentsFileSpec)),
-      DataColumn(label: Text(lang.delete)),
       DataColumn(label: Text(lang.archive)),
+      DataColumn(label: Text(lang.delete)),
     ];
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
@@ -94,12 +94,10 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
       DataCell(Text(data.number)),
       DataCell(Text(data.specification.name)),
       DataCell(
-        Padding(
-          padding: const EdgeInsets.only(right: 8.0),
-          child: Text(data.currentStep.name),
-        ),
-        showEditIcon: true,
-        onTap: (() => updateCurrentStep(data)),
+        TextButton.icon(
+            label: Text(data.currentStep.name),
+            onPressed: (() => updateCurrentStep(data)),
+            icon: Icon(Icons.edit)),
       ),
       DataCell(TextButton(
           onPressed: () => customerDetails(data),
@@ -110,16 +108,15 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
             onPressed: (() => onPrint(data.printedDocId))),
       ),
       DataCell(
-        Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Text(lang.listDocumentsFileSpec)),
-        showEditIcon: true,
-        onTap: () async => await updateDocumentFolderCustomer(data),
+        TextButton.icon(
+            label: Text(lang.listDocumentsFileSpec),
+            onPressed: () async => await updateDocumentFolderCustomer(data),
+            icon: Icon(Icons.edit)),
       ),
       DataCell(TextButton(
-          onPressed: () => deleteFiles(data), child: Text(lang.delete))),
-      DataCell(TextButton(
           onPressed: () => archiveFiles(data), child: Text(lang.archive))),
+      DataCell(TextButton(
+          onPressed: () => deleteFiles(data), child: Text(lang.delete))),
     ];
     return DataRow(cells: cellList);
   }

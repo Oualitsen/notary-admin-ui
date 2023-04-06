@@ -166,14 +166,33 @@ class _LoadTemplatePageState extends BasicState<LoadTemplatePage>
         ).then((value) => key.currentState?.reload());
       }
       if (value == items[2]) {
-        try {
-          await service.delete(template.id);
-          key.currentState?.reload();
-          await showSnackBar2(context, lang.deletedSuccessfully);
-        } catch (error, stackTrace) {
-          print(stackTrace);
-          showServerError(context, error: error);
-        }
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(lang.confirm),
+            content: Text(lang.confirmDelete),
+            actions: <Widget>[
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  },
+                  child: Text(lang.no.toUpperCase())),
+              TextButton(
+                  onPressed: () async {
+                    try {
+                      await service.delete(template.id);
+                      key.currentState?.reload();
+                      showSnackBar2(context, lang.deletedSuccessfully);
+                      Navigator.of(context).pop(false);
+                    } catch (error, stackTrace) {
+                      print(stackTrace);
+                      showServerError(context, error: error);
+                    }
+                  },
+                  child: Text(lang.yes.toUpperCase())),
+            ],
+          ),
+        );
       }
     }
   }
