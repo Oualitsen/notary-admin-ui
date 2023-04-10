@@ -164,7 +164,6 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
         content: WidgetMixin.ListCustomers(
           context,
           listCustomers: data.customers,
-          width: 300,
         ),
       );
     } catch (error, stacktrace) {
@@ -207,22 +206,18 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
     WidgetMixin.showDialog2(
       context,
       label: lang.listDocumentsFileSpec,
-      content: Container(
-        height: 300,
-        width: 400,
-        child: InfiniteScrollListView<String>(
-          elementBuilder: (context, element, index, animation) {
-            return ListTile(
-              leading: CircleAvatar(child: Text("${(index + 1)}")),
-              title: Text("$element"),
-              trailing: element.endsWith("pdf")
-                  ? Icon(Icons.picture_as_pdf)
-                  : Icon(Icons.download),
-              onTap: () => downloadDocument(element, data.uploadedFiles[index]),
-            );
-          },
-          pageLoader: ((index) => getDataDocuments(index, data)),
-        ),
+      content: InfiniteScrollListView<String>(
+        elementBuilder: (context, element, index, animation) {
+          return ListTile(
+            leading: CircleAvatar(child: Text("${(index + 1)}")),
+            title: Text("$element"),
+            trailing: element.endsWith("pdf")
+                ? Icon(Icons.picture_as_pdf)
+                : Icon(Icons.download),
+            onTap: () => downloadDocument(element, data.uploadedFiles[index]),
+          );
+        },
+        pageLoader: ((index) => getDataDocuments(index, data)),
       ),
     );
   }

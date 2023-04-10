@@ -10,12 +10,12 @@ import 'package:notary_admin/src/widgets/mixins/lang.dart';
 import 'package:notary_model/model/customer.dart';
 
 class WidgetMixin {
-  static Future<T?> showDialog2<T>(
-    BuildContext context, {
-    required String label,
-    required Widget content,
-    List<Widget>? actions,
-  }) {
+  static Future<T?> showDialog2<T>(BuildContext context,
+      {required String label,
+      required Widget content,
+      List<Widget>? actions,
+      double? width,
+      double? height}) {
     var lang = getLang(context);
     return showDialog(
         context: context,
@@ -42,7 +42,11 @@ class WidgetMixin {
                   ],
                 ),
               ),
-              content: content,
+              content: SizedBox(
+                height: height != null ? height : 600,
+                width: width != null ? width : 600,
+                child: content,
+              ),
               actions: actions,
             ));
   }

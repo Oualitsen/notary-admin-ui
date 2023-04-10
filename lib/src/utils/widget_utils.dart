@@ -1,7 +1,7 @@
-import 'package:notary_admin/src/pages/assistant/list_assistant_page.dart';
-import 'package:notary_admin/src/pages/customer/list_customer_page.dart';
-import 'package:notary_admin/src/pages/file-spec/file_spec_List.dart';
-import 'package:notary_admin/src/pages/files/list_files_customer.dart';
+import 'package:notary_admin/src/pages/assistant/assistant_page.dart';
+import 'package:notary_admin/src/pages/customer/customer_page.dart';
+import 'package:notary_admin/src/pages/file-spec/file_spec_page.dart';
+import 'package:notary_admin/src/pages/files/files_page.dart';
 import 'package:notary_admin/src/pages/login_page.dart';
 import 'package:notary_admin/src/pages/printed_docs/printed_docs_page.dart';
 import 'package:notary_admin/src/pages/profile_page.dart';
@@ -131,7 +131,7 @@ Widget createDrawer(BuildContext context) {
         onTap: () => {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ListCustomerPage()),
+            MaterialPageRoute(builder: (context) => CustomerPage()),
           )
         },
       ),
@@ -142,7 +142,7 @@ Widget createDrawer(BuildContext context) {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ListAssistantPage(),
+              builder: (context) => AssistantPage(),
             ),
           );
         },
@@ -171,13 +171,13 @@ Widget createDrawer(BuildContext context) {
         title: (lang.fileSpec),
         icon: Icons.file_download,
         onTap: () => Navigator.push(
-            context, MaterialPageRoute(builder: ((context) => FileSpecList()))),
+            context, MaterialPageRoute(builder: ((context) => FileSpecPage()))),
       ),
       DrawerMenuItem(
         title: lang.listFilesCustomer,
         icon: Icons.file_present_rounded,
-        onTap: () => Navigator.push(context,
-            MaterialPageRoute(builder: (context) => ListFilesCustomer())),
+        onTap: () => Navigator.push(
+            context, MaterialPageRoute(builder: (context) => FilesPage())),
       ),
       DrawerMenuItem(
         title: lang.savedTemplates,

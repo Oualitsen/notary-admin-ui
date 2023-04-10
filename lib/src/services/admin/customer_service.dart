@@ -26,4 +26,13 @@ abstract class CustomerService {
 
   @GET("/admin/customers/files/{id}")
   Future<List<Files>> getFilesByCustomerId(@Path("id") String id);
+  @GET("/admin/customers/search")
+  Future<List<Customer>> searchCustomers({
+    @Query("name") required String name,
+    @Query("index") required int index,
+    @Query("size") required int size,
+  });
+
+  @GET("/admin/customers/search/count")
+  Future<int> searchCount({@Query("name") required String name});
 }

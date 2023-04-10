@@ -1,5 +1,6 @@
 {
   "ar": [
+    "selectCustomers",
     "siteWorkHours",
     "confirmArchiveFiles",
     "general",
@@ -25,6 +26,7 @@
     "addFiles",
     "assistantDetails",
     "menu",
+    "specification",
     "print",
     "fileName",
     "templates",
@@ -89,6 +91,7 @@
   ],
 
   "fr": [
+    "selectCustomers",
     "siteWorkHours",
     "confirmArchiveFiles",
     "general",
@@ -114,6 +117,8 @@
     "addFiles",
     "assistantDetails",
     "menu",
+    "creationDate",
+    "specification",
     "print",
     "fileName",
     "templates",

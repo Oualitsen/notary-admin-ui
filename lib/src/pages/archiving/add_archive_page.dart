@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
+import 'package:notary_admin/src/pages/customer/customer_selection_dialog.dart';
 import 'package:notary_admin/src/pages/customer/customer_selection_page.dart';
 import 'package:notary_admin/src/pages/templates/upload_template.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
@@ -20,7 +21,6 @@ import 'package:notary_model/model/files.dart';
 import 'package:notary_model/model/files_archive.dart';
 import 'package:notary_model/model/files_archive_input.dart';
 import 'package:notary_model/model/files_spec.dart';
-import 'package:notary_model/model/selection_type.dart';
 import 'package:rxdart/rxdart.dart';
 
 class AddArchivePage extends StatefulWidget {
@@ -98,63 +98,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
                 steps: <Step>[
                   Step(
                     title: Text(lang.general.toUpperCase()),
-                    content: Form(
-                        key: _selectFileSpecKey,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              height: 20,
-                            ),
-                            wrapInIgnorePointer(
-                              onTap: selectDate,
-                              child: TextFormField(
-                                  controller: archvingDateCtrl,
-                                  validator: (text) {
-                                    return ValidationUtils.requiredField(
-                                        text, context);
-                                  },
-                                  decoration: getDecoration(
-                                      lang.selectArchivingDate, true)),
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            TextFormField(
-                              controller: _numberFileCtrl,
-                              decoration: getDecoration(
-                                  lang.filesNumber, true, lang.filesNumber),
-                              validator: (String? value) {
-                                if (value == null || value.isEmpty) {
-                                  return lang.requiredField;
-                                }
-                                return null;
-                              },
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            TextFormField(
-                                readOnly: true,
-                                controller: _selectFileSpecCtrl,
-                                decoration: getDecoration(lang.selectFileSpec,
-                                    true, lang.selectFileSpec),
-                                onTap: selectFileSpec,
-                                validator: (String? value) {
-                                  if (value == null || value.isEmpty) {
-                                    return lang.requiredField;
-                                  }
-                                  return null;
-                                }),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            getButtons(
-                                onSave: continued,
-                                skipCancel: true,
-                                saveLabel: lang.next)
-                          ],
-                        )),
+                    content: selectFileSpecWidget(),
                     isActive: activeState == 0,
                     state: getState(0),
                   ),
@@ -162,9 +106,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
                     title: Row(
                       children: [
                         Text(lang.selectCustomer.toUpperCase()),
-                        SizedBox(
-                          width: 20,
-                        ),
+                        SizedBox(width: 20),
                         ButtonBar(
                           children: [
                             ElevatedButton(
@@ -176,27 +118,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
                         ),
                       ],
                     ),
-                    content: Column(
-                      children: [
-                        StreamBuilder<List<Customer>>(
-                            stream: _listcustomerStream,
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) {
-                                return SizedBox.shrink();
-                              }
-                              //
-                              return WidgetMixin.ListCustomers(
-                                context,
-                                listCustomers: _listcustomerStream.value,
-                              );
-                            }),
-                        getButtons(
-                            onSave: continued,
-                            onCancel: previous,
-                            saveLabel: lang.next,
-                            cancelLabel: lang.previous),
-                      ],
-                    ),
+                    content: selectCustomersWidget(),
                     isActive: activeState == 1,
                     state: getState(1),
                   ),
@@ -205,10 +127,8 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
                       title: Text(lang.listDocumentsFileSpec.toUpperCase()),
                       content: Column(
                         children: [
-                          SizedBox(
-                            height: 200,
-                            child: getDocuments(),
-                          ),
+                          getDocuments(),
+                          SizedBox(height: 16),
                           getButtons(
                             onSave: continued,
                             onCancel: previous,
@@ -235,70 +155,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
                         ]),
                       ],
                     ),
-                    content: StreamBuilder<List<UploadData>>(
-                      stream: scannedDocumentsStream,
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return SizedBox.shrink();
-                        }
-                        return Column(
-                          children: [
-                            SizedBox(
-                              height: 200,
-                              child: ListView.builder(
-                                itemCount: snapshot.data!.length,
-                                itemBuilder: (context, index) {
-                                  var element = snapshot.data![index];
-                                  return ListTile(
-                                    leading: CircleAvatar(
-                                        child: Text("${(index + 1)}")),
-                                    title: Text(element.name),
-                                    trailing: Wrap(
-                                      children: [
-                                        StreamBuilder<double>(
-                                            stream: element.progress,
-                                            builder: (context, snapshot) {
-                                              if (snapshot.hasError) {
-                                                return IconButton(
-                                                    onPressed: () {
-                                                      upload(archive.id,
-                                                              element)
-                                                          .listen((event) {});
-                                                    },
-                                                    icon: Icon(
-                                                      Icons.refresh,
-                                                      color: Theme.of(context)
-                                                          .colorScheme
-                                                          .secondary,
-                                                    ));
-                                              }
-                                              if (snapshot.hasData) {
-                                                return Text(
-                                                    "${snapshot.data} %");
-                                              }
-                                              return IconButton(
-                                                  icon: Icon(Icons.cancel),
-                                                  onPressed: () {
-                                                    delete(element);
-                                                  });
-                                            }),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                            getButtons(
-                                onSave: scannedDocumentsStream.value.isNotEmpty
-                                    ? save
-                                    : null,
-                                onCancel: previous,
-                                saveLabel: lang.submit,
-                                cancelLabel: lang.previous),
-                          ],
-                        );
-                      },
-                    ),
+                    content: scannedDocumentWidget(),
                     isActive: widget.files != null
                         ? activeState == 3
                         : activeState == 2,
@@ -352,11 +209,6 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
     } else {
       return StepState.disabled;
     }
-  }
-
-  Future<List<FilesSpec>> getFilesSpec(int index) {
-    var result = fileSpecService.getFileSpecs(pageIndex: index, pageSize: 10);
-    return result;
   }
 
   void save() async {
@@ -415,12 +267,13 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
     WidgetMixin.showDialog2(
       context,
       label: lang.selectFileSpec.toUpperCase(),
-      content: SizedBox(
-        width: 400,
-        height: 300,
-        child: listFilesSpecWidget(),
-      ),
+      content: listFilesSpecWidget(),
     );
+  }
+
+  Future<List<FilesSpec>> getFilesSpec(int index) {
+    var result = fileSpecService.getFileSpecs(pageIndex: index, pageSize: 10);
+    return result;
   }
 
   Widget listFilesSpecWidget() {
@@ -440,15 +293,15 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
   }
 
   void selectCustomers() {
-    push<List<Customer>>(
-        context,
-        CustomerSelection(
-          selectionType: SelectionType.MULTIPLE,
-        )).listen((event) async {
-      if (event.isNotEmpty) {
-        _listcustomerStream.add(event);
-      }
-    });
+    showDialog(
+      context: context,
+      builder: (context) => CustomerSelectionDialog(
+        onSave: (selectedCustomer) {
+          _listcustomerStream.add(selectedCustomer);
+          Navigator.pop(context);
+        },
+      ),
+    );
   }
 
   void uploadTemplate() async {
@@ -560,13 +413,147 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
           name: "${lang.additionalDocuments} ${(i + 1)}",
           id: widget.files!.additionalDocumentIds[i]));
     }
-
-    return ListView.builder(
-      itemCount: documentsInfolist.length,
-      itemBuilder: (context, index) {
+    var index = -1;
+    return Column(
+        children: documentsInfolist.map(
+      (doc) {
+        index++;
         return ListTile(
           leading: CircleAvatar(child: Text("${(index + 1)}")),
-          title: Text("${documentsInfolist[index].name}"),
+          title: Text("${doc.name}"),
+        );
+      },
+    ).toList());
+  }
+
+  Widget selectFileSpecWidget() {
+    return Form(
+        key: _selectFileSpecKey,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(height: 16),
+            wrapInIgnorePointer(
+              onTap: selectDate,
+              child: TextFormField(
+                  controller: archvingDateCtrl,
+                  validator: (text) {
+                    return ValidationUtils.requiredField(text, context);
+                  },
+                  decoration: getDecoration(lang.selectArchivingDate, true)),
+            ),
+            SizedBox(height: 16),
+            TextFormField(
+              controller: _numberFileCtrl,
+              decoration:
+                  getDecoration(lang.filesNumber, true, lang.filesNumber),
+              validator: (String? value) {
+                if (value == null || value.isEmpty) {
+                  return lang.requiredField;
+                }
+                return null;
+              },
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            TextFormField(
+                readOnly: true,
+                controller: _selectFileSpecCtrl,
+                decoration: getDecoration(
+                    lang.selectFileSpec, true, lang.selectFileSpec),
+                onTap: selectFileSpec,
+                validator: (String? value) {
+                  if (value == null || value.isEmpty) {
+                    return lang.requiredField;
+                  }
+                  return null;
+                }),
+            SizedBox(height: 16),
+            getButtons(
+                onSave: continued, skipCancel: true, saveLabel: lang.next)
+          ],
+        ));
+  }
+
+  Widget selectCustomersWidget() {
+    return Column(
+      children: [
+        StreamBuilder<List<Customer>>(
+            stream: _listcustomerStream,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return SizedBox.shrink();
+              }
+              //
+              return WidgetMixin.ListCustomers(
+                context,
+                listCustomers: _listcustomerStream.value,
+              );
+            }),
+        SizedBox(height: 16),
+        getButtons(
+            onSave: continued,
+            onCancel: previous,
+            saveLabel: lang.next,
+            cancelLabel: lang.previous),
+      ],
+    );
+  }
+
+  Widget scannedDocumentWidget() {
+    return StreamBuilder<List<UploadData>>(
+      stream: scannedDocumentsStream,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return SizedBox.shrink();
+        }
+        var index = -1;
+        return Column(
+          children: [
+            Column(
+                children: snapshot.data!.map((element) {
+              index++;
+              return ListTile(
+                leading: CircleAvatar(child: Text("${(index + 1)}")),
+                title: Text(element.name),
+                trailing: Wrap(
+                  children: [
+                    StreamBuilder<double>(
+                        stream: element.progress,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return IconButton(
+                                onPressed: () {
+                                  upload(archive.id, element)
+                                      .listen((event) {});
+                                },
+                                icon: Icon(
+                                  Icons.refresh,
+                                  color:
+                                      Theme.of(context).colorScheme.secondary,
+                                ));
+                          }
+                          if (snapshot.hasData) {
+                            return Text("${snapshot.data} %");
+                          }
+                          return IconButton(
+                              icon: Icon(Icons.cancel),
+                              onPressed: () {
+                                delete(element);
+                              });
+                        }),
+                  ],
+                ),
+              );
+            }).toList()),
+            SizedBox(height: 16),
+            getButtons(
+                onSave: scannedDocumentsStream.value.isNotEmpty ? save : null,
+                onCancel: previous,
+                saveLabel: lang.submit,
+                cancelLabel: lang.previous),
+          ],
         );
       },
     );

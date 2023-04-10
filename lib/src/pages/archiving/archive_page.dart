@@ -162,19 +162,17 @@ class _ArchivePageState extends BasicState<ArchivePage> with WidgetUtilsMixin {
     WidgetMixin.showDialog2(
       context,
       label: lang.selectYear,
-      content: Container(
-        width: 300,
-        height: 300,
-        child: YearPicker(
-          firstDate: DateTime(DateTime.now().year - 100, 1),
-          lastDate: DateTime(DateTime.now().year),
-          initialDate: DateTime(_selectedYearStream.value),
-          selectedDate: DateTime(_selectedYearStream.value),
-          onChanged: (DateTime dateTime) {
-            _selectedYearStream.add(dateTime.year);
-            Navigator.pop(context);
-          },
-        ),
+      width: 300,
+      height: 300,
+      content: YearPicker(
+        firstDate: DateTime(DateTime.now().year - 100, 1),
+        lastDate: DateTime(DateTime.now().year),
+        initialDate: DateTime(_selectedYearStream.value),
+        selectedDate: DateTime(_selectedYearStream.value),
+        onChanged: (DateTime dateTime) {
+          _selectedYearStream.add(dateTime.year);
+          Navigator.pop(context);
+        },
       ),
     );
   }

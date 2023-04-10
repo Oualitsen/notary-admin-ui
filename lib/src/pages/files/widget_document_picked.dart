@@ -8,7 +8,7 @@ import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/files.dart';
 import 'package:rxdart/rxdart.dart';
-import 'list_files_customer.dart';
+import 'files_page.dart';
 
 class WidgetDocumentPicked extends StatefulWidget {
   final Files files;
@@ -31,42 +31,45 @@ class _WidgetDocumentPickedState extends BasicState<WidgetDocumentPicked>
   void initState() {
     files = widget.files;
     if (files.uploadedFiles.isEmpty) {
-      pathDocumentsStream.add(widget.files.specification.partsSpecs[0].documentSpec
-          .map(
-            (e) => PathsDocuments(
-              idDocument: e.id,
-              document: null,
-              selected: false,
-              namePickedDocument: null,
-              path: null,
-            ),
-          )
-          .toList());
+      pathDocumentsStream
+          .add(widget.files.specification.partsSpecs[0].documentSpec
+              .map(
+                (e) => PathsDocuments(
+                  idDocument: e.id,
+                  document: null,
+                  selected: false,
+                  namePickedDocument: null,
+                  path: null,
+                ),
+              )
+              .toList());
     } else {
-      pathDocumentsStream.add(widget.files.specification.partsSpecs[0].documentSpec
-          .map(
-            (e) => PathsDocuments(
-              idDocument: e.id,
-              document: null,
-              selected: true,
-              namePickedDocument: '',
-              nameDocument: '',
-              path: null,
-            ),
-          )
-          .toList());
-      pathDocumentsUpdateStream.add(widget.files.specification.partsSpecs[0].documentSpec
-          .map(
-            (e) => PathsDocuments(
-              idDocument: e.id,
-              document: null,
-              selected: false,
-              namePickedDocument: '',
-              nameDocument: '',
-              path: null,
-            ),
-          )
-          .toList());
+      pathDocumentsStream
+          .add(widget.files.specification.partsSpecs[0].documentSpec
+              .map(
+                (e) => PathsDocuments(
+                  idDocument: e.id,
+                  document: null,
+                  selected: true,
+                  namePickedDocument: '',
+                  nameDocument: '',
+                  path: null,
+                ),
+              )
+              .toList());
+      pathDocumentsUpdateStream
+          .add(widget.files.specification.partsSpecs[0].documentSpec
+              .map(
+                (e) => PathsDocuments(
+                  idDocument: e.id,
+                  document: null,
+                  selected: false,
+                  namePickedDocument: '',
+                  nameDocument: '',
+                  path: null,
+                ),
+              )
+              .toList());
     }
     super.initState();
   }
@@ -292,10 +295,8 @@ class _WidgetDocumentPickedState extends BasicState<WidgetDocumentPicked>
             }
           }
           await showSnackBar2(context, lang.savedSuccessfully);
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (BuildContext) => ListFilesCustomer()));
+          Navigator.push(context,
+              MaterialPageRoute(builder: (BuildContext) => FilesPage()));
         } else {
           showSnackBar2(context, lang.noDocument);
         }
@@ -308,10 +309,8 @@ class _WidgetDocumentPickedState extends BasicState<WidgetDocumentPicked>
           }
 
           await showSnackBar2(context, lang.savedSuccessfully);
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (BuildContext) => ListFilesCustomer()));
+          Navigator.push(context,
+              MaterialPageRoute(builder: (BuildContext) => FilesPage()));
         } else {
           showSnackBar2(context, lang.noDocument);
         }
@@ -335,10 +334,8 @@ class _WidgetDocumentPickedState extends BasicState<WidgetDocumentPicked>
             }
           }
           await showSnackBar2(context, lang.savedSuccessfully);
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (BuildContext) => ListFilesCustomer()));
+          Navigator.push(context,
+              MaterialPageRoute(builder: (BuildContext) => FilesPage()));
         } else {
           showSnackBar2(context, lang.noDocument);
         }
@@ -350,10 +347,8 @@ class _WidgetDocumentPickedState extends BasicState<WidgetDocumentPicked>
             }
           }
           await showSnackBar2(context, lang.savedSuccessfully);
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (BuildContext) => ListFilesCustomer()));
+          Navigator.push(context,
+              MaterialPageRoute(builder: (BuildContext) => FilesPage()));
         } else {
           showSnackBar2(context, lang.noDocument);
         }

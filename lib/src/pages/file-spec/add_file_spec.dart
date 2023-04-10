@@ -3,7 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:notary_admin/src/pages/file-spec/document/add_parts_spec.dart';
-import 'package:notary_admin/src/pages/file-spec/file_spec_List.dart';
+import 'package:notary_admin/src/pages/file-spec/file_spec_page.dart';
 import 'package:notary_admin/src/pages/steps/step_selection_widget.dart';
 import 'package:notary_admin/src/services/admin/template_document_service.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
@@ -379,7 +379,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
         await service.saveFileSpec(input);
         await showSnackBar2(context, lang.savedSuccessfully);
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => FileSpecList()));
+            context, MaterialPageRoute(builder: (context) => FileSpecPage()));
       } else {
         var update = FilesSpecInput(
             steps: _listStepsStream.value,
@@ -390,7 +390,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
         if (partsSpecInputStream.value.isNotEmpty) {
           await service.saveFileSpec(update);
           await showSnackBar2(context, lang.updatedSuccessfully);
-          push(context, FileSpecList());
+          push(context, FileSpecPage());
         } else {
           await showSnackBar2(
               context, " ${lang.listDocumentsFileSpec}   ${lang.empty}");
@@ -424,23 +424,19 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
     WidgetMixin.showDialog2(
       context,
       label: lang.selectTemplate,
-      content: SizedBox(
-        width: 400,
-        height: 300,
-        child: InfiniteScrollListView(
-            elementBuilder: ((context, element, index, animation) {
-              return ListTile(
-                title: Text(element.name),
-                onTap: () {
-                  _templateFileSpecCtrl.text = element.name;
-                  templateIdStream.add(element.id);
-                  Navigator.of(context).pop(true);
-                },
-              );
-            }),
-            refreshable: true,
-            pageLoader: getTemplates),
-      ),
+      content: InfiniteScrollListView(
+          elementBuilder: ((context, element, index, animation) {
+            return ListTile(
+              title: Text(element.name),
+              onTap: () {
+                _templateFileSpecCtrl.text = element.name;
+                templateIdStream.add(element.id);
+                Navigator.of(context).pop(true);
+              },
+            );
+          }),
+          refreshable: true,
+          pageLoader: getTemplates),
     );
   }
 

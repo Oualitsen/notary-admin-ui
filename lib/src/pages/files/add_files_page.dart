@@ -1,11 +1,15 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_responsive_tools/device_screen_type.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
+import 'package:notary_admin/src/pages/customer/add_customer_page.dart';
+import 'package:notary_admin/src/pages/customer/customer_selection_dialog.dart';
 import 'package:notary_admin/src/pages/customer/customer_selection_page.dart';
 import 'package:notary_admin/src/pages/file-spec/document/upload_parts_documents.dart';
+import 'package:notary_admin/src/pages/search/search_widget.dart';
 import 'package:notary_admin/src/pages/templates/form_and_view_html.dart';
 import 'package:notary_admin/src/pages/templates/upload_template.dart';
 import 'package:notary_admin/src/services/admin/template_document_service.dart';
@@ -25,7 +29,7 @@ import 'package:notary_model/model/printed_doc_input.dart';
 import 'package:notary_model/model/selection_type.dart';
 import 'package:rxdart/rxdart.dart';
 
-import 'list_files_customer.dart';
+import 'files_page.dart';
 
 class AddFilesCustomer extends StatefulWidget {
   const AddFilesCustomer({
@@ -53,13 +57,15 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
   final _pathDocumentsStream = BehaviorSubject.seeded(<PathsDocuments>[]);
   //Key
   final GlobalKey<FormState> _selectFileSpecKey = GlobalKey();
+  final listKey = GlobalKey<InfiniteScrollListViewState>();
+
   //controlers
   final _selectFileSpecCtrl = TextEditingController();
   final _numberFileCtrl = TextEditingController();
   //var
+  @override
   void initState() {
     _folderValidateStream.add(false);
-    super.initState();
   }
 
   @override
@@ -84,95 +90,12 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                 steps: <Step>[
                   Step(
                     title: Text(lang.general.toUpperCase()),
-                    content: Form(
-                        key: _selectFileSpecKey,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              height: 20,
-                            ),
-                            TextFormField(
-                              controller: _numberFileCtrl,
-                              decoration: getDecoration(
-                                  lang.filesNumber, true, lang.filesNumber),
-                              validator: (String? value) {
-                                if (value == null || value.isEmpty) {
-                                  return lang.requiredField;
-                                }
-                                return null;
-                              },
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            wrapInIgnorePointer(
-                              child: TextFormField(
-                                controller: _selectFileSpecCtrl,
-                                decoration: getDecoration(lang.selectFileSpec,
-                                    true, lang.selectFileSpec),
-                                validator: (text) =>
-                                    ValidationUtils.requiredField(
-                                        text, context),
-                              ),
-                              onTap: selectFileSpec,
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            getButtons(
-                                onSave: continued,
-                                skipCancel: true,
-                                saveLabel: lang.next)
-                          ],
-                        )),
+                    content: generalFormWidget(),
                     isActive: activeState == 0,
                     state: getState(0),
                   ),
                   Step(
-                    title: Row(
-                      children: [
-                        Text(lang.selectCustomer.toUpperCase()),
-                        SizedBox(
-                          width: 20,
-                        ),
-                        StreamBuilder<int>(
-                            stream: _currentStepStream,
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData == false) {
-                                return SizedBox.shrink();
-                              }
-                              return ButtonBar(children: [
-                                ElevatedButton(
-                                  onPressed: snapshot.data == 1
-                                      ? () {
-                                          Navigator.push<List<Customer>>(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    CustomerSelection(
-                                                      selectionType:
-                                                          SelectionType
-                                                              .MULTIPLE,
-                                                    )),
-                                          ).then((value) async {
-                                            if (value != null) {
-                                              _listcustomerStream.add(value);
-                                              if (_listcustomerStream
-                                                  .value.isEmpty) {
-                                                await showSnackBar2(
-                                                    context, lang.noCustomer);
-                                              }
-                                            }
-                                          });
-                                        }
-                                      : null,
-                                  child: Icon(Icons.add),
-                                ),
-                              ]);
-                            }),
-                      ],
-                    ),
+                    title: selectCustomerTitleWidget(),
                     content: Column(
                       children: [
                         StreamBuilder<List<Customer>>(
@@ -443,8 +366,8 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
               context, files.id, additionalDocumentsStream.value);
         }
         await showSnackBar2(context, lang.createdsuccssfully);
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => ListFilesCustomer()));
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => FilesPage()));
       }
     } catch (error, stackTrace) {
       print(stackTrace);
@@ -465,23 +388,19 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
     WidgetMixin.showDialog2(
       context,
       label: lang.selectFileSpec.toUpperCase(),
-      content: SizedBox(
-        width: 400,
-        height: 300,
-        child: InfiniteScrollListView(
-            elementBuilder: ((context, element, index, animation) {
-              return ListTile(
-                title: Text("${element.name}"),
-                onTap: () {
-                  _selectFileSpecCtrl.text = element.name;
-                  _filesSpecStream.add(element);
-                  Navigator.of(context).pop(true);
-                },
-              );
-            }),
-            refreshable: true,
-            pageLoader: getFilesSpec),
-      ),
+      content: InfiniteScrollListView(
+          elementBuilder: ((context, element, index, animation) {
+            return ListTile(
+              title: Text("${element.name}"),
+              onTap: () {
+                _selectFileSpecCtrl.text = element.name;
+                _filesSpecStream.add(element);
+                Navigator.of(context).pop(true);
+              },
+            );
+          }),
+          refreshable: true,
+          pageLoader: getFilesSpec),
     );
   }
 
@@ -537,5 +456,88 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
       print(stacktrace);
       throw error;
     }
+  }
+
+  Widget generalFormWidget() {
+    return Form(
+        key: _selectFileSpecKey,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: 20,
+            ),
+            TextFormField(
+              controller: _numberFileCtrl,
+              decoration:
+                  getDecoration(lang.filesNumber, true, lang.filesNumber),
+              validator: (String? value) {
+                if (value == null || value.isEmpty) {
+                  return lang.requiredField;
+                }
+                return null;
+              },
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            wrapInIgnorePointer(
+              child: TextFormField(
+                controller: _selectFileSpecCtrl,
+                decoration: getDecoration(
+                    lang.selectFileSpec, true, lang.selectFileSpec),
+                validator: (text) =>
+                    ValidationUtils.requiredField(text, context),
+              ),
+              onTap: selectFileSpec,
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            getButtons(
+                onSave: continued, skipCancel: true, saveLabel: lang.next)
+          ],
+        ));
+  }
+
+  Widget selectCustomerTitleWidget() {
+    return Row(
+      children: [
+        Text(lang.selectCustomer.toUpperCase()),
+        SizedBox(
+          width: 20,
+        ),
+        StreamBuilder<int>(
+            stream: _currentStepStream,
+            builder: (context, snapshot) {
+              if (snapshot.hasData == false) {
+                return SizedBox.shrink();
+              }
+              return ButtonBar(children: [
+                ElevatedButton(
+                  onPressed: snapshot.data == 1
+                      ? (() => selectCustomerDialog())
+                      : null,
+                  child: Icon(Icons.add),
+                ),
+              ]);
+            }),
+      ],
+    );
+  }
+
+  selectCustomerDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => CustomerSelectionDialog(
+        onSave: (selectedCustomer) {
+          _listcustomerStream.add(selectedCustomer);
+          if (_listcustomerStream.value.isEmpty) {
+            showSnackBar2(context, lang.noCustomer);
+          }
+          Navigator.pop(context);
+        },
+      ),
+    );
   }
 }
