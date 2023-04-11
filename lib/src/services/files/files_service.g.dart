@@ -320,7 +320,7 @@ class _FilesService implements FilesService {
     )
             .compose(
               _dio.options,
-              'search/spec',
+              '/admin/files/search/spec',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -344,7 +344,7 @@ class _FilesService implements FilesService {
     )
         .compose(
           _dio.options,
-          'count/spec',
+          '/admin/files/count/spec',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -375,7 +375,7 @@ class _FilesService implements FilesService {
     )
             .compose(
               _dio.options,
-              'search/number',
+              '/admin/files/search/number',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -399,7 +399,7 @@ class _FilesService implements FilesService {
     )
         .compose(
           _dio.options,
-          'count/number',
+          '/admin/files/count/number',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -430,7 +430,7 @@ class _FilesService implements FilesService {
     )
             .compose(
               _dio.options,
-              'search/customer',
+              '/admin/files/search/customer',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -454,7 +454,70 @@ class _FilesService implements FilesService {
     )
         .compose(
           _dio.options,
-          'count/customer',
+          '/admin/files/count/customer',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = _result.data!;
+    return value;
+  }
+
+  @override
+  Future<List<Files>> searchFiles({
+    required number,
+    required filesSpecName,
+    required customerIds,
+  }) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'number': number,
+      r'filesSpecName': filesSpecName,
+      r'customerIds': customerIds,
+    };
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result =
+        await _dio.fetch<List<dynamic>>(_setStreamType<List<Files>>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/admin/files/search',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    var value = _result.data!
+        .map((dynamic i) => Files.fromJson(i as Map<String, dynamic>))
+        .toList();
+    return value;
+  }
+
+  @override
+  Future<int> countSearchFiles({
+    required number,
+    required filesSpecName,
+    required customerIds,
+  }) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'number': number,
+      r'filesSpecName': filesSpecName,
+      r'customerIds': customerIds,
+    };
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.fetch<int>(_setStreamType<int>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          '/admin/files/search/count',
           queryParameters: queryParameters,
           data: _data,
         )

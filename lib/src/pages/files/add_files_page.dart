@@ -1,15 +1,11 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_responsive_tools/device_screen_type.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
-import 'package:notary_admin/src/pages/customer/add_customer_page.dart';
 import 'package:notary_admin/src/pages/customer/customer_selection_dialog.dart';
-import 'package:notary_admin/src/pages/customer/customer_selection_page.dart';
 import 'package:notary_admin/src/pages/file-spec/document/upload_parts_documents.dart';
-import 'package:notary_admin/src/pages/search/search_widget.dart';
 import 'package:notary_admin/src/pages/templates/form_and_view_html.dart';
 import 'package:notary_admin/src/pages/templates/upload_template.dart';
 import 'package:notary_admin/src/services/admin/template_document_service.dart';
@@ -26,7 +22,6 @@ import 'package:notary_model/model/customer.dart';
 import 'package:notary_model/model/files_input.dart';
 import 'package:notary_model/model/files_spec.dart';
 import 'package:notary_model/model/printed_doc_input.dart';
-import 'package:notary_model/model/selection_type.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'files_page.dart';

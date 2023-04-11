@@ -31,23 +31,28 @@ class FilesTableWidget extends StatefulWidget {
 
 class _FilesTableWidgetState extends BasicState<FilesTableWidget>
     with WidgetUtilsMixin {
+  //services
   final filesService = GetIt.instance.get<FilesService>();
   final servicePrintDocument = GetIt.instance.get<PrintedDocService>();
+  //key
   final tableKey = GlobalKey<LazyPaginatedDataTableState>();
+  final fileNameKey = GlobalKey<FormState>();
+  //controllers
+  final templateNameCtrl = TextEditingController();
+  final filesCodeSearchCtrl = TextEditingController();
+  final filesSpecSearchCtrl = TextEditingController();
+  //streams
+  final dropDownValueStream = BehaviorSubject.seeded("");
+  final searchValueStream = BehaviorSubject.seeded("");
+  final filesCodeSearchStream = BehaviorSubject.seeded("");
+  final filesSpecSearchStream = BehaviorSubject.seeded("");
+  final searchFilterStream = BehaviorSubject<SearchFilter?>();
+  final customerSearchStream = BehaviorSubject.seeded(<Customer>[]);
+  //variables
   List<DataColumn> columns = [];
   bool initialized = false;
   final columnSpacing = 60.0;
   late List<String> items;
-  final dropDownValueStream = BehaviorSubject.seeded("");
-  final fileNameKey = GlobalKey<FormState>();
-  final templateNameCtrl = TextEditingController();
-  final searchFilterStream = BehaviorSubject<SearchFilter?>();
-  final filesCodeSearchCtrl = TextEditingController();
-  final filesCodeSearchStream = BehaviorSubject.seeded("");
-  final filesSpecSearchCtrl = TextEditingController();
-  final filesSpecSearchStream = BehaviorSubject.seeded("");
-  final customerSearchStream = BehaviorSubject.seeded(<Customer>[]);
-  final searchValueStream = BehaviorSubject.seeded("");
 
   @override
   void initState() {
@@ -55,6 +60,15 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
         .where((event) => tableKey.currentState != null)
         .debounceTime(Duration(milliseconds: 500))
         .listen((value) {
+      tableKey.currentState?.refreshPage();
+    });
+    filesCodeSearchStream.listen((value) {
+      tableKey.currentState?.refreshPage();
+    });
+    filesSpecSearchStream.listen((value) {
+      tableKey.currentState?.refreshPage();
+    });
+    customerSearchStream.listen((value) {
       tableKey.currentState?.refreshPage();
     });
     super.initState();
@@ -93,77 +107,16 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
         },
       )),
       DataColumn(
-        label: StreamBuilder<SearchFilter?>(
-            stream: searchFilterStream,
-            builder: (context, snapshot) {
-              if (snapshot.data == SearchFilter.NUMBER) {
-                return Container(
-                  width: 100,
-                  child: TextFormField(
-                    autofocus: true,
-                    onChanged: (value) {
-                      filesCodeSearchStream.add(value);
-                      print("this is the value : $value");
-                    },
-                    controller: filesCodeSearchCtrl,
-                    decoration: InputDecoration(
-                      suffixIcon: IconButton(
-                        onPressed: () {
-                          searchFilterStream.add(null);
-                          filesCodeSearchCtrl.clear();
-                          filesCodeSearchStream.add("");
-                        },
-                        icon: Icon(Icons.close),
-                      ),
-                    ),
-                  ),
-                );
-              }
-              return InkWell(
-                child: Row(
-                  children: [Text(lang.filesNumber), Icon(Icons.search)],
-                ),
-                onTap: () {
-                  searchFilterStream.add(SearchFilter.NUMBER);
-                },
-              );
-            }),
+        label: columnWidget(
+          lang.filesNumber,
+          SearchFilter.NUMBER,
+        ),
       ),
       DataColumn(
-        label: StreamBuilder<SearchFilter?>(
-            stream: searchFilterStream,
-            builder: (context, snapshot) {
-              if (snapshot.data == SearchFilter.FILES_SPEC_NAME) {
-                return Container(
-                  width: 100,
-                  child: TextFormField(
-                    autofocus: true,
-                    onChanged: (value) {
-                      filesSpecSearchStream.add(value);
-                    },
-                    controller: filesSpecSearchCtrl,
-                    decoration: InputDecoration(
-                      suffixIcon: IconButton(
-                        onPressed: () {
-                          searchFilterStream.add(null);
-                          filesSpecSearchCtrl.clear();
-                          filesSpecSearchStream.add("");
-                        },
-                        icon: Icon(Icons.close),
-                      ),
-                    ),
-                  ),
-                );
-              }
-              return InkWell(
-                child: Row(
-                  children: [Text(lang.specification), Icon(Icons.search)],
-                ),
-                onTap: () {
-                  searchFilterStream.add(SearchFilter.FILES_SPEC_NAME);
-                },
-              );
-            }),
+        label: columnWidget(
+          lang.specification,
+          SearchFilter.FILES_SPEC_NAME,
+        ),
       ),
       DataColumn(label: Text(lang.state)),
       DataColumn(
@@ -214,7 +167,6 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
                 filesCode.isNotEmpty
                     ? InputChip(
                         label: Text("${filesCode}"),
-                        backgroundColor: Colors.lightBlue,
                         onDeleted: () {
                           filesCodeSearchStream.add("");
                           filesCodeSearchCtrl.clear();
@@ -225,7 +177,6 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
                 filesSpec.isNotEmpty
                     ? InputChip(
                         label: Text("${filesSpec}"),
-                        backgroundColor: Colors.cyan,
                         onDeleted: () {
                           filesSpecSearchStream.add("");
                           filesSpecSearchCtrl.clear();
@@ -262,54 +213,41 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   }
 
   Future<List<Files>> getData(PageInfo page) {
-    if (widget.seachValue != null && widget.seachValue!.isNotEmpty) {
-      switch (searchFilterStream.valueOrNull) {
-        case SearchFilter.ARCHIVNG_DATE:
-          return filesService.getFilesAll(
-              pageIndex: page.pageIndex, pageSize: page.pageSize);
-        case SearchFilter.CUSTOMER_NAME:
-          return filesService.searchByCustomerName(
-            name: widget.seachValue!,
-            index: page.pageIndex,
-            size: page.pageSize,
-          );
-        case SearchFilter.FILES_SPEC_NAME:
-          return filesService.searchBySpecificationName(
-            name: widget.seachValue!,
-            index: page.pageIndex,
-            size: page.pageSize,
-          );
-        case SearchFilter.NUMBER:
-          return filesService.searchByNumber(
-            number: widget.seachValue!,
-            index: page.pageIndex,
-            size: page.pageSize,
-          );
-        default:
-          return filesService.getFilesAll(
-              pageIndex: page.pageIndex, pageSize: page.pageSize);
+    try {
+      if (filesCodeSearchStream.value.isNotEmpty ||
+          filesSpecSearchStream.value.isNotEmpty ||
+          customerSearchStream.value.isNotEmpty) {
+        var customerIds = "";
+        customerSearchStream.value.forEach((e) {
+          customerIds = customerIds + "," + e.id;
+        });
+
+        return filesService.searchFiles(
+            number: filesCodeSearchStream.value,
+            filesSpecName: filesSpecSearchStream.value,
+            customerIds: customerIds);
       }
+      return filesService.getFilesAll(
+          pageIndex: page.pageIndex, pageSize: page.pageSize);
+    } catch (error, stacktrace) {
+      print(stacktrace);
+      showServerError(context, error: error);
+      throw error;
     }
-    return filesService.getFilesAll(
-        pageIndex: page.pageIndex, pageSize: page.pageSize);
   }
 
   Future<int> getTotal() {
-    if (widget.seachValue != null && widget.seachValue!.isNotEmpty) {
-      switch (searchFilterStream.valueOrNull) {
-        case SearchFilter.ARCHIVNG_DATE:
-          return filesService.getFilesCount();
-        case SearchFilter.CUSTOMER_NAME:
-          return filesService.countByCustomerName(
-            widget.seachValue!,
-          );
-        case SearchFilter.FILES_SPEC_NAME:
-          return filesService.countBySpecificationName(widget.seachValue!);
-        case SearchFilter.NUMBER:
-          return filesService.countByNumber(widget.seachValue!);
-        default:
-          return filesService.getFilesCount();
-      }
+    if (filesCodeSearchStream.value.isNotEmpty ||
+        filesSpecSearchStream.value.isNotEmpty ||
+        customerSearchStream.value.isNotEmpty) {
+      var customerIds = "";
+      customerSearchStream.value.forEach((e) {
+        customerIds = customerIds + "," + e.id;
+      });
+      return filesService.countSearchFiles(
+          number: filesCodeSearchStream.value,
+          filesSpecName: filesSpecSearchStream.value,
+          customerIds: customerIds);
     }
     return filesService.getFilesCount();
   }
@@ -405,21 +343,22 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
               },
               child: Text(lang.no.toUpperCase())),
           TextButton(
-              onPressed: () async {
-                try {
-                  progressSubject.add(true);
-                  await filesService.updateCurrentStep(id, newStep);
-                  tableKey.currentState?.refreshPage();
-                  Navigator.of(context).pop(true);
-                  await showSnackBar2(context, lang.updatedSuccessfully);
-                } catch (error, stacktrace) {
-                  showServerError(context, error: error);
-                  print(stacktrace);
-                } finally {
-                  progressSubject.add(false);
-                }
-              },
-              child: Text(lang.yes.toUpperCase())),
+            onPressed: () async {
+              try {
+                progressSubject.add(true);
+                await filesService.updateCurrentStep(id, newStep);
+                tableKey.currentState?.refreshPage();
+                Navigator.of(context).pop(true);
+                await showSnackBar2(context, lang.updatedSuccessfully);
+              } catch (error, stacktrace) {
+                showServerError(context, error: error);
+                print(stacktrace);
+              } finally {
+                progressSubject.add(false);
+              }
+            },
+            child: Text(lang.yes.toUpperCase()),
+          ),
         ],
       ),
     );
@@ -558,6 +497,50 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
       }
     }
     return isUploaded;
+  }
+
+  Widget columnWidget(String label, SearchFilter filter) {
+    var stream = filter == SearchFilter.NUMBER
+        ? filesCodeSearchStream
+        : filesSpecSearchStream;
+
+    var controller = filter == SearchFilter.NUMBER
+        ? filesCodeSearchCtrl
+        : filesSpecSearchCtrl;
+
+    return StreamBuilder<SearchFilter?>(
+        stream: searchFilterStream,
+        builder: (context, snapshot) {
+          if (snapshot.data == filter || controller.text.isNotEmpty) {
+            return Container(
+              width: 100,
+              child: TextFormField(
+                autofocus: true,
+                onFieldSubmitted: (value) {
+                  stream.add(value);
+                },
+                controller: controller,
+                decoration: InputDecoration(
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      searchFilterStream.add(null);
+                      controller.clear();
+                      stream.add("");
+                    },
+                    icon: Icon(Icons.close),
+                  ),
+                ),
+              ),
+            );
+          }
+
+          return InkWell(
+            child: Row(
+              children: [Text(label), Icon(Icons.search)],
+            ),
+            onTap: () => searchFilterStream.add(filter),
+          );
+        });
   }
 }
 

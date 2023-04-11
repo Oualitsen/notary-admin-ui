@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/pages/archiving/add_archive_page.dart';
 import 'package:notary_admin/src/pages/archiving/files_archived_table_widget.dart';
 import 'package:notary_admin/src/services/files/files_archive_service.dart';
@@ -19,34 +20,12 @@ class ArchivePage extends StatefulWidget {
 class _ArchivePageState extends BasicState<ArchivePage> with WidgetUtilsMixin {
   final archiveService = GetIt.instance.get<FilesArchiveService>();
   final _selectedYearStream = BehaviorSubject.seeded(DateTime.now().year);
-  final countStream = BehaviorSubject.seeded(<int>[]);
+
   final listViewKey = GlobalKey();
-  late List<String> monthList;
-  bool initialize = false;
-  init() {
-    if (initialize) return;
-    initialize = true;
-    monthList = [
-      lang.january,
-      lang.february,
-      lang.march,
-      lang.april,
-      lang.may,
-      lang.june,
-      lang.july,
-      lang.august,
-      lang.september,
-      lang.october,
-      lang.novermber,
-      lang.december
-    ];
-    var list = monthList.map((e) => 0).toList();
-    countStream.add(list);
-  }
+  final tableKey = GlobalKey<LazyPaginatedDataTableState>();
 
   @override
   Widget build(BuildContext context) {
-    init();
     return WidgetUtils.wrapRoute(
       (context, type) => Scaffold(
         appBar: AppBar(
@@ -112,46 +91,16 @@ class _ArchivePageState extends BasicState<ArchivePage> with WidgetUtilsMixin {
         body: StreamBuilder<int>(
             stream: _selectedYearStream,
             builder: (context, snapshot) {
-              if (snapshot.hasData == false) {
+              if (!snapshot.hasData) {
                 return SizedBox.shrink();
               }
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ListView.builder(
-                  key: listViewKey,
-                  itemCount: DateTime.monthsPerYear,
-                  itemBuilder: (context, index) {
-                    var startDate = DateTime(snapshot.data!, (index + 1))
-                        .millisecondsSinceEpoch;
-                    var endDate =
-                        DateTime(snapshot.data!, (index + 2), 0, 23, 59, 59)
-                            .millisecondsSinceEpoch;
-                    var title = "${monthList[index]}";
-                    getCount(index, startDate, endDate);
-                    return StreamBuilder<List<int>>(
-                        stream: countStream,
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return SizedBox.shrink();
-                          }
-                          return ListTile(
-                            leading: Icon(Icons.folder),
-                            title: Text("${title} (${snapshot.data![index]})"),
-                            onTap: () {
-                              push(
-                                context,
-                                FilesArchiveTableWidget(
-                                  title:
-                                      "${title} ${_selectedYearStream.value}",
-                                  startDate: startDate,
-                                  endDate: endDate,
-                                ),
-                              );
-                            },
-                          );
-                        });
-                  },
-                ),
+              var startDate = DateTime(snapshot.data!, 1, 1);
+              var endDate = DateTime(startDate.year, 12, 31);
+              tableKey.currentState?.refreshPage();
+              return FilesArchiveTableWidget(
+                tableKey: tableKey,
+                startDate: startDate.millisecondsSinceEpoch,
+                endDate: endDate.millisecondsSinceEpoch,
               );
             }),
       ),
@@ -182,13 +131,4 @@ class _ArchivePageState extends BasicState<ArchivePage> with WidgetUtilsMixin {
 
   @override
   List<Subject> get subjects => [];
-
-  getCount(int index, int startDate, int endDate) async {
-    var res =
-        await archiveService.getCountFilesArchiveByDate(startDate, endDate);
-    var list = countStream.value;
-    list.insert(index, res);
-    list.removeAt(index + 1);
-    countStream.add(list);
-  }
 }
