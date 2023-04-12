@@ -1,6 +1,7 @@
 {
   "ar": [
     "selectCustomers",
+    "end",
     "siteWorkHours",
     "confirmArchiveFiles",
     "general",
@@ -87,11 +88,13 @@
     "permissionText",
     "openSettings",
     "rotateLeft",
-    "rotateRight"
+    "rotateRight",
+    "selectDateRange"
   ],
 
   "fr": [
     "selectCustomers",
+    "end",
     "siteWorkHours",
     "confirmArchiveFiles",
     "general",
@@ -179,6 +182,7 @@
     "permissionText",
     "openSettings",
     "rotateLeft",
-    "rotateRight"
+    "rotateRight",
+    "selectDateRange"
   ]
 }

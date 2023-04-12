@@ -77,14 +77,20 @@ abstract class FilesService {
   Future<int> countByCustomerName(@Query("name") String name);
 
   @GET("/admin/files/search")
-  Future<List<Files>> searchFiles(
-      {@Query("number") required String number,
-      @Query("filesSpecName") required String filesSpecName,
-      @Query("customerIds") required String customerIds});
+  Future<List<Files>> searchFiles({
+    @Query("number") required String number,
+    @Query("filesSpecName") required String filesSpecName,
+    @Query("customerIds") required String customerIds,
+    @Query("startDate") required int startDate,
+    @Query("endDate") required int endDate,
+  });
 
   @GET("/admin/files/search/count")
-  Future<int> countSearchFiles(
-      {@Query("number") required String number,
-      @Query("filesSpecName") required String filesSpecName,
-      @Query("customerIds") required String customerIds});
+  Future<int> countSearchFiles({
+    @Query("number") required String number,
+    @Query("filesSpecName") required String filesSpecName,
+    @Query("customerIds") required String customerIds,
+    @Query("startDate") required int startDate,
+    @Query("endDate") required int endDate,
+  });
 }

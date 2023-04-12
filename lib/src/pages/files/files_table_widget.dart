@@ -8,6 +8,7 @@ import 'package:notary_admin/src/pages/customer/customer_selection_dialog.dart';
 import 'package:notary_admin/src/pages/file-spec/document/replace_document_widget.dart';
 import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget.dart';
 import 'package:notary_admin/src/pages/printed_docs/printed_doc_view.dart';
+import 'package:notary_admin/src/pages/search/date_range_picker_widget.dart';
 import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
 import 'package:notary_admin/src/services/files/files_service.dart';
 import 'package:notary_admin/src/utils/widget_mixin_new.dart';
@@ -48,6 +49,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   final filesSpecSearchStream = BehaviorSubject.seeded("");
   final searchFilterStream = BehaviorSubject<SearchFilter?>();
   final customerSearchStream = BehaviorSubject.seeded(<Customer>[]);
+  final rangeDateSearchStream = BehaviorSubject.seeded(<int>[]);
   //variables
   List<DataColumn> columns = [];
   bool initialized = false;
@@ -69,6 +71,12 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
       tableKey.currentState?.refreshPage();
     });
     customerSearchStream.listen((value) {
+      tableKey.currentState?.refreshPage();
+    });
+    rangeDateSearchStream.listen((value) {
+      if (value.isNotEmpty && value[0] == -1 && value[1] == -1) {
+        rangeDateSearchStream.add(<int>[]);
+      }
       tableKey.currentState?.refreshPage();
     });
     super.initState();
@@ -99,11 +107,29 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
           children: [Text(lang.creationDate), Icon(Icons.search)],
         ),
         onTap: () {
-          if (searchFilterStream.valueOrNull == SearchFilter.ARCHIVNG_DATE) {
-            searchFilterStream.add(null);
-          } else {
-            searchFilterStream.add(SearchFilter.ARCHIVNG_DATE);
-          }
+          searchFilterStream.add(SearchFilter.ARCHIVNG_DATE);
+          showDialog(
+            context: context,
+            builder: ((context) {
+              var startDate = null;
+              var endDate = null;
+              if (rangeDateSearchStream.value.isNotEmpty) {
+                if (rangeDateSearchStream.value[0] > 0) {
+                  startDate = rangeDateSearchStream.value[0];
+                }
+                if (rangeDateSearchStream.value[1] > 0) {
+                  endDate = rangeDateSearchStream.value[1];
+                }
+              }
+              return DateRangePickerWidget(
+                onSave: (range) {
+                  rangeDateSearchStream.add(range);
+                },
+                startDate: startDate,
+                endDate: endDate,
+              );
+            }),
+          );
         },
       )),
       DataColumn(
@@ -146,15 +172,12 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
       child: Column(
         children: [
           StreamBuilder<List<Object>>(
-            stream: Rx.combineLatest3(
+            stream: Rx.combineLatest4(
                 filesCodeSearchStream,
                 filesSpecSearchStream,
                 customerSearchStream,
-                (a, b, c) => [
-                      a,
-                      b,
-                      c,
-                    ]),
+                rangeDateSearchStream,
+                (a, b, c, d) => [a, b, c, d]),
             builder: (context, snapshot) {
               var data = snapshot.data;
               if (data == null || data.isEmpty) {
@@ -163,7 +186,32 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
               var filesCode = data[0] as String;
               var filesSpec = data[1] as String;
               var customers = data[2] as List<Customer>;
+              var range = data[3] as List<int>;
               return Wrap(spacing: 20, children: [
+                range.isNotEmpty && range.elementAt(0) > 0
+                    ? InputChip(
+                        label: Text(
+                            "${lang.start} : ${lang.formatDate(range.elementAt(0))}"),
+                        onDeleted: () {
+                          range.insert(0, -1);
+                          range.removeAt(1);
+                          rangeDateSearchStream.add(range);
+                        },
+                        deleteIcon: Icon(Icons.cancel),
+                      )
+                    : SizedBox.shrink(),
+                range.isNotEmpty && range.elementAt(1) > 0
+                    ? InputChip(
+                        label: Text(
+                            "${lang.end} : ${lang.formatDate(range.elementAt(1))}"),
+                        onDeleted: () {
+                          range.insert(1, -1);
+                          range.removeAt(2);
+                          rangeDateSearchStream.add(range);
+                        },
+                        deleteIcon: Icon(Icons.cancel),
+                      )
+                    : SizedBox.shrink(),
                 filesCode.isNotEmpty
                     ? InputChip(
                         label: Text("${filesCode}"),
@@ -216,16 +264,17 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
     try {
       if (filesCodeSearchStream.value.isNotEmpty ||
           filesSpecSearchStream.value.isNotEmpty ||
-          customerSearchStream.value.isNotEmpty) {
-        var customerIds = "";
-        customerSearchStream.value.forEach((e) {
-          customerIds = customerIds + "," + e.id;
-        });
+          customerSearchStream.value.isNotEmpty ||
+          rangeDateSearchStream.value.isNotEmpty) {
+        var listArgs = _getArgs();
 
         return filesService.searchFiles(
-            number: filesCodeSearchStream.value,
-            filesSpecName: filesSpecSearchStream.value,
-            customerIds: customerIds);
+          number: listArgs.elementAt(0) as String,
+          filesSpecName: listArgs.elementAt(1) as String,
+          customerIds: listArgs.elementAt(2) as String,
+          startDate: listArgs.elementAt(3) as int,
+          endDate: listArgs.elementAt(4) as int,
+        );
       }
       return filesService.getFilesAll(
           pageIndex: page.pageIndex, pageSize: page.pageSize);
@@ -239,17 +288,46 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   Future<int> getTotal() {
     if (filesCodeSearchStream.value.isNotEmpty ||
         filesSpecSearchStream.value.isNotEmpty ||
-        customerSearchStream.value.isNotEmpty) {
-      var customerIds = "";
-      customerSearchStream.value.forEach((e) {
-        customerIds = customerIds + "," + e.id;
-      });
+        customerSearchStream.value.isNotEmpty ||
+        rangeDateSearchStream.value.isNotEmpty) {
+      var listArgs = _getArgs();
+
       return filesService.countSearchFiles(
-          number: filesCodeSearchStream.value,
-          filesSpecName: filesSpecSearchStream.value,
-          customerIds: customerIds);
+        number: listArgs.elementAt(0) as String,
+        filesSpecName: listArgs.elementAt(1) as String,
+        customerIds: listArgs.elementAt(2) as String,
+        startDate: listArgs.elementAt(3) as int,
+        endDate: listArgs.elementAt(4) as int,
+      );
     }
     return filesService.getFilesCount();
+  }
+
+  List<dynamic> _getArgs() {
+    var res = [];
+    var customerIds = "";
+    customerSearchStream.value.forEach((e) {
+      customerIds = customerIds + "," + e.id;
+    });
+    var startDate = -1;
+    var endDate = -1;
+    if (rangeDateSearchStream.value.isNotEmpty) {
+      startDate = rangeDateSearchStream.value[0];
+      if (rangeDateSearchStream.value[1] > 0) {
+        endDate =
+            DateTime.fromMillisecondsSinceEpoch(rangeDateSearchStream.value[1])
+                .add(Duration(days: 1))
+                .millisecondsSinceEpoch;
+      } else {
+        endDate = rangeDateSearchStream.value[1];
+      }
+    }
+    res.add(filesCodeSearchStream.value);
+    res.add(filesSpecSearchStream.value);
+    res.add(customerIds);
+    res.add(startDate);
+    res.add(endDate);
+    return res;
   }
 
   DataRow dataToRow(Files data, int indexInCurrentPage) {

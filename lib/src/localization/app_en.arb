@@ -191,6 +191,7 @@
   "site": "Site",
   "agentName": "Agent name",
   "start": "Start",
+  "end": "End",
   "agents": "Agents",
   "customers": "Customers",
   "agentTypeList": "Agent-type list",
@@ -347,5 +348,6 @@
   "permissionText": "Please grant the permission manually through the device settings",
   "openSettings": "Open settings",
   "rotateLeft": "Rotate Left",
-  "rotateRight": "Rotate Right"
+  "rotateRight": "Rotate Right",
+  "selectDateRange": "Select a date range"
 }

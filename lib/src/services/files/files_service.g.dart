@@ -468,12 +468,16 @@ class _FilesService implements FilesService {
     required number,
     required filesSpecName,
     required customerIds,
+    required startDate,
+    required endDate,
   }) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'number': number,
       r'filesSpecName': filesSpecName,
       r'customerIds': customerIds,
+      r'startDate': startDate,
+      r'endDate': endDate,
     };
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
@@ -501,12 +505,16 @@ class _FilesService implements FilesService {
     required number,
     required filesSpecName,
     required customerIds,
+    required startDate,
+    required endDate,
   }) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'number': number,
       r'filesSpecName': filesSpecName,
       r'customerIds': customerIds,
+      r'startDate': startDate,
+      r'endDate': endDate,
     };
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
