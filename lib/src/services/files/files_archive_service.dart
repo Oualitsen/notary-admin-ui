@@ -37,4 +37,21 @@ abstract class FilesArchiveService {
 
   @GET("/admin/archive/documents/{archiveId}")
   Future<List<String>> getDocumentsName(@Path("archiveId") String archiveId);
+
+  @GET("/admin/archive/search")
+  Future<List<FilesArchive>> searchFilesArchive({
+    @Query("number") required String number,
+    @Query("filesSpecName") required String filesSpecName,
+    @Query("customerIds") required String customerIds,
+    @Query("startDate") required int startDate,
+    @Query("endDate") required int endDate,
+  });
+  @GET("/admin/archive/search/count")
+  Future<int> countSearchFilesArchive({
+    @Query("number") required String number,
+    @Query("filesSpecName") required String filesSpecName,
+    @Query("customerIds") required String customerIds,
+    @Query("startDate") required int startDate,
+    @Query("endDate") required int endDate,
+  });
 }

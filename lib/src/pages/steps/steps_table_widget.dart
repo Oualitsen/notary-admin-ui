@@ -29,7 +29,7 @@ class _StepsTableWidgetState extends BasicState<StepsTableWidget>
   @override
   Widget build(BuildContext context) {
     columns = [
-      DataColumn(label: Text(lang.createdFileSpec)),
+      DataColumn(label: Text(lang.creationDate)),
       DataColumn(label: Text(lang.name)),
       DataColumn(label: Text(lang.estimationTime)),
       DataColumn(label: Text(lang.edit)),

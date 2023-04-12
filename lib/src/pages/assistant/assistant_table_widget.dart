@@ -15,7 +15,8 @@ import 'package:rxdart/src/subjects/subject.dart';
 
 class AssistantTableWidget extends StatefulWidget {
   final GlobalKey<LazyPaginatedDataTableState>? tableKey;
-  AssistantTableWidget({super.key, this.tableKey});
+  final String? searchValue;
+  AssistantTableWidget({super.key, this.tableKey, required this.searchValue});
 
   @override
   State<AssistantTableWidget> createState() => AssistantTableWidgetState();
@@ -54,11 +55,22 @@ class AssistantTableWidgetState extends BasicState<AssistantTableWidget>
   }
 
   Future<List<Admin>> getData(PageInfo page) {
-    return service.getAssistants(index: page.pageIndex, size: page.pageSize);
+    if (widget.searchValue == null || widget.searchValue!.isEmpty) {
+      return service.getAssistants(index: page.pageIndex, size: page.pageSize);
+    }
+
+    return service.searchAssistant(
+      name: widget.searchValue!,
+      index: page.pageIndex,
+      size: page.pageSize,
+    );
   }
 
   Future<int> getTotal() {
-    return service.getAssistantsCount();
+    if (widget.searchValue == null || widget.searchValue!.isEmpty) {
+      return service.getAssistantsCount();
+    }
+    return service.searchCount(name: widget.searchValue!);
   }
 
   DataRow dataToRow(Admin data, int indexInCurrentPage) {
@@ -133,12 +145,10 @@ class AssistantTableWidgetState extends BasicState<AssistantTableWidget>
     return WidgetMixin.showDialog2(
       context,
       label: lang.addSteps,
-      content: Container(
-        height: 200,
-        child: AssistantDetailsInput(
-          key: assistantKey,
-          assistant: assistant,
-        ),
+      height: 300,
+      content: AssistantDetailsInput(
+        key: assistantKey,
+        assistant: assistant,
       ),
       actions: <Widget>[
         getButtons(onSave: () => saveAssistant(assistant)),
@@ -177,18 +187,15 @@ class AssistantTableWidgetState extends BasicState<AssistantTableWidget>
     WidgetMixin.showDialog2(
       context,
       label: lang.resetPassword.toUpperCase(),
-      content: Container(
-        height: 100,
-        width: 400,
-        child: Form(
-          key: _formKeyNewPassword,
-          child: PasswordInput(
-            controller: newPwdCtr,
-            label: Text(lang.newPassword),
-            validator: (text) {
-              return ValidationUtils.requiredField(text, context);
-            },
-          ),
+      height: 100,
+      content: Form(
+        key: _formKeyNewPassword,
+        child: PasswordInput(
+          controller: newPwdCtr,
+          label: Text(lang.newPassword),
+          validator: (text) {
+            return ValidationUtils.requiredField(text, context);
+          },
         ),
       ),
       actions: <Widget>[

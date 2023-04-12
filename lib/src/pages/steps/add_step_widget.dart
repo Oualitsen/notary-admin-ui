@@ -36,29 +36,35 @@ class AddStepWidgetState extends BasicState<AddStepWidget>
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: key,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextFormField(
-              autofocus: true,
-              textInputAction: TextInputAction.next,
-              validator: (text) {
-                return ValidationUtils.requiredField(text, context);
-              },
-              controller: nameController,
-              decoration: (getDecoration(lang.name, true, lang.name))),
-          const SizedBox(height: 16),
-          TextFormField(
-            validator: (text) {
-              return ValidationUtils.requiredField(text, context);
-            },
-            controller: estimatedTimeController,
-            decoration:
-                (getDecoration(lang.estimationTime, true, lang.estimationTime)),
+    return SizedBox(
+      width: 600,
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Form(
+          key: key,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                  autofocus: true,
+                  textInputAction: TextInputAction.next,
+                  validator: (text) {
+                    return ValidationUtils.requiredField(text, context);
+                  },
+                  controller: nameController,
+                  decoration: (getDecoration(lang.name, true, lang.name))),
+              const SizedBox(height: 16),
+              TextFormField(
+                validator: (text) {
+                  return ValidationUtils.requiredField(text, context);
+                },
+                controller: estimatedTimeController,
+                decoration: (getDecoration(
+                    lang.estimationTime, true, lang.estimationTime)),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

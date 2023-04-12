@@ -1,5 +1,7 @@
 {
   "ar": [
+    "selectCustomers",
+    "end",
     "siteWorkHours",
     "confirmArchiveFiles",
     "general",
@@ -25,6 +27,7 @@
     "addFiles",
     "assistantDetails",
     "menu",
+    "specification",
     "print",
     "fileName",
     "templates",
@@ -85,10 +88,13 @@
     "permissionText",
     "openSettings",
     "rotateLeft",
-    "rotateRight"
+    "rotateRight",
+    "selectDateRange"
   ],
 
   "fr": [
+    "selectCustomers",
+    "end",
     "siteWorkHours",
     "confirmArchiveFiles",
     "general",
@@ -114,6 +120,8 @@
     "addFiles",
     "assistantDetails",
     "menu",
+    "creationDate",
+    "specification",
     "print",
     "fileName",
     "templates",
@@ -174,6 +182,7 @@
     "permissionText",
     "openSettings",
     "rotateLeft",
-    "rotateRight"
+    "rotateRight",
+    "selectDateRange"
   ]
 }

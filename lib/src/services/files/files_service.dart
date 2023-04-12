@@ -46,5 +46,51 @@ abstract class FilesService {
 
   @GET("/admin/files/archive-date")
   Future<List<FilesArchive>> getArchivedFiles(
-      @Query("startDate") int startDate, @Query("endDate") int endDate);
+      {@Query("startDate") required int startDate,
+      @Query("endDate") required int endDate});
+
+  @GET("/admin/files/search/spec")
+  Future<List<Files>> searchBySpecificationName(
+      {@Query("name") required String name,
+      @Query("index") required int index,
+      @Query("size") required int size});
+
+  @GET("/admin/files/count/spec")
+  Future<int> countBySpecificationName(@Query("name") String name);
+
+  @GET("/admin/files/search/number")
+  Future<List<Files>> searchByNumber(
+      {@Query("number") required String number,
+      @Query("index") required int index,
+      @Query("size") required int size});
+
+  @GET("/admin/files/count/number")
+  Future<int> countByNumber(@Query("number") String number);
+
+  @GET("/admin/files/search/customer")
+  Future<List<Files>> searchByCustomerName(
+      {@Query("name") required String name,
+      @Query("index") required int index,
+      @Query("size") required int size});
+
+  @GET("/admin/files/count/customer")
+  Future<int> countByCustomerName(@Query("name") String name);
+
+  @GET("/admin/files/search")
+  Future<List<Files>> searchFiles({
+    @Query("number") required String number,
+    @Query("filesSpecName") required String filesSpecName,
+    @Query("customerIds") required String customerIds,
+    @Query("startDate") required int startDate,
+    @Query("endDate") required int endDate,
+  });
+
+  @GET("/admin/files/search/count")
+  Future<int> countSearchFiles({
+    @Query("number") required String number,
+    @Query("filesSpecName") required String filesSpecName,
+    @Query("customerIds") required String customerIds,
+    @Query("startDate") required int startDate,
+    @Query("endDate") required int endDate,
+  });
 }

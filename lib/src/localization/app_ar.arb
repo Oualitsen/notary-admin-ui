@@ -256,7 +256,7 @@
   "selectDocuments": "إرفاق مستندات ملف العميل",
   "documentName": "اسم الملف",
   "fileSpec": "مجلد المواصفات",
-  "createdFileSpec": "تاريخ الإنشاء",
+  "creationDate": "تاريخ الإنشاء",
   "addFileSpec": "إضافة مجلد المواصفات",
   "nameFileSpec": "اسم مجلد المواصفات",
   "listDocumentsFileSpec": "قائمة الملفات",
