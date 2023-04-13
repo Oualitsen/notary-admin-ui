@@ -73,7 +73,9 @@
     "addArchive",
     "completeTemplate",
     "noTemplateInstance",
-    "additionalDocuments"
+    "additionalDocuments",
+    "lowerBound",
+    "upperBound"
   ],
 
   "fr": [
@@ -150,6 +152,8 @@
     "addArchive",
     "completeTemplate",
     "noTemplateInstance",
-    "additionalDocuments"
+    "additionalDocuments",
+    "lowerBound",
+    "upperBound"
   ]
 }

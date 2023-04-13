@@ -334,6 +334,12 @@
   "addArchive": "Add an archive",
   "completeTemplate": "Complete template",
   "noTemplateInstance": "No Document Generated",
-  "additionalDocuments": "Additional documents"
+  "additionalDocuments": "Additional documents",
+  "lowerBound" : "Lower Bound",
+  "upperBound" :"Upper bound",
+  "name":"Name",
+  "value":"Value",
+  "percentage":"Percentage"
+
 
 }

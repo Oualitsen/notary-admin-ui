@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/animation/animation_controller.dart';
-import 'package:flutter/src/foundation/change_notifier.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/ticker_provider.dart';
-import 'package:notary_admin/src/init.dart';
+import 'package:notary_admin/src/pages/contract_function_input_widget.dart';
+import 'package:notary_admin/src/pages/range_input_widget.dart';
+import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:rxdart/src/subjects/subject.dart';
-import 'package:universal_html/html.dart' as html;
 
 class DowloadFile extends StatefulWidget {
   const DowloadFile({super.key});
@@ -19,27 +15,13 @@ class DowloadFile extends StatefulWidget {
 }
 
 class _DowloadFileState extends BasicState<DowloadFile> with WidgetUtilsMixin {
-  final controller = TextEditingController();
+  final lowerBoundCrl = TextEditingController();
+  final upperBoundCtl = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return WidgetUtils.wrapRoute(
-      (context, type) => Scaffold(
-        body: Column(
-          children: [
-            TextFormField(
-              controller: controller,
-            ),
-            TextButton(onPressed: () => dowload(), child: Text("dowload"))
-          ],
-        ),
-      ),
+      (context, type) => Scaffold(body: ContractInputFunctionWidget()),
     );
-  }
-
-  dowload() {
-    html.AnchorElement anchor = new html.AnchorElement(
-        href: "${getUrlBase()}/admin/grid/content/${controller.text}");
-    anchor.click();
   }
 
   @override
