@@ -1,45 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:notary_admin/src/pages/files/files_table_widget.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:rxdart/subjects.dart';
 
 class DateRangePickerWidget extends StatefulWidget {
-  final Function(List<int> range) onSave;
-  final int? startDate;
-  final int? endDate;
-  DateRangePickerWidget(
-      {super.key, required this.onSave, this.endDate, this.startDate});
+  final Function(DateRange range) onSave;
+  final DateRange? range;
+  DateRangePickerWidget({super.key, required this.onSave, this.range});
   @override
   _DateRangePickerWidgetState createState() => _DateRangePickerWidgetState();
 }
 
 class _DateRangePickerWidgetState extends BasicState<DateRangePickerWidget>
     with WidgetUtilsMixin {
-  final _startDate = BehaviorSubject<DateTime?>();
-  final _endDate = BehaviorSubject<DateTime?>();
+  final startDateStream = BehaviorSubject<DateTime?>();
+  final endDateStream = BehaviorSubject<DateTime?>();
   //input controller
   final startDateCtrl = TextEditingController();
   final endDateCtrl = TextEditingController();
 
   @override
   void initState() {
-    print("end date = ${widget.endDate}");
-    if (widget.startDate != null) {
-      _startDate.add(DateTime.fromMillisecondsSinceEpoch(widget.startDate!));
+    if (widget.range?.startDate != null) {
+      startDateStream.add(widget.range!.startDate!);
     }
 
-    if (widget.endDate != null) {
-      _endDate.add(DateTime.fromMillisecondsSinceEpoch(widget.endDate!));
+    if (widget.range?.endDate != null) {
+      endDateStream.add(widget.range!.endDate!);
     }
 
-    _startDate.listen((value) {
+    startDateStream.listen((value) {
       if (value == null) {
         startDateCtrl.text = "";
       } else {
         startDateCtrl.text = lang.formatDateDate(value);
       }
     });
-    _endDate.listen((value) {
+    endDateStream.listen((value) {
       if (value == null) {
         endDateCtrl.text = "";
       } else {
@@ -69,7 +67,7 @@ class _DateRangePickerWidgetState extends BasicState<DateRangePickerWidget>
               ),
               IconButton(
                 onPressed: () {
-                  _startDate.add(null);
+                  startDateStream.add(null);
                 },
                 icon: Icon(Icons.cancel),
               ),
@@ -91,7 +89,7 @@ class _DateRangePickerWidgetState extends BasicState<DateRangePickerWidget>
               ),
               IconButton(
                 onPressed: () {
-                  _endDate.add(null);
+                  endDateStream.add(null);
                 },
                 icon: Icon(Icons.cancel),
               ),
@@ -102,10 +100,9 @@ class _DateRangePickerWidgetState extends BasicState<DateRangePickerWidget>
       actions: [
         getButtons(
           onSave: () {
-            widget.onSave(List.of([
-              _startDate.valueOrNull?.millisecondsSinceEpoch ?? -1,
-              _endDate.valueOrNull?.millisecondsSinceEpoch ?? -1,
-            ]));
+            widget.onSave(DateRange(
+                startDate: startDateStream.valueOrNull,
+                endDate: endDateStream.valueOrNull));
             Navigator.of(context).pop();
           },
         )
@@ -114,7 +111,12 @@ class _DateRangePickerWidgetState extends BasicState<DateRangePickerWidget>
   }
 
   Future<void> _selectDate(BuildContext context, bool start) async {
-    var value = start ? _startDate.valueOrNull : _endDate.valueOrNull;
+    DateTime? value;
+    if (start) {
+      value = startDateStream.valueOrNull;
+    } else {
+      value = endDateStream.valueOrNull;
+    }
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: value ?? DateTime.now(),
@@ -122,23 +124,23 @@ class _DateRangePickerWidgetState extends BasicState<DateRangePickerWidget>
       lastDate: DateTime.now(),
     );
     if (picked != null && picked != value) {
-      var startDate = _startDate.valueOrNull;
-      var endDate = _endDate.valueOrNull;
+      var startDate = startDateStream.valueOrNull;
+      var endDate = endDateStream.valueOrNull;
       if (start) {
         if (startDate != null &&
             startDate.millisecondsSinceEpoch < picked.millisecondsSinceEpoch) {
-          _endDate.add(picked);
-          _startDate.add(endDate);
+          endDateStream.add(picked);
+          startDateStream.add(endDate);
         } else {
-          _startDate.add(picked);
+          startDateStream.add(picked);
         }
       } else {
         if (startDate != null &&
             startDate.millisecondsSinceEpoch > picked.millisecondsSinceEpoch) {
-          _startDate.add(picked);
-          _endDate.add(startDate);
+          startDateStream.add(picked);
+          endDateStream.add(startDate);
         } else {
-          _endDate.add(picked);
+          endDateStream.add(picked);
         }
       }
     }
@@ -149,4 +151,11 @@ class _DateRangePickerWidgetState extends BasicState<DateRangePickerWidget>
 
   @override
   List<Subject> get subjects => [];
+}
+
+class DateRange {
+  final DateTime? startDate;
+  final DateTime? endDate;
+
+  DateRange({required this.startDate, required this.endDate});
 }

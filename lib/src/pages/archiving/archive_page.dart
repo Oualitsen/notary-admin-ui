@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/pages/archiving/add_archive_page.dart';
 import 'package:notary_admin/src/pages/archiving/files_archived_table_widget.dart';
+import 'package:notary_admin/src/pages/search/date_range_picker_widget.dart';
 import 'package:notary_admin/src/services/files/files_archive_service.dart';
 import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
@@ -99,8 +100,7 @@ class _ArchivePageState extends BasicState<ArchivePage> with WidgetUtilsMixin {
               tableKey.currentState?.refreshPage();
               return FilesArchiveTableWidget(
                 tableKey: tableKey,
-                startDate: startDate.millisecondsSinceEpoch,
-                endDate: endDate.millisecondsSinceEpoch,
+                initialRange: DateRange(startDate: startDate, endDate: endDate),
               );
             }),
       ),
