@@ -38,11 +38,8 @@ class _FilesPageState extends BasicState<FilesPage> with WidgetUtilsMixin {
                     }
                   }),
               child: Text(lang.addFiles)),
-          body: Padding(
-              padding: EdgeInsets.all(20.0),
-              child: FilesTableWidget(
-                onSearch: ((doSearch) {}),
-              )),
+          body:
+              Padding(padding: EdgeInsets.all(20.0), child: FilesTableWidget()),
         ));
   }
 
