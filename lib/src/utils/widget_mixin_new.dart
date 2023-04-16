@@ -8,22 +8,20 @@ import 'package:notary_admin/src/services/upload_service.dart';
 import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget.dart';
 import 'package:notary_admin/src/widgets/mixins/lang.dart';
 import 'package:notary_model/model/customer.dart';
-import 'package:notary_model/model/files.dart';
-import 'package:notary_model/model/files_spec.dart';
 
 class WidgetMixin {
-  static Future<T?> showDialog2<T>(
-    BuildContext context, {
-    required String label,
-    required Widget content,
-    List<Widget>? actions,
-  }) {
+  static Future<T?> showDialog2<T>(BuildContext context,
+      {required String label,
+      required Widget content,
+      List<Widget>? actions,
+      double? width,
+      double? height}) {
     var lang = getLang(context);
     return showDialog(
         context: context,
         builder: (BuildContext context) => AlertDialog(
               title: Container(
-                height: 50,
+                height: 40,
                 child: Wrap(
                   alignment: WrapAlignment.spaceBetween,
                   children: [
@@ -44,25 +42,28 @@ class WidgetMixin {
                   ],
                 ),
               ),
-              content: content,
+              content: SizedBox(
+                height: height != null ? height : 600,
+                width: width != null ? width : 600,
+                child: content,
+              ),
               actions: actions,
             ));
   }
 
-  static uploadFiles(BuildContext context, Files finalFiles,
+  static uploadFiles(BuildContext context, String filesId,
       List<PathsDocuments> _pathDocuments) async {
     final serviceUploadDocument = GetIt.instance.get<UploadService>();
-    var uri =
-        "/admin/files/upload/${finalFiles.id}/${finalFiles.specification.id}/";
+    var uri = "/admin/files/upload/${filesId}/";
     try {
       if (_pathDocuments.isNotEmpty) {
         if (kIsWeb) {
           for (var pathDoc in _pathDocuments) {
             if (pathDoc.selected) {
               await serviceUploadDocument.upload(
-                uri + "${pathDoc.idDocument}",
+                uri + "${pathDoc.idParts}/${pathDoc.idDocument}",
                 pathDoc.document!,
-                pathDoc.nameDocument,
+                pathDoc.namePickedDocument!,
                 callBack: (percentage) {
                   pathDoc.progress.add(percentage);
                 },
@@ -73,7 +74,7 @@ class WidgetMixin {
           for (var pathDoc in _pathDocuments) {
             if (pathDoc.selected) {
               await serviceUploadDocument.uploadFileDynamic(
-                uri + "${pathDoc.idDocument}",
+                uri + "${pathDoc.idParts}/${pathDoc.idDocument}",
                 pathDoc.path!,
                 callBack: (percentage) {
                   pathDoc.progress.add(percentage);
@@ -93,43 +94,33 @@ class WidgetMixin {
   static Widget ListCustomers(BuildContext context,
       {required List<Customer> listCustomers, double? width}) {
     var lang = getLang(context);
+
     return SizedBox(
-      height: 200,
-      width: width,
-      child: listCustomers.isNotEmpty
-          ? ListView.builder(
-              scrollDirection: Axis.vertical,
-              itemCount: listCustomers.length,
-              itemBuilder: (BuildContext context, int index) {
-                var customer = listCustomers[index];
-                return ListTile(
-                  leading: CircleAvatar(
-                      child: Text(
-                          "${customer.lastName[0].toUpperCase()}${customer.firstName[0].toUpperCase()}")),
-                  title: Text("${customer.lastName} ${customer.firstName}"),
-                  subtitle:
-                      Text("${lang.idCard} : ${customer.idCard.idCardId}"),
-                  trailing: Icon(Icons.arrow_forward),
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          CustomerDetailsPage(customer: customer),
-                    ),
-                  ),
-                );
-              })
-          : Padding(
-              padding: const EdgeInsets.all(5),
-              child: Text(lang.noCustomer.toUpperCase()),
-            ),
-    );
+        width: width,
+        child: Column(
+          children: listCustomers.map((customer) {
+            return ListTile(
+              leading: CircleAvatar(
+                  child: Text(
+                      "${customer.lastName[0].toUpperCase()}${customer.firstName[0].toUpperCase()}")),
+              title: Text("${customer.lastName} ${customer.firstName}"),
+              subtitle: Text("${lang.idCard} : ${customer.idCard.idCardId}"),
+              trailing: Icon(Icons.arrow_forward),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CustomerDetailsPage(customer: customer),
+                ),
+              ),
+            );
+          }).toList(),
+        ));
   }
 
-  static uploadAdditionalData(BuildContext context, Files files,
+  static uploadAdditionalData(BuildContext context, String filesId,
       List<UploadData> additionalFiles) async {
     final serviceUploadDocument = GetIt.instance.get<UploadService>();
-    var uri = "/admin/files/upload/additional/${files.id}";
+    var uri = "/admin/files/upload/additional/${filesId}";
     try {
       if (additionalFiles.isNotEmpty) {
         if (kIsWeb) {

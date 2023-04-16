@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/pages/files/add_files_page.dart';
+import 'package:notary_admin/src/utils/widget_utils.dart';
+import 'package:notary_admin/src/widgets/basic_state.dart';
+import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/files.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:rxdart/src/subjects/subject.dart';
+import 'package:rxdart/subjects.dart';
 
-import '../../utils/widget_utils.dart';
-import '../../widgets/basic_state.dart';
-import '../../widgets/mixins/button_utils_mixin.dart';
 import 'files_table_widget.dart';
 
-class ListFilesCustomer extends StatefulWidget {
-  const ListFilesCustomer({super.key});
+class FilesPage extends StatefulWidget {
+  const FilesPage({super.key});
 
   @override
-  State<ListFilesCustomer> createState() => _ListFilesCustomerState();
+  State<FilesPage> createState() => _FilesPageState();
 }
 
-class _ListFilesCustomerState extends BasicState<ListFilesCustomer>
-    with WidgetUtilsMixin {
+class _FilesPageState extends BasicState<FilesPage> with WidgetUtilsMixin {
   final tableKey = GlobalKey<LazyPaginatedDataTableState>();
 
   @override
@@ -43,10 +44,8 @@ class _ListFilesCustomerState extends BasicState<ListFilesCustomer>
   }
 
   @override
-  // TODO: implement notifiers
   List<ChangeNotifier> get notifiers => [];
 
   @override
-  // TODO: implement subjects
   List<Subject> get subjects => [];
 }

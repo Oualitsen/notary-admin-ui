@@ -6,18 +6,15 @@ import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
-import 'package:notary_model/model/files.dart';
 import 'package:rxdart/subjects.dart';
 
 class ReplaceDocumentWidget extends StatefulWidget {
-  final Files files;
-  final double width;
-  final double height;
+  final List<PathsDocuments> pathDocumentsList;
+  final String filesId;
   const ReplaceDocumentWidget({
     super.key,
-    required this.files,
-    this.width = 400,
-    this.height = 400,
+    required this.filesId,
+    required this.pathDocumentsList,
   });
 
   @override
@@ -33,42 +30,35 @@ class _ReplaceDocumentWidgetState extends BasicState<ReplaceDocumentWidget>
   void init() {
     if (initialized) return;
     initialized = true;
-    var pathDocumentsList = widget.files.specification.documents.map((e) {
-      return UpdateDocuments(
-          pathDocument: PathsDocuments(
-        idDocument: e.id,
-        document: null,
-        selected: true,
-        namePickedDocument: null,
-        nameDocument: e.name,
-        path: null,
-      ));
-    }).toList();
+    var pathDocumentsList = widget.pathDocumentsList
+        .map((e) => UpdateDocuments(pathDocument: e))
+        .toList();
     updateDocumentsStream.add(pathDocumentsList);
   }
 
   @override
   Widget build(BuildContext context) {
     init();
-    return SingleChildScrollView(
-      child: Column(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("${lang.listDocumentsFileSpec}"),
+      ),
+      body: Column(
         children: [
-          Container(
-            width: widget.width,
-            height: widget.height - 50,
-            child: StreamBuilder<List<UpdateDocuments>>(
-              stream: updateDocumentsStream,
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return SizedBox.shrink();
-                }
-                return ListView.builder(
+          StreamBuilder<List<UpdateDocuments>>(
+            stream: updateDocumentsStream,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return SizedBox.shrink();
+              }
+              return Expanded(
+                child: ListView.builder(
                   itemCount: snapshot.data!.length,
                   itemBuilder: (BuildContext context, int index) {
                     return ListTile(
                       leading: CircleAvatar(child: Text("${(index + 1)}")),
                       title: Text(
-                        " ${widget.files.specification.documents[index].name} ",
+                        " ${snapshot.data![index].pathDocument.nameDocument} ",
                         softWrap: true,
                       ),
                       subtitle: Wrap(
@@ -100,17 +90,22 @@ class _ReplaceDocumentWidgetState extends BasicState<ReplaceDocumentWidget>
                         alignment: WrapAlignment.end,
                         spacing: 10,
                         children: [
-                          ElevatedButton(
-                            child: Text(lang.remplaceFile),
-                            onPressed: () => pickFile(index),
-                          ),
+                          snapshot.data![index].pathDocument.selected
+                              ? OutlinedButton(
+                                  child: Text(lang.remplaceFile),
+                                  onPressed: () => pickFile(index),
+                                )
+                              : ElevatedButton(
+                                  child: Text(lang.uploadFile),
+                                  onPressed: () => pickFile(index),
+                                ),
                         ],
                       ),
                     );
                   },
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
           ButtonBar(
             alignment: MainAxisAlignment.end,
@@ -147,12 +142,14 @@ class _ReplaceDocumentWidgetState extends BasicState<ReplaceDocumentWidget>
       if (pickedBytes != null || pickedPath != null) {
         var list = updateDocumentsStream.value;
         if (updateDocumentsStream.value.asMap().containsKey(index)) {
+          var element = updateDocumentsStream.value[index].pathDocument;
           var pathDoc = PathsDocuments(
-            idDocument: widget.files.specification.documents[index].id,
+            idParts: element.idParts,
+            idDocument: element.idDocument,
             document: pickedBytes,
             selected: true,
             namePickedDocument: namePickedFile,
-            nameDocument: widget.files.specification.documents[index].name,
+            nameDocument: element.nameDocument,
             path: pickedPath,
           );
           var updatePathDoc = UpdateDocuments(
@@ -180,14 +177,14 @@ class _ReplaceDocumentWidgetState extends BasicState<ReplaceDocumentWidget>
       if (updateDocumentsStream.value.isNotEmpty) {
         await WidgetMixin.uploadFiles(
           context,
-          widget.files,
+          widget.filesId,
           updateDocumentsStream.value
               .where((element) => element.updated)
               .map((e) => e.pathDocument)
               .toList(),
         );
-        Navigator.pop(context);
-        await showSnackBar2(context, lang.savedSuccessfully);
+        showSnackBar2(context, lang.savedSuccessfully);
+        Navigator.of(context).pop();
       }
     } catch (error, stackTrace) {
       print(stackTrace);

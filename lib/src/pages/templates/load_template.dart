@@ -4,9 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
-import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/widgets/widget_roles.dart';
-import 'package:notary_admin/src/pages/templates/form_and_view_html.dart';
 import 'package:notary_admin/src/pages/templates/html_editor_template.dart';
 import 'package:notary_admin/src/pages/templates/upload_template.dart';
 import 'package:notary_admin/src/services/admin/template_document_service.dart';
@@ -55,7 +53,7 @@ class _LoadTemplatePageState extends BasicState<LoadTemplatePage>
             child: AlertVerticalWidget.createDanger(
                 lang.noAccessRightError.toUpperCase())),
         child: Scaffold(
-          appBar: AppBar(title: Text(lang.fileList)),
+          appBar: AppBar(title: Text(lang.template)),
           floatingActionButton: ElevatedButton(
             onPressed: loadFiles,
             child: Text(lang.addFiles),
@@ -91,30 +89,32 @@ class _LoadTemplatePageState extends BasicState<LoadTemplatePage>
 
   Future<String?> showTextInputDialog(
       BuildContext context, TemplateDocument file) async {
-    return WidgetMixin.showDialog2<String>(
-      context,
-      label: lang.editFileName,
-      content: Form(
-        key: fileNameKey,
-        child: TextFormField(
-          controller: templateNameCrtl,
-          autofocus: true,
-          textInputAction: TextInputAction.next,
-          validator: (text) {
-            return ValidationUtils.requiredField(text, context);
-          },
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.editFileName),
+        content: Form(
+          key: fileNameKey,
+          child: TextFormField(
+            controller: templateNameCrtl,
+            autofocus: true,
+            textInputAction: TextInputAction.next,
+            validator: (text) {
+              return ValidationUtils.requiredField(text, context);
+            },
+          ),
         ),
+        actions: <Widget>[
+          getButtons(
+            onSave: () {
+              if (fileNameKey.currentState?.validate() ?? false) {
+                Navigator.of(context).pop(templateNameCrtl.text);
+                templateNameCrtl.clear();
+              }
+            },
+          )
+        ],
       ),
-      actions: <Widget>[
-        getButtons(
-          onSave: () {
-            if (fileNameKey.currentState?.validate() ?? false) {
-              Navigator.of(context).pop(templateNameCrtl.text);
-              templateNameCrtl.clear();
-            }
-          },
-        )
-      ],
     );
   }
 
@@ -166,39 +166,33 @@ class _LoadTemplatePageState extends BasicState<LoadTemplatePage>
         ).then((value) => key.currentState?.reload());
       }
       if (value == items[2]) {
-        try {
-          await service.delete(template.id);
-          key.currentState?.reload();
-          await showSnackBar2(context, lang.deletedSuccessfully);
-        } catch (error, stackTrace) {
-          print(stackTrace);
-          showServerError(context, error: error);
-        }
-
-        //form generating
-        //   try {
-        //     var finalList = [];
-        //     var list = await service.formGenerating(template.id);
-        //     for (var res in list) {
-        //       //res =
-        //       finalList.add(res.replaceAll(" ", "_"));
-        //     }
-        //     var data = await service.replacements(template.id);
-        //     //  print(data);
-        //     Navigator.push(
-        //       context,
-        //       MaterialPageRoute(
-        //         builder: (context) => FormAndViewHtml(
-        //           listFormField: finalList,
-        //           text: data,
-        //         ),
-        //       ),
-        //     ).then((value) => key.currentState?.reload());
-        //     ;
-        //   } catch (error, stackTrace) {
-        //     print(stackTrace);
-        //     showServerError(context, error: error);
-        //   }
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(lang.confirm),
+            content: Text(lang.confirmDelete),
+            actions: <Widget>[
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  },
+                  child: Text(lang.no.toUpperCase())),
+              TextButton(
+                  onPressed: () async {
+                    try {
+                      await service.delete(template.id);
+                      key.currentState?.reload();
+                      showSnackBar2(context, lang.deletedSuccessfully);
+                      Navigator.of(context).pop(false);
+                    } catch (error, stackTrace) {
+                      print(stackTrace);
+                      showServerError(context, error: error);
+                    }
+                  },
+                  child: Text(lang.yes.toUpperCase())),
+            ],
+          ),
+        );
       }
     }
   }
@@ -228,8 +222,10 @@ class _LoadTemplatePageState extends BasicState<LoadTemplatePage>
             )
             .then((value) => key.currentState?.reload());
       }
-    } catch (e) {
-      print("[ERROR]${e.toString}");
+    } catch (error, stacktrace) {
+      showServerError(context, error: error);
+      print(stacktrace);
+      throw error;
     }
   }
 }

@@ -4,24 +4,22 @@ import 'package:flutter/material.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
-import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
+import 'package:notary_admin/src/widgets/basic_state.dart';
+import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/printed_doc_input.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:webviewx/webviewx.dart';
-import '../../widgets/basic_state.dart';
-import '../../widgets/mixins/button_utils_mixin.dart';
 
 class FormAndViewHtml extends StatefulWidget {
-  static const home = "/";
-  final List listFormField;
+  final List<String> listFormField;
   final String text;
-  final String? idPrintDocument;
-  const FormAndViewHtml(
-      {super.key,
-      required this.listFormField,
-      required this.text,
-      this.idPrintDocument});
+
+  const FormAndViewHtml({
+    super.key,
+    required this.listFormField,
+    required this.text,
+  });
 
   @override
   State<FormAndViewHtml> createState() => _FormAndViewHtmlState();
@@ -31,26 +29,19 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
     with WidgetUtilsMixin {
   WebViewXController? controllerWeb;
   final printedDocService = GetIt.instance.get<PrintedDocService>();
-  final GlobalKey<FormState> _formKeyListNames = GlobalKey<FormState>();
-  List<TextEditingController> _controller = [];
-  late List listFormField;
-  late String text;
+  final _formKey = GlobalKey<FormState>();
   final fileNameKey = GlobalKey<FormState>();
   final templateNameCrtl = TextEditingController();
   final _htmlDocument = BehaviorSubject.seeded('');
   final webStream = BehaviorSubject.seeded(false);
-  var toPrint = """
-   <script>
-      function display() {
-         window.print();
-      }
-   </script>
-""";
+  late List<String> listFormField;
+  late String text;
+  var textFormCtrlList = <TextEditingController>[];
   @override
   void initState() {
-    text = toPrint + widget.text;
+    text = widget.text;
     listFormField = widget.listFormField;
-    _controller =
+    textFormCtrlList =
         List.generate(listFormField.length, (i) => TextEditingController());
     _htmlDocument.where((event) => controllerWeb != null).listen((value) {
       controllerWeb!.loadContent(value, SourceType.html);
@@ -63,7 +54,7 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
     return WidgetUtils.wrapRoute(
       (context, type) => Scaffold(
         appBar: AppBar(
-          title: Text(lang.formToHtml),
+          title: Text(lang.template),
           actions: [
             Tooltip(
               message: lang.print,
@@ -105,7 +96,7 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
                     elevation: 0,
                   ),
                   Form(
-                    key: _formKeyListNames,
+                    key: _formKey,
                     onChanged: onDataChange,
                     child: Expanded(
                       child: ListView.builder(
@@ -116,7 +107,7 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
                             child: TextFormField(
                               decoration:
                                   getDecoration(listFormField[index], false),
-                              controller: _controller[index],
+                              controller: textFormCtrlList[index],
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return lang.requiredField;
@@ -187,12 +178,13 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
   }
 
   onDataChange() {
-    Map map = Map<String, String>();
-    for (int index = 0; index < listFormField.length; index++)
-      map[listFormField[index]] = _controller[index].text;
+    Map<String, String> map = Map<String, String>();
+    for (int index = 0; index < listFormField.length; index++) {
+      map[listFormField[index]] = textFormCtrlList[index].text;
+    }
     var doc = parse(text);
     map.forEach((key, value) {
-      doc.querySelectorAll('.$key').map((e) => e.text = value).toList();
+      doc.querySelectorAll('.$key').forEach((e) => e.text = value);
     });
     text = doc.outerHtml;
     _htmlDocument.add(text);
@@ -205,14 +197,12 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
   List<Subject> get subjects => [];
 
   void saveCopy() async {
-    if (_formKeyListNames.currentState?.validate() ?? false) {
+    if (_formKey.currentState?.validate() ?? false) {
       try {
         webStream.add(true);
         var name = await getName();
         webStream.add(false);
-        if (widget.idPrintDocument != null) {
-          await printedDocService.delete(widget.idPrintDocument!);
-        }
+
         if (name != null) {
           var input = PrintedDocInput(
               id: null, htmlData: _htmlDocument.value, name: name);
@@ -227,30 +217,32 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
   }
 
   Future<String?> getName() async {
-    return WidgetMixin.showDialog2<String>(
-      context,
-      label: lang.fileName,
-      content: Form(
-        key: fileNameKey,
-        child: TextFormField(
-          controller: templateNameCrtl,
-          autofocus: true,
-          textInputAction: TextInputAction.next,
-          validator: (text) {
-            return ValidationUtils.requiredField(text, context);
-          },
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.fileName),
+        content: Form(
+          key: fileNameKey,
+          child: TextFormField(
+            controller: templateNameCrtl,
+            autofocus: true,
+            textInputAction: TextInputAction.next,
+            validator: (text) {
+              return ValidationUtils.requiredField(text, context);
+            },
+          ),
         ),
+        actions: <Widget>[
+          getButtons(
+            onSave: () {
+              if (fileNameKey.currentState?.validate() ?? false) {
+                Navigator.of(context).pop(templateNameCrtl.text);
+                templateNameCrtl.clear();
+              }
+            },
+          )
+        ],
       ),
-      actions: <Widget>[
-        getButtons(
-          onSave: () {
-            if (fileNameKey.currentState?.validate() ?? false) {
-              Navigator.of(context).pop(templateNameCrtl.text);
-              templateNameCrtl.clear();
-            }
-          },
-        )
-      ],
     );
   }
 }

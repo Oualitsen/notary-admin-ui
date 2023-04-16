@@ -2,27 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
-import 'package:notary_admin/src/pages/file-spec/file_spec_List.dart';
+import 'package:notary_admin/src/pages/file-spec/document/add_parts_spec.dart';
+import 'package:notary_admin/src/pages/file-spec/file_spec_page.dart';
 import 'package:notary_admin/src/pages/steps/step_selection_widget.dart';
+import 'package:notary_admin/src/services/admin/template_document_service.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
 import 'package:notary_admin/src/utils/widget_mixin_new.dart';
+import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
-import 'package:notary_model/model/document_spec_input.dart';
+import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/files_spec.dart';
 import 'package:notary_model/model/files_spec_input.dart';
+import 'package:notary_model/model/parts_spec_input.dart';
 import 'package:notary_model/model/selection_type.dart';
 import 'package:notary_model/model/steps.dart';
 import 'package:notary_model/model/template_document.dart';
 import 'package:rxdart/rxdart.dart';
-import '../../services/admin/template_document_service.dart';
-import '../../utils/widget_utils.dart';
-import '../../widgets/mixins/button_utils_mixin.dart';
-import 'document/add_document.dart';
-import 'document/document_table.dart';
 
 class AddFileSpec extends StatefulWidget {
   final FilesSpec? fileSpec;
-
   const AddFileSpec({
     super.key,
     this.fileSpec,
@@ -37,15 +35,14 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
   final service = GetIt.instance.get<FileSpecService>();
   final serviceTemplate = GetIt.instance.get<TemplateDocumentService>();
   final _currentStepStream = BehaviorSubject.seeded(0);
-  final _listDocumentsInputStream =
-      BehaviorSubject.seeded(<DocumentSpecInput>[]);
+  final partsSpecInputStream = BehaviorSubject.seeded(<PartsSpecInput>[]);
   final templateIdStream = BehaviorSubject.seeded('');
   final _listStepsStream = BehaviorSubject.seeded(<Steps>[]);
   final GlobalKey<FormState> _fileSpecNameKey = GlobalKey<FormState>();
   final GlobalKey<FormState> _templateFileSpecKey = GlobalKey<FormState>();
   final _nameFileSpecCtrl = TextEditingController();
   final _templateFileSpecCtrl = TextEditingController();
-  List<DocumentSpecInput> listDocumentsInput = [];
+  List<PartsSpecInput> listPartsSpecInput = [];
   late FilesSpec fileSpec;
 
   @override
@@ -54,21 +51,17 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
     if (fileSpec != null) {
       _listStepsStream.add(fileSpec.steps);
       _nameFileSpecCtrl.text = fileSpec.name;
-      listDocumentsInput = fileSpec.documents
-          .map((e) => DocumentSpecInput(
-              id: e.id,
-              name: e.name,
-              doubleSided: e.doubleSided,
-              optional: e.optional,
-              original: e.original))
+
+      listPartsSpecInput = fileSpec.partsSpecs
+          .map((e) =>
+              PartsSpecInput(id: e.id, name: e.name, documentSpecInputs: []))
           .toList();
-      _listDocumentsInputStream.add(listDocumentsInput);
+      partsSpecInputStream.add(listPartsSpecInput);
       templateIdStream.add(fileSpec.templateId);
       serviceTemplate
           .getTemplate(fileSpec.templateId)
           .then((value) => _templateFileSpecCtrl.text = value.name);
     }
-
     super.initState();
   }
 
@@ -77,7 +70,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
     return WidgetUtils.wrapRoute(
       (context, type) => Scaffold(
         appBar: AppBar(
-          title: Text(lang.addFileSpec),
+          title: Text(lang.addPart),
         ),
         body: StreamBuilder<int>(
           stream: _currentStepStream,
@@ -94,7 +87,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
               },
               steps: <Step>[
                 Step(
-                  title: Text(lang.nameFileSpec.toUpperCase()),
+                  title: Text(lang.name.toUpperCase()),
                   content: Column(
                     children: [
                       Form(
@@ -104,8 +97,8 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                           children: <Widget>[
                             TextFormField(
                               controller: _nameFileSpecCtrl,
-                              decoration: getDecoration(
-                                  lang.nameFileSpec, true, lang.nameFileSpec),
+                              decoration:
+                                  getDecoration(lang.name, true, lang.name),
                               validator: (String? value) {
                                 if (value == null || value.isEmpty) {
                                   return lang.requiredField;
@@ -179,7 +172,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                                     _listStepsStream.add(value);
                                     if (_listStepsStream.value.isEmpty) {
                                       await showSnackBar2(
-                                          context, lang.noCustomer);
+                                          context, lang.noSteps);
                                     }
                                   }
                                 });
@@ -196,27 +189,24 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                         if (snapshot.hasData == false) {
                           return SizedBox.shrink();
                         }
+                        var index = -1;
                         return Column(
                           children: [
-                            SizedBox(
-                                height: 250,
-                                child: ListView.builder(
-                                  itemCount: snapshot.data!.length,
-                                  itemBuilder: (context, index) {
-                                    var currentStep = snapshot.data![index];
-                                    return ListTile(
-                                      leading: CircleAvatar(
-                                          child: Text("${(index + 1)}")),
-                                      title: Text("${currentStep.name}"),
-                                      trailing: TextButton.icon(
-                                          onPressed: () {
-                                            deleteStep(index);
-                                          },
-                                          icon: Icon(Icons.delete),
-                                          label: Text(lang.delete)),
-                                    );
-                                  },
-                                )),
+                            Column(
+                                children: snapshot.data!.map((step) {
+                              index++;
+                              return ListTile(
+                                leading:
+                                    CircleAvatar(child: Text("${(index + 1)}")),
+                                title: Text("${step.name}"),
+                                trailing: TextButton.icon(
+                                    onPressed: () {
+                                      deleteStep(index);
+                                    },
+                                    icon: Icon(Icons.delete),
+                                    label: Text(lang.delete)),
+                              );
+                            }).toList()),
                             SizedBox(height: 16),
                             ButtonBar(
                               alignment: MainAxisAlignment.end,
@@ -243,22 +233,23 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                 Step(
                   title: Row(
                     children: [
-                      Text(lang.listDocumentsFileSpec.toUpperCase()),
+                      Text(lang.listPart.toUpperCase()),
                       SizedBox(
                         width: 40,
                       ),
+                      SizedBox(width: 20),
                       ElevatedButton(
                         onPressed: snapshot.data == 3
                             ? () {
-                                Navigator.push<DocumentSpecInput>(
+                                Navigator.push<PartsSpecInput>(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => AddDocument()),
+                                      builder: (context) => AddPartsSpecPage()),
                                 ).then((value) {
                                   if (value != null) {
-                                    var list = _listDocumentsInputStream.value;
+                                    var list = partsSpecInputStream.value;
                                     list.add(value);
-                                    _listDocumentsInputStream.add(list);
+                                    partsSpecInputStream.add(list);
                                   }
                                 });
                               }
@@ -267,21 +258,34 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                       ),
                     ],
                   ),
-                  content: StreamBuilder<List<DocumentSpecInput>>(
-                      stream: _listDocumentsInputStream,
-                      initialData: _listDocumentsInputStream.value,
+                  content: StreamBuilder<List<PartsSpecInput>>(
+                      stream: partsSpecInputStream,
+                      initialData: partsSpecInputStream.value,
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
                           return SizedBox.shrink();
                         }
+                        var index = -1;
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            DocumentsTable(
-                              listDocument: snapshot.data!,
-                              onChanged: (List<DocumentSpecInput> listDoc) {
-                                _listDocumentsInputStream.add(listDoc);
-                              },
+                            Column(
+                              children: partsSpecInputStream.value.map((part) {
+                                index++;
+                                return ListTile(
+                                  leading: CircleAvatar(
+                                      child: Text("${(index + 1)}")),
+                                  title: Text("${part.name}"),
+                                  trailing: IconButton(
+                                    icon: Icon(Icons.delete),
+                                    onPressed: () {
+                                      var list = partsSpecInputStream.value;
+                                      list.removeAt(index);
+                                      partsSpecInputStream.add(list);
+                                    },
+                                  ),
+                                );
+                              }).toList(),
                             ),
                             SizedBox(height: 16),
                             ButtonBar(
@@ -369,30 +373,24 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
         var input = FilesSpecInput(
             steps: _listStepsStream.value,
             name: _nameFileSpecCtrl.text,
-            documentInputs: _listDocumentsInputStream.value,
+            partsSpecInput: partsSpecInputStream.value,
             id: null,
             templateId: templateIdStream.value);
-        if (_listDocumentsInputStream.value.isNotEmpty) {
-          await service.saveFileSpec(input);
-          await showSnackBar2(context, lang.savedSuccessfully);
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => FileSpecList()));
-        } else {
-          await showSnackBar2(
-              context, " ${lang.listDocumentsFileSpec}   ${lang.empty}");
-        }
+        await service.saveFileSpec(input);
+        await showSnackBar2(context, lang.savedSuccessfully);
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => FileSpecPage()));
       } else {
         var update = FilesSpecInput(
-            steps: widget.fileSpec!.steps,
+            steps: _listStepsStream.value,
             name: _nameFileSpecCtrl.text,
-            documentInputs: _listDocumentsInputStream.value,
+            partsSpecInput: partsSpecInputStream.value,
             id: widget.fileSpec!.id,
             templateId: templateIdStream.value);
-        if (_listDocumentsInputStream.value.isNotEmpty) {
+        if (partsSpecInputStream.value.isNotEmpty) {
           await service.saveFileSpec(update);
           await showSnackBar2(context, lang.updatedSuccessfully);
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => FileSpecList()));
+          push(context, FileSpecPage());
         } else {
           await showSnackBar2(
               context, " ${lang.listDocumentsFileSpec}   ${lang.empty}");
@@ -426,24 +424,19 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
     WidgetMixin.showDialog2(
       context,
       label: lang.selectTemplate,
-      content: SizedBox(
-        width: 400,
-        height: 300,
-        child: InfiniteScrollListView(
-            elementBuilder: ((context, element, index, animation) {
-              return ListTile(
-                leading: Text(lang.formatDate(element.creationDate)),
-                title: Text(element.name),
-                onTap: () {
-                  _templateFileSpecCtrl.text = element.name;
-                  templateIdStream.add(element.id);
-                  Navigator.of(context).pop(true);
-                },
-              );
-            }),
-            refreshable: true,
-            pageLoader: getTemplates),
-      ),
+      content: InfiniteScrollListView(
+          elementBuilder: ((context, element, index, animation) {
+            return ListTile(
+              title: Text(element.name),
+              onTap: () {
+                _templateFileSpecCtrl.text = element.name;
+                templateIdStream.add(element.id);
+                Navigator.of(context).pop(true);
+              },
+            );
+          }),
+          refreshable: true,
+          pageLoader: getTemplates),
     );
   }
 

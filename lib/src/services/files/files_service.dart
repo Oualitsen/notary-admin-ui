@@ -1,8 +1,5 @@
-import 'dart:typed_data';
-
 import 'package:dio/dio.dart';
 import 'package:notary_model/model/customer.dart';
-import 'package:notary_model/model/documents.dart';
 import 'package:notary_model/model/files.dart';
 import 'package:notary_model/model/files_archive.dart';
 import 'package:notary_model/model/files_input.dart';
@@ -15,9 +12,6 @@ part 'files_service.g.dart';
 @RestApi()
 abstract class FilesService {
   factory FilesService(Dio dio) = _FilesService;
-  // @PUT("/upload/{id}/{fileSpecId}/{docSpecId}")
-  // Future <Files> addDocSpec(@Path("id") String id,@Path("fileSpecId") String fileSpecId,
-  // @Path("docSpecId")String docSpecId,@Query("document") <DocumentSpec> document);
 
   @POST("/admin/files")
   Future<Files> saveFiles(@Body() FilesInput files);
@@ -44,7 +38,7 @@ abstract class FilesService {
       @Path("filesId") String filesId, @Body() Steps newStep);
 
   @PUT("/admin/files/archive/{id}")
-  Future<FilesArchive> archiveFiles(@Path("id") String id);
+  Future archiveFiles(@Path("id") String id);
 
   @GET("/admin/files/archive")
   Future<List<FilesArchive>> getArchived(
@@ -52,5 +46,51 @@ abstract class FilesService {
 
   @GET("/admin/files/archive-date")
   Future<List<FilesArchive>> getArchivedFiles(
-      @Query("startDate") int startDate, @Query("endDate") int endDate);
+      {@Query("startDate") required int startDate,
+      @Query("endDate") required int endDate});
+
+  @GET("/admin/files/search/spec")
+  Future<List<Files>> searchBySpecificationName(
+      {@Query("name") required String name,
+      @Query("index") required int index,
+      @Query("size") required int size});
+
+  @GET("/admin/files/count/spec")
+  Future<int> countBySpecificationName(@Query("name") String name);
+
+  @GET("/admin/files/search/number")
+  Future<List<Files>> searchByNumber(
+      {@Query("number") required String number,
+      @Query("index") required int index,
+      @Query("size") required int size});
+
+  @GET("/admin/files/count/number")
+  Future<int> countByNumber(@Query("number") String number);
+
+  @GET("/admin/files/search/customer")
+  Future<List<Files>> searchByCustomerName(
+      {@Query("name") required String name,
+      @Query("index") required int index,
+      @Query("size") required int size});
+
+  @GET("/admin/files/count/customer")
+  Future<int> countByCustomerName(@Query("name") String name);
+
+  @GET("/admin/files/search")
+  Future<List<Files>> searchFiles({
+    @Query("number") required String number,
+    @Query("filesSpecName") required String filesSpecName,
+    @Query("customerIds") required String customerIds,
+    @Query("startDate") required int startDate,
+    @Query("endDate") required int endDate,
+  });
+
+  @GET("/admin/files/search/count")
+  Future<int> countSearchFiles({
+    @Query("number") required String number,
+    @Query("filesSpecName") required String filesSpecName,
+    @Query("customerIds") required String customerIds,
+    @Query("startDate") required int startDate,
+    @Query("endDate") required int endDate,
+  });
 }

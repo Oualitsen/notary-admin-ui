@@ -8,14 +8,16 @@ import 'package:notary_admin/src/services/admin/steps_service.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
 import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
+import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/document_spec_input.dart';
 import 'package:notary_model/model/files_spec.dart';
-import 'package:notary_model/model/step_input.dart';
+import 'package:notary_model/model/parts_spec.dart';
 import 'package:rxdart/rxdart.dart';
-import '../../widgets/mixins/button_utils_mixin.dart';
 
 class FileSpecTable extends StatefulWidget {
-  const FileSpecTable({super.key});
+  final GlobalKey<LazyPaginatedDataTableState>? tableKey;
+  final String? searchValue;
+  const FileSpecTable({super.key, this.tableKey, required this.searchValue});
 
   @override
   State<FileSpecTable> createState() => _FileSpecTableState();
@@ -27,13 +29,12 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
   final columnSpacing = 65.0;
   bool initialized = false;
   List<DataColumn> columns = [];
-  final tableKey = GlobalKey<LazyPaginatedDataTableState>();
   final stepService = GetIt.instance.get<StepsService>();
   final stepKey = GlobalKey<AddStepWidgetState>();
   @override
   Widget build(BuildContext context) {
     columns = [
-      DataColumn(label: Text(lang.createdFileSpec)),
+      DataColumn(label: Text(lang.creationDate)),
       DataColumn(label: Text(lang.name)),
       DataColumn(label: Text(lang.listDocumentsFileSpec)),
       DataColumn(label: Text(lang.steps)),
@@ -43,7 +44,7 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: LazyPaginatedDataTable<FilesSpec>(
-        key: tableKey,
+        key: widget.tableKey,
         columnSpacing: columnSpacing,
         getData: getData,
         getTotal: getTotal,
@@ -57,12 +58,20 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
   }
 
   Future<List<FilesSpec>> getData(PageInfo page) {
-    return service.getFileSpecs(
-        pageIndex: page.pageIndex, pageSize: page.pageSize);
+    if (widget.searchValue == null || widget.searchValue!.isEmpty) {
+      return service.getFileSpecs(
+          pageIndex: page.pageIndex, pageSize: page.pageSize);
+    }
+
+    return service.searchFilesSpec(
+        name: widget.searchValue!, index: page.pageIndex, size: page.pageSize);
   }
 
   Future<int> getTotal() {
-    return service.getFilesSpecCount();
+    if (widget.searchValue == null || widget.searchValue!.isEmpty) {
+      return service.getFilesSpecCount();
+    }
+    return service.searchCount(name: widget.searchValue!);
   }
 
   DataRow dataToRow(FilesSpec data, int indexInCurrentPage) {
@@ -72,7 +81,7 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
       DataCell(
         TextButton(
           onPressed: () => documentList(context, data),
-          child: Text(lang.listDocumentsFileSpec),
+          child: Text(lang.listPart),
         ),
       ),
       DataCell(
@@ -116,28 +125,17 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
   void documentList(BuildContext context, FilesSpec data) {
     WidgetMixin.showDialog2(
       context,
-      label: lang.listDocumentsFileSpec,
-      content: Container(
-        height: 400,
-        width: 400,
-        child: ListView.builder(
-          itemCount: data.documents.length,
-          itemBuilder: (context, int index) {
-            var isRequired = data.documents[index].optional
-                ? lang.isNotRequired
-                : lang.isNotRequired;
-            var isOriginal = data.documents[index].original
-                ? lang.isOriginal
-                : lang.isNotOriginal;
-            return ListTile(
-              leading: CircleAvatar(
-                child: Text("${(index + 1)}"),
-              ),
-              title: Text("${data.documents[index].name}"),
-              subtitle: Text("${isRequired} , ${isOriginal}"),
-            );
-          },
-        ),
+      label: lang.listPart,
+      content: ListView.builder(
+        itemCount: data.partsSpecs.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            leading: CircleAvatar(child: Text("${(index + 1)}")),
+            title: Text("${data.partsSpecs[index].name}"),
+            trailing: Icon(Icons.arrow_forward),
+            onTap: (() => showDocuments(data.partsSpecs[index])),
+          );
+        },
       ),
     );
   }
@@ -146,10 +144,8 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
     WidgetMixin.showDialog2(
       context,
       label: lang.steps,
-      content: Container(
-        padding: EdgeInsets.all(10),
-        height: 400,
-        width: 400,
+      content: Padding(
+        padding: const EdgeInsets.all(10),
         child: ListView.builder(
             itemCount: data.steps.length,
             itemBuilder: (context, int index) {
@@ -163,30 +159,60 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
   }
 
   deleteFileSpec(FilesSpec data) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.confirm),
+        content: Text(lang.confirmDelete),
+        actions: <Widget>[
+          TextButton(
+            child: Text(lang.no.toUpperCase()),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TextButton(
+            child: Text(lang.yes.toUpperCase()),
+            onPressed: () async {
+              try {
+                await service.deleteFileSpec(data.id);
+                Navigator.of(context).pop(true);
+                widget.tableKey?.currentState?.refreshPage();
+                await showSnackBar2(context, lang.delete);
+              } catch (error, stacktrace) {
+                showServerError(context, error: error);
+                print(stacktrace);
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  showDocuments(PartsSpec data) {
     WidgetMixin.showDialog2(
       context,
-      label: lang.confirm,
-      content: Text(lang.confirmDelete),
-      actions: <Widget>[
-        TextButton(
-          child: Text(lang.no.toUpperCase()),
-          onPressed: () => Navigator.of(context).pop(false),
-        ),
-        TextButton(
-          child: Text(lang.yes.toUpperCase()),
-          onPressed: () async {
-            try {
-              await service.deleteFileSpec(data.id);
-              Navigator.of(context).pop(true);
-              tableKey.currentState?.refreshPage();
-              await showSnackBar2(context, lang.delete);
-            } catch (error, stacktrace) {
-              showServerError(context, error: error);
-              print(stacktrace);
-            }
-          },
-        ),
-      ],
+      label: lang.listDocumentsFileSpec,
+      content: ListView.builder(
+        itemCount: data.documentSpec.length,
+        itemBuilder: (context, int index) {
+          var isRequired = data.documentSpec[index].optional
+              ? lang.isNotRequired
+              : lang.isNotRequired;
+          var isOriginal = data.documentSpec[index].original
+              ? lang.isOriginal
+              : lang.isNotOriginal;
+          var isDoubleSide = data.documentSpec[index].doubleSided
+              ? lang.isDoubleSided
+              : lang.isNotDoubleSided;
+          return ListTile(
+            leading: CircleAvatar(
+              child: Text("${(index + 1)}"),
+            ),
+            title: Text("${data.documentSpec[index].name}"),
+            subtitle: Text("${isRequired} , ${isOriginal} , ${isDoubleSide}"),
+          );
+        },
+      ),
     );
   }
 }

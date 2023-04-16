@@ -1,18 +1,14 @@
-import 'dart:typed_data';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
-import 'package:notary_admin/src/utils/widget_mixin_new.dart';
+import 'package:notary_admin/src/services/upload_service.dart';
+import 'package:notary_admin/src/widgets/basic_state.dart';
+import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/files.dart';
 import 'package:rxdart/rxdart.dart';
-import '../../services/files/files_service.dart';
-import '../../services/upload_service.dart';
-import '../../widgets/basic_state.dart';
-import '../../widgets/mixins/button_utils_mixin.dart';
-import 'list_files_customer.dart';
+import 'files_page.dart';
 
 class WidgetDocumentPicked extends StatefulWidget {
   final Files files;
@@ -26,7 +22,6 @@ class WidgetDocumentPicked extends StatefulWidget {
 class _WidgetDocumentPickedState extends BasicState<WidgetDocumentPicked>
     with WidgetUtilsMixin {
   final serviceUploadDocument = GetIt.instance.get<UploadService>();
-  final serviceFiles = GetIt.instance.get<FilesService>();
   late Files files;
   final bool statusUpload = false;
   final pathDocumentsStream = BehaviorSubject.seeded(<PathsDocuments>[]);
@@ -36,42 +31,45 @@ class _WidgetDocumentPickedState extends BasicState<WidgetDocumentPicked>
   void initState() {
     files = widget.files;
     if (files.uploadedFiles.isEmpty) {
-      pathDocumentsStream.add(widget.files.specification.documents
-          .map(
-            (e) => PathsDocuments(
-              idDocument: e.id,
-              document: null,
-              selected: false,
-              namePickedDocument: null,
-              path: null,
-            ),
-          )
-          .toList());
+      pathDocumentsStream
+          .add(widget.files.specification.partsSpecs[0].documentSpec
+              .map(
+                (e) => PathsDocuments(
+                  idDocument: e.id,
+                  document: null,
+                  selected: false,
+                  namePickedDocument: null,
+                  path: null,
+                ),
+              )
+              .toList());
     } else {
-      pathDocumentsStream.add(widget.files.specification.documents
-          .map(
-            (e) => PathsDocuments(
-              idDocument: e.id,
-              document: null,
-              selected: true,
-              namePickedDocument: '',
-              nameDocument: '',
-              path: null,
-            ),
-          )
-          .toList());
-      pathDocumentsUpdateStream.add(widget.files.specification.documents
-          .map(
-            (e) => PathsDocuments(
-              idDocument: e.id,
-              document: null,
-              selected: false,
-              namePickedDocument: '',
-              nameDocument: '',
-              path: null,
-            ),
-          )
-          .toList());
+      pathDocumentsStream
+          .add(widget.files.specification.partsSpecs[0].documentSpec
+              .map(
+                (e) => PathsDocuments(
+                  idDocument: e.id,
+                  document: null,
+                  selected: true,
+                  namePickedDocument: '',
+                  nameDocument: '',
+                  path: null,
+                ),
+              )
+              .toList());
+      pathDocumentsUpdateStream
+          .add(widget.files.specification.partsSpecs[0].documentSpec
+              .map(
+                (e) => PathsDocuments(
+                  idDocument: e.id,
+                  document: null,
+                  selected: false,
+                  namePickedDocument: '',
+                  nameDocument: '',
+                  path: null,
+                ),
+              )
+              .toList());
     }
     super.initState();
   }
@@ -79,11 +77,11 @@ class _WidgetDocumentPickedState extends BasicState<WidgetDocumentPicked>
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-        itemCount: files.specification.documents.isEmpty
+        itemCount: files.specification.partsSpecs[0].documentSpec.isEmpty
             ? 1
-            : files.specification.documents.length,
+            : files.specification.partsSpecs[0].documentSpec.length,
         itemBuilder: (BuildContext context, int index) {
-          return files.specification.documents.isEmpty
+          return files.specification.partsSpecs[0].documentSpec.isEmpty
               ? Padding(
                   padding: const EdgeInsets.all(40),
                   child: Text(lang.noDocument.toUpperCase()),
@@ -97,7 +95,7 @@ class _WidgetDocumentPickedState extends BasicState<WidgetDocumentPicked>
                     return ListTile(
                       leading: Icon(Icons.file_download),
                       title: Text(
-                        " ${files.specification.documents[index].name} ",
+                        " ${files.specification.partsSpecs[0].documentSpec[index].name} ",
                         style: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
                         maxLines: 50,
                       ),
@@ -178,13 +176,13 @@ class _WidgetDocumentPickedState extends BasicState<WidgetDocumentPicked>
                                         list.insert(
                                             index,
                                             addPathDocument(
-                                              files.specification
-                                                  .documents[index].id,
+                                              files.specification.partsSpecs[0]
+                                                  .documentSpec[index].id,
                                               pickedBytes,
                                               true,
                                               namePickedFile,
-                                              files.specification
-                                                  .documents[index].name,
+                                              files.specification.partsSpecs[0]
+                                                  .documentSpec[index].name,
                                               pickedPath,
                                             ));
                                         pathDocumentsStream.add(list);
@@ -220,13 +218,13 @@ class _WidgetDocumentPickedState extends BasicState<WidgetDocumentPicked>
                                           list.insert(
                                             index,
                                             addPathDocument(
-                                              files.specification
-                                                  .documents[index].id,
+                                              files.specification.partsSpecs[0]
+                                                  .documentSpec[index].id,
                                               pickedBytes,
                                               true,
                                               namePickedFile,
-                                              files.specification
-                                                  .documents[index].name,
+                                              files.specification.partsSpecs[0]
+                                                  .documentSpec[index].name,
                                               pickedPath,
                                             ),
                                           );
@@ -297,12 +295,10 @@ class _WidgetDocumentPickedState extends BasicState<WidgetDocumentPicked>
             }
           }
           await showSnackBar2(context, lang.savedSuccessfully);
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (BuildContext) => ListFilesCustomer()));
+          Navigator.push(context,
+              MaterialPageRoute(builder: (BuildContext) => FilesPage()));
         } else {
-          await showSnackBar2(context, lang.noDocument);
+          showSnackBar2(context, lang.noDocument);
         }
       } else {
         if (pathDocumentsUpdateStream.value.isNotEmpty) {
@@ -313,12 +309,10 @@ class _WidgetDocumentPickedState extends BasicState<WidgetDocumentPicked>
           }
 
           await showSnackBar2(context, lang.savedSuccessfully);
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (BuildContext) => ListFilesCustomer()));
+          Navigator.push(context,
+              MaterialPageRoute(builder: (BuildContext) => FilesPage()));
         } else {
-          await showSnackBar2(context, lang.noDocument);
+          showSnackBar2(context, lang.noDocument);
         }
       }
     } catch (error, stackTrace) {
@@ -340,12 +334,10 @@ class _WidgetDocumentPickedState extends BasicState<WidgetDocumentPicked>
             }
           }
           await showSnackBar2(context, lang.savedSuccessfully);
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (BuildContext) => ListFilesCustomer()));
+          Navigator.push(context,
+              MaterialPageRoute(builder: (BuildContext) => FilesPage()));
         } else {
-          await showSnackBar2(context, lang.noDocument);
+          showSnackBar2(context, lang.noDocument);
         }
       } else {
         if (pathDocumentsUpdateStream.value.isNotEmpty) {
@@ -355,12 +347,10 @@ class _WidgetDocumentPickedState extends BasicState<WidgetDocumentPicked>
             }
           }
           await showSnackBar2(context, lang.savedSuccessfully);
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (BuildContext) => ListFilesCustomer()));
+          Navigator.push(context,
+              MaterialPageRoute(builder: (BuildContext) => FilesPage()));
         } else {
-          await showSnackBar2(context, lang.noDocument);
+          showSnackBar2(context, lang.noDocument);
         }
       }
     } catch (error, stackTrace) {
@@ -410,36 +400,38 @@ class _WidgetDocumentPickedState extends BasicState<WidgetDocumentPicked>
   List<Subject> get subjects => throw UnimplementedError();
 
   delete(PathsDocuments pathsDocuments, int index) {
-    WidgetMixin.showDialog2(
-      context,
-      label: lang.confirm,
-      content: Text(lang.confirmDelete),
-      actions: [
-        TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: Text(lang.no.toUpperCase())),
-        TextButton(
-            onPressed: () {
-              var list = pathDocumentsStream.value;
-              list.removeAt(index);
-              list.insert(
-                  index,
-                  addPathDocument(
-                    files.specification.documents[index].id,
-                    null,
-                    false,
-                    '',
-                    '',
-                    null,
-                  ));
-              pathDocumentsStream.add(list);
-              allUploaded(false);
-              Navigator.of(context).pop(true);
-            },
-            child: Text(lang.confirm.toUpperCase())),
-      ],
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.confirm),
+        content: Text(lang.confirmDelete),
+        actions: [
+          TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: Text(lang.no.toUpperCase())),
+          TextButton(
+              onPressed: () {
+                var list = pathDocumentsStream.value;
+                list.removeAt(index);
+                list.insert(
+                    index,
+                    addPathDocument(
+                      files.specification.partsSpecs[0].documentSpec[index].id,
+                      null,
+                      false,
+                      '',
+                      '',
+                      null,
+                    ));
+                pathDocumentsStream.add(list);
+                allUploaded(false);
+                Navigator.of(context).pop(true);
+              },
+              child: Text(lang.confirm.toUpperCase())),
+        ],
+      ),
     );
   }
 }

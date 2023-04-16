@@ -1,26 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_responsive_tools/device_screen_type.dart';
 import 'package:get_it/get_it.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/pages/customer/add_customer_page.dart';
 import 'package:notary_admin/src/pages/customer/customer_table_widget.dart';
+import 'package:notary_admin/src/pages/search/search_widget.dart';
 import 'package:notary_admin/src/services/admin/customer_service.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/customer.dart';
-import 'package:rxdart/src/subjects/subject.dart';
+import 'package:rxdart/rxdart.dart';
 
-class ListCustomerPage extends StatefulWidget {
-  const ListCustomerPage({super.key});
+class CustomerPage extends StatefulWidget {
+  const CustomerPage({super.key});
 
   @override
-  State<ListCustomerPage> createState() => _ListCustomerPageState();
+  State<CustomerPage> createState() => _CustomerPageState();
 }
 
-class _ListCustomerPageState extends BasicState<ListCustomerPage>
+class _CustomerPageState extends BasicState<CustomerPage>
     with WidgetUtilsMixin {
   final service = GetIt.instance.get<CustomerService>();
   final tableKey = GlobalKey<LazyPaginatedDataTableState>();
+  final searchValueStream = BehaviorSubject.seeded("");
+
+  @override
+  void initState() {
+    searchValueStream
+        .where((event) => tableKey.currentState != null)
+        .debounceTime(Duration(milliseconds: 500))
+        .listen((value) {
+      tableKey.currentState?.refreshPage();
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,17 +42,13 @@ class _ListCustomerPageState extends BasicState<ListCustomerPage>
       (context, type) => Scaffold(
         appBar: AppBar(
           title: Text(lang.customerList),
-          // titleSpacing: 00.0,
-          // centerTitle: true,
-          // toolbarHeight: 60.2,
-          // toolbarOpacity: 0.8,
-          // shape: const RoundedRectangleBorder(
-          //   borderRadius: BorderRadius.only(
-          //       bottomRight: Radius.circular(25),
-          //       bottomLeft: Radius.circular(25)),
-          // ),
-          // elevation: 0.00,
-          // backgroundColor: Colors.greenAccent[400],
+          actions: [
+            SearchWidget(
+                type: type,
+                onChange: ((searchValue) {
+                  searchValueStream.add(searchValue);
+                })),
+          ],
         ),
         floatingActionButton: ElevatedButton(
           onPressed: () {
@@ -47,18 +57,23 @@ class _ListCustomerPageState extends BasicState<ListCustomerPage>
               MaterialPageRoute(builder: (context) => AddCustomerPage()),
             ).then((value) {
               if (value != null) {
-                tableKey.currentState?.add(value);
+                tableKey.currentState?.refreshPage();
               }
             });
           },
           child: Text(lang.addCustomer),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: CustomerTableWidget(
-            tableKey: tableKey,
-          ),
-        ),
+        body: StreamBuilder<String>(
+            stream: searchValueStream,
+            builder: (context, snapshot) {
+              return Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: CustomerTableWidget(
+                  tableKey: tableKey,
+                  searchValue: snapshot.data,
+                ),
+              );
+            }),
       ),
     );
   }

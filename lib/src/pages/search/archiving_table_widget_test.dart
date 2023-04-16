@@ -13,7 +13,6 @@ import 'package:notary_admin/src/pages/customer/customer_selection_dialog.dart';
 import 'package:notary_admin/src/pages/files/files_table_widget.dart';
 import 'package:notary_admin/src/pages/pdf/pdf_images.dart';
 import 'package:notary_admin/src/pages/search/date_range_picker_widget.dart';
-import 'package:notary_admin/src/pages/search/search_filter_table_widget.dart';
 import 'package:notary_admin/src/services/files/files_archive_service.dart';
 import 'package:notary_admin/src/services/files/pdf_service.dart';
 import 'package:notary_admin/src/utils/widget_mixin_new.dart';
@@ -47,24 +46,15 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
   final archiveService = GetIt.instance.get<FilesArchiveService>();
   final pdfService = GetIt.instance.get<PdfService>();
   //key
-  final searchFilterKey = GlobalKey<SearchFilterTableWidgetState>();
   final fileNameKey = GlobalKey<FormState>();
   //stream
   final dropDownValueStream = BehaviorSubject.seeded("");
-
+  final filesCodeSearchStream = BehaviorSubject.seeded("");
+  final filesSpecSearchStream = BehaviorSubject.seeded("");
   final searchFilterStream = BehaviorSubject<SearchFilter?>();
-  final subject = BehaviorSubject.seeded(SearchParams2(
-      customers: [],
-      fileSpecName: "",
-      number: "",
-      range: DateRange(endDate: null, startDate: null)));
-  final searchParamsStream = BehaviorSubject.seeded(SearchParams(
-    customerIds: "",
-    endDate: -1,
-    fileSpecName: "",
-    number: "",
-    startDate: -1,
-  ));
+  final customerSearchStream = BehaviorSubject.seeded(<Customer>[]);
+  final rangeDateSearchStream =
+      BehaviorSubject.seeded(DateRange(startDate: null, endDate: null));
   //input controller
   final templateNameCrtl = TextEditingController();
   final filesCodeSearchCtrl = TextEditingController();
@@ -76,20 +66,18 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
 
   @override
   void initState() {
-    subject.listen((data) {
-      searchFilterKey.currentState?.refresh(subject.value);
+    filesCodeSearchStream.listen((value) {
       widget.tableKey.currentState?.refreshPage();
     });
-    searchParamsStream.listen((data) {
-      if (data.number.isEmpty) {
-        filesCodeSearchCtrl.text = "";
-      }
-      if (data.fileSpecName.isEmpty) {
-        filesSpecSearchCtrl.text = "";
-      }
+    filesSpecSearchStream.listen((value) {
       widget.tableKey.currentState?.refreshPage();
     });
-
+    customerSearchStream.listen((value) {
+      widget.tableKey.currentState?.refreshPage();
+    });
+    rangeDateSearchStream.listen((value) {
+      widget.tableKey.currentState?.refreshPage();
+    });
     super.initState();
   }
 
@@ -106,11 +94,11 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
     return SingleChildScrollView(
       child: Column(
         children: [
-          SearchFilterTableWidget(
-            key: searchFilterKey,
-            onSearchParamsChanged: (p0) {
-              searchParamsStream.add(p0);
-            },
+          getDataTableFilters(
+            filesCodeSearchStream: filesCodeSearchStream,
+            filesSpecSearchStream: filesSpecSearchStream,
+            customerSearchStream: customerSearchStream,
+            rangeDateSearchStream: rangeDateSearchStream,
           ),
           Padding(
             padding: const EdgeInsets.all(15.0),
@@ -131,12 +119,8 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
   Future<List<FilesArchive>> getData(PageInfo page) {
     try {
       {
-        var params = searchParamsStream.value;
-        if (params.customerIds.isNotEmpty ||
-            params.number.isNotEmpty ||
-            params.fileSpecName.isNotEmpty ||
-            params.startDate != -1 ||
-            params.endDate != -1) {
+        var params = _getArgs();
+        if (params != null) {
           return archiveService.searchFilesArchive(
             number: params.number,
             filesSpecName: params.fileSpecName,
@@ -159,12 +143,8 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
 
   Future<int> getTotal() {
     try {
-      var params = searchParamsStream.value;
-      if (params.customerIds.isNotEmpty ||
-          params.number.isNotEmpty ||
-          params.fileSpecName.isNotEmpty ||
-          params.startDate != -1 ||
-          params.endDate != -1) {
+      var params = _getArgs();
+      if (params != null) {
         return archiveService.countSearchFilesArchive(
           number: params.number,
           filesSpecName: params.fileSpecName,
@@ -364,11 +344,9 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
             builder: ((context) {
               return DateRangePickerWidget(
                 onSave: (range) {
-                  var value = subject.value;
-                  value.range = range;
-                  subject.add(value);
+                  rangeDateSearchStream.add(range);
                 },
-                range: subject.value.range,
+                range: rangeDateSearchStream.value,
               );
             }),
           );
@@ -397,9 +375,8 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
                 context: context,
                 builder: (context) => CustomerSelectionDialog(
                   onSave: (selectedCustomer) {
-                    var value = subject.value;
-                    value.customers = selectedCustomer;
-                    subject.add(value);
+                    customerSearchStream.add(selectedCustomer);
+                    Navigator.pop(context);
                   },
                 ),
               );
@@ -411,7 +388,95 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
     return columns;
   }
 
+  Widget getDataTableFilters({
+    required BehaviorSubject<String> filesCodeSearchStream,
+    required BehaviorSubject<String> filesSpecSearchStream,
+    required BehaviorSubject<List<Customer>> customerSearchStream,
+    required BehaviorSubject<DateRange> rangeDateSearchStream,
+  }) {
+    return StreamBuilder<List<Object>>(
+      stream: Rx.combineLatest4(
+          filesCodeSearchStream,
+          filesSpecSearchStream,
+          customerSearchStream,
+          rangeDateSearchStream,
+          (a, b, c, d) => [a, b, c, d]),
+      builder: (context, snapshot) {
+        var data = snapshot.data;
+        if (data == null || data.isEmpty) {
+          return SizedBox.shrink();
+        }
+        var filesCode = data[0] as String;
+        var filesSpec = data[1] as String;
+        var customers = data[2] as List<Customer>;
+        var range = data[3] as DateRange;
+        return Wrap(spacing: 20, children: [
+          range.startDate != null
+              ? InputChip(
+                  label: Text(
+                      "${lang.start} : ${lang.formatDateDate(range.startDate!)}"),
+                  onDeleted: () {
+                    range = DateRange(startDate: null, endDate: range.endDate);
+                    rangeDateSearchStream.add(range);
+                  },
+                  deleteIcon: Icon(Icons.cancel),
+                )
+              : SizedBox.shrink(),
+          range.endDate != null
+              ? InputChip(
+                  label: Text(
+                      "${lang.end} : ${lang.formatDateDate(range.endDate!)}"),
+                  onDeleted: () {
+                    range =
+                        DateRange(startDate: range.startDate, endDate: null);
+                    rangeDateSearchStream.add(range);
+                    ;
+                  },
+                  deleteIcon: Icon(Icons.cancel),
+                )
+              : SizedBox.shrink(),
+          filesCode.isNotEmpty
+              ? InputChip(
+                  label: Text("${filesCode}"),
+                  onDeleted: () {
+                    filesCodeSearchStream.add("");
+                    filesCodeSearchCtrl.clear();
+                  },
+                  deleteIcon: Icon(Icons.cancel),
+                )
+              : SizedBox.shrink(),
+          filesSpec.isNotEmpty
+              ? InputChip(
+                  label: Text("${filesSpec}"),
+                  onDeleted: () {
+                    filesSpecSearchStream.add("");
+                    filesSpecSearchCtrl.clear();
+                  },
+                  deleteIcon: Icon(Icons.cancel),
+                )
+              : SizedBox.shrink(),
+          ...customers
+              .map(
+                (e) => InputChip(
+                  label: Text("${e.firstName} ${e.lastName}"),
+                  onDeleted: () {
+                    customers.remove(e);
+                    customerSearchStream.add(customers);
+                  },
+                  deleteIcon: Icon(Icons.cancel),
+                ),
+              )
+              .toList()
+        ]);
+      },
+    );
+  }
+
   Widget columnWidget(String label, SearchFilter filter) {
+    var stream = filter == SearchFilter.NUMBER
+        ? filesCodeSearchStream
+        : filesSpecSearchStream;
+
     var controller = filter == SearchFilter.NUMBER
         ? filesCodeSearchCtrl
         : filesSpecSearchCtrl;
@@ -425,11 +490,7 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
               child: TextFormField(
                 autofocus: true,
                 onFieldSubmitted: (value) {
-                  var val = subject.value;
-                  filter == SearchFilter.NUMBER
-                      ? val.number = value
-                      : val.fileSpecName = value;
-                  subject.add(val);
+                  stream.add(value);
                 },
                 controller: controller,
                 decoration: InputDecoration(
@@ -438,11 +499,7 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
                       searchFilterStream.add(null);
                       controller.clear();
                       controller.text = "";
-                      var val = subject.value;
-                      filter == SearchFilter.NUMBER
-                          ? val.number = ""
-                          : val.fileSpecName = "";
-                      subject.add(val);
+                      stream.add("");
                     },
                     icon: Icon(Icons.close),
                   ),
@@ -458,6 +515,41 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
             onTap: () => searchFilterStream.add(filter),
           );
         });
+  }
+
+  SearchParams? _getArgs() {
+    if (filesCodeSearchStream.value.isNotEmpty ||
+        filesSpecSearchStream.value.isNotEmpty ||
+        customerSearchStream.value.isNotEmpty ||
+        rangeDateSearchStream.value.startDate != null ||
+        rangeDateSearchStream.value.endDate != null) {
+      var customerIds = "";
+      customerSearchStream.value.forEach((e) {
+        customerIds = customerIds + "," + e.id;
+      });
+      var startDate = -1;
+      var endDate = -1;
+
+      if (rangeDateSearchStream.value.endDate != null) {
+        endDate = rangeDateSearchStream.value.endDate!
+            .add(Duration(days: 1))
+            .millisecondsSinceEpoch;
+      }
+      if (rangeDateSearchStream.value.startDate != null) {
+        startDate =
+            rangeDateSearchStream.value.startDate!.millisecondsSinceEpoch;
+      }
+
+      var res = SearchParams(
+        number: filesCodeSearchStream.value,
+        fileSpecName: filesSpecSearchStream.value,
+        customerIds: customerIds,
+        startDate: startDate,
+        endDate: endDate,
+      );
+      return res;
+    }
+    return null;
   }
 }
 

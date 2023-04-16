@@ -26,4 +26,14 @@ abstract class AdminAssistantService {
 
   @DELETE("/admin/assistant/{id}")
   Future<void> deleteAssistant(@Path("id") String id);
+
+  @GET("/admin/assistant/search")
+  Future<List<Admin>> searchAssistant({
+    @Query("name") required String name,
+    @Query("index") required int index,
+    @Query("size") required int size,
+  });
+
+  @GET("/admin/assistant/search/count")
+  Future<int> searchCount({@Query("name") required String name});
 }

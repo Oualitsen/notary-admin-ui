@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/pages/archiving/add_archive_page.dart';
-import 'package:notary_admin/src/pages/archiving/files_archived_list.dart';
 import 'package:notary_admin/src/pages/archiving/files_archived_table_widget.dart';
+import 'package:notary_admin/src/pages/search/date_range_picker_widget.dart';
+import 'package:notary_admin/src/services/files/files_archive_service.dart';
+import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
@@ -15,7 +19,12 @@ class ArchivePage extends StatefulWidget {
 }
 
 class _ArchivePageState extends BasicState<ArchivePage> with WidgetUtilsMixin {
+  final archiveService = GetIt.instance.get<FilesArchiveService>();
   final _selectedYearStream = BehaviorSubject.seeded(DateTime.now().year);
+
+  final listViewKey = GlobalKey();
+  final tableKey = GlobalKey<LazyPaginatedDataTableState>();
+
   @override
   Widget build(BuildContext context) {
     return WidgetUtils.wrapRoute(
@@ -23,20 +32,57 @@ class _ArchivePageState extends BasicState<ArchivePage> with WidgetUtilsMixin {
         appBar: AppBar(
           title: Text(lang.archive),
           actions: [
-            StreamBuilder<int>(
-                stream: _selectedYearStream,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData == false) {
-                    return SizedBox.shrink();
-                  }
-                  return Tooltip(
-                    message: lang.selectYear,
-                    child: ElevatedButton(
-                      child: Text("${snapshot.data}"),
-                      onPressed: yearPicker,
-                    ),
-                  );
-                }),
+            StreamBuilder(
+              stream: _selectedYearStream,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return SizedBox.shrink();
+                }
+                var year = snapshot.data!;
+                var currentYear = DateTime.now().year;
+                return Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Row(
+                    children: [
+                      Tooltip(
+                        message: lang.previousYear,
+                        child: IconButton(
+                          onPressed: year > (currentYear - 100)
+                              ? () {
+                                  _selectedYearStream.add((year - 1));
+                                }
+                              : null,
+                          icon: Icon(Icons.arrow_back_ios),
+                        ),
+                      ),
+                      Tooltip(
+                        message: lang.selectYear,
+                        child: Container(
+                          alignment: Alignment.centerRight,
+                          padding: EdgeInsets.all(10),
+                          child: InkWell(
+                            child: Text("${snapshot.data}"),
+                            onTap: yearPicker,
+                          ),
+                        ),
+                      ),
+                      Tooltip(
+                        message: lang.nextYear,
+                        child: IconButton(
+                          onPressed: year < currentYear
+                              ? () {
+                                  _selectedYearStream.add((year + 1));
+                                }
+                              : null,
+                          icon: Icon(Icons.arrow_forward_ios),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            SizedBox(width: 5),
             ElevatedButton(
               onPressed: (() => push(context, AddArchivePage())),
               child: Text(lang.addArchive),
@@ -46,31 +92,15 @@ class _ArchivePageState extends BasicState<ArchivePage> with WidgetUtilsMixin {
         body: StreamBuilder<int>(
             stream: _selectedYearStream,
             builder: (context, snapshot) {
-              if (snapshot.hasData == false) {
+              if (!snapshot.hasData) {
                 return SizedBox.shrink();
               }
-              return ListView.builder(
-                itemCount: DateTime.monthsPerYear,
-                itemBuilder: (context, index) {
-                  var startDate = DateTime(snapshot.data!, (index + 1))
-                      .millisecondsSinceEpoch;
-                  var endDate =
-                      DateTime(snapshot.data!, (index + 2), 0, 23, 59, 59)
-                          .millisecondsSinceEpoch;
-                  return ListTile(
-                    leading: Icon(Icons.folder),
-                    title: Text("${lang.monthName(startDate)}"),
-                    onTap: () {
-                      push(
-                        context,
-                        FilesArchiveTableWidget(
-                          startDate: startDate,
-                          endDate: endDate,
-                        ),
-                      );
-                    },
-                  );
-                },
+              var startDate = DateTime(snapshot.data!, 1, 1);
+              var endDate = DateTime(startDate.year, 12, 31);
+              tableKey.currentState?.refreshPage();
+              return FilesArchiveTableWidget(
+                tableKey: tableKey,
+                initialRange: DateRange(startDate: startDate, endDate: endDate),
               );
             }),
       ),
@@ -78,27 +108,21 @@ class _ArchivePageState extends BasicState<ArchivePage> with WidgetUtilsMixin {
   }
 
   yearPicker() async {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(lang.selectYear),
-          content: Container(
-            width: 300,
-            height: 300,
-            child: YearPicker(
-              firstDate: DateTime(DateTime.now().year - 100, 1),
-              lastDate: DateTime(DateTime.now().year),
-              initialDate: DateTime(_selectedYearStream.value),
-              selectedDate: DateTime(_selectedYearStream.value),
-              onChanged: (DateTime dateTime) {
-                _selectedYearStream.add(dateTime.year);
-                Navigator.pop(context);
-              },
-            ),
-          ),
-        );
-      },
+    WidgetMixin.showDialog2(
+      context,
+      label: lang.selectYear,
+      width: 300,
+      height: 300,
+      content: YearPicker(
+        firstDate: DateTime(DateTime.now().year - 100, 1),
+        lastDate: DateTime(DateTime.now().year),
+        initialDate: DateTime(_selectedYearStream.value),
+        selectedDate: DateTime(_selectedYearStream.value),
+        onChanged: (DateTime dateTime) {
+          _selectedYearStream.add(dateTime.year);
+          Navigator.pop(context);
+        },
+      ),
     );
   }
 

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
-import 'package:notary_admin/src/pages/assistant/assistant_detail_page.dart';
 import 'package:notary_admin/src/pages/assistant/assistant_details_input.dart';
 import 'package:notary_admin/src/services/assistant/admin_assistant_service.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
@@ -11,13 +10,13 @@ import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_admin/src/widgets/password_input.dart';
 import 'package:notary_model/model/admin.dart';
-import 'package:notary_model/model/assistant.dart';
 import 'package:notary_model/model/assistant_input.dart';
 import 'package:rxdart/src/subjects/subject.dart';
 
 class AssistantTableWidget extends StatefulWidget {
   final GlobalKey<LazyPaginatedDataTableState>? tableKey;
-  AssistantTableWidget({super.key, this.tableKey});
+  final String? searchValue;
+  AssistantTableWidget({super.key, this.tableKey, required this.searchValue});
 
   @override
   State<AssistantTableWidget> createState() => AssistantTableWidgetState();
@@ -56,11 +55,22 @@ class AssistantTableWidgetState extends BasicState<AssistantTableWidget>
   }
 
   Future<List<Admin>> getData(PageInfo page) {
-    return service.getAssistants(index: page.pageIndex, size: page.pageSize);
+    if (widget.searchValue == null || widget.searchValue!.isEmpty) {
+      return service.getAssistants(index: page.pageIndex, size: page.pageSize);
+    }
+
+    return service.searchAssistant(
+      name: widget.searchValue!,
+      index: page.pageIndex,
+      size: page.pageSize,
+    );
   }
 
   Future<int> getTotal() {
-    return service.getAssistantsCount();
+    if (widget.searchValue == null || widget.searchValue!.isEmpty) {
+      return service.getAssistantsCount();
+    }
+    return service.searchCount(name: widget.searchValue!);
   }
 
   DataRow dataToRow(Admin data, int indexInCurrentPage) {
@@ -97,20 +107,22 @@ class AssistantTableWidgetState extends BasicState<AssistantTableWidget>
   @override
   List<Subject> get subjects => [];
   void deleteConfirmation(String assistantId) {
-    WidgetMixin.showDialog2(
-      context,
-      label: lang.confirm,
-      content: Text(lang.confirmDelete),
-      actions: <Widget>[
-        TextButton(
-          child: Text(lang.no.toUpperCase()),
-          onPressed: () => Navigator.of(context).pop(false),
-        ),
-        TextButton(
-          child: Text(lang.yes.toUpperCase()),
-          onPressed: (() => delete(assistantId)),
-        ),
-      ],
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.confirm),
+        content: Text(lang.confirmDelete),
+        actions: <Widget>[
+          TextButton(
+            child: Text(lang.no.toUpperCase()),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TextButton(
+            child: Text(lang.yes.toUpperCase()),
+            onPressed: (() => delete(assistantId)),
+          ),
+        ],
+      ),
     );
   }
 
@@ -133,12 +145,10 @@ class AssistantTableWidgetState extends BasicState<AssistantTableWidget>
     return WidgetMixin.showDialog2(
       context,
       label: lang.addSteps,
-      content: Container(
-        height: 200,
-        child: AssistantDetailsInput(
-          key: assistantKey,
-          assistant: assistant,
-        ),
+      height: 300,
+      content: AssistantDetailsInput(
+        key: assistantKey,
+        assistant: assistant,
       ),
       actions: <Widget>[
         getButtons(onSave: () => saveAssistant(assistant)),
@@ -177,18 +187,15 @@ class AssistantTableWidgetState extends BasicState<AssistantTableWidget>
     WidgetMixin.showDialog2(
       context,
       label: lang.resetPassword.toUpperCase(),
-      content: Container(
-        height: 100,
-        width: 400,
-        child: Form(
-          key: _formKeyNewPassword,
-          child: PasswordInput(
-            controller: newPwdCtr,
-            label: Text(lang.newPassword),
-            validator: (text) {
-              return ValidationUtils.requiredField(text, context);
-            },
-          ),
+      height: 100,
+      content: Form(
+        key: _formKeyNewPassword,
+        child: PasswordInput(
+          controller: newPwdCtr,
+          label: Text(lang.newPassword),
+          validator: (text) {
+            return ValidationUtils.requiredField(text, context);
+          },
         ),
       ),
       actions: <Widget>[

@@ -7,12 +7,11 @@ import 'package:notary_admin/src/pages/printed_docs/printed_doc_view.dart';
 import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_admin/src/utils/widget_mixin_new.dart';
+import 'package:notary_admin/src/utils/widget_utils.dart';
+import 'package:notary_admin/src/widgets/basic_state.dart';
+import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/printed_doc.dart';
 import 'package:rxdart/subjects.dart';
-
-import '../../utils/widget_utils.dart';
-import '../../widgets/basic_state.dart';
-import '../../widgets/mixins/button_utils_mixin.dart';
 
 class PrintedDocumentsPage extends StatefulWidget {
   const PrintedDocumentsPage({super.key});
@@ -109,23 +108,25 @@ class _PrintedDocumentsPageState extends BasicState<PrintedDocumentsPage>
         push(context, PrintedDocViewHtml(text: doc.htmlData));
       }
       if (value == items[3]) {
-        WidgetMixin.showDialog2(
-          context,
-          label: lang.confirm,
-          content: Text(lang.confirmDelete),
-          actions: [
-            TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(false);
-                },
-                child: Text(lang.no.toUpperCase())),
-            TextButton(
-                onPressed: () async {
-                  Navigator.of(context).pop(true);
-                  await _delete(doc);
-                },
-                child: Text(lang.confirm.toUpperCase())),
-          ],
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(lang.confirm),
+            content: Text(lang.confirmDelete),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  },
+                  child: Text(lang.no.toUpperCase())),
+              TextButton(
+                  onPressed: () async {
+                    Navigator.of(context).pop(true);
+                    await _delete(doc);
+                  },
+                  child: Text(lang.confirm.toUpperCase())),
+            ],
+          ),
         );
       }
       ;

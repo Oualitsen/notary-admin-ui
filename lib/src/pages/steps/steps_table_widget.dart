@@ -4,7 +4,6 @@ import 'package:http_error_handler/error_handler.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/pages/steps/add_step_widget.dart';
 import 'package:notary_admin/src/services/admin/steps_service.dart';
-import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/step_input.dart';
@@ -30,7 +29,7 @@ class _StepsTableWidgetState extends BasicState<StepsTableWidget>
   @override
   Widget build(BuildContext context) {
     columns = [
-      DataColumn(label: Text(lang.createdFileSpec)),
+      DataColumn(label: Text(lang.creationDate)),
       DataColumn(label: Text(lang.name)),
       DataColumn(label: Text(lang.estimationTime)),
       DataColumn(label: Text(lang.edit)),
@@ -88,43 +87,47 @@ class _StepsTableWidgetState extends BasicState<StepsTableWidget>
   List<Subject> get subjects => [];
 
   deleteSteps(String id) {
-    WidgetMixin.showDialog2(
-      context,
-      label: lang.confirm,
-      content: Text(lang.confirmDelete),
-      actions: <Widget>[
-        TextButton(
-          child: Text(lang.no.toUpperCase()),
-          onPressed: () => Navigator.of(context).pop(false),
-        ),
-        TextButton(
-            child: Text(lang.yes.toUpperCase()),
-            onPressed: () async {
-              try {
-                await service.delete(id);
-                Navigator.of(context).pop(true);
-                widget.tableKey?.currentState?.refreshPage();
-                await showSnackBar2(context, lang.delete);
-              } catch (error, stacktrace) {
-                showServerError(context, error: error);
-                print(stacktrace);
-              }
-            }),
-      ],
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.confirm),
+        content: Text(lang.confirmDelete),
+        actions: <Widget>[
+          TextButton(
+            child: Text(lang.no.toUpperCase()),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TextButton(
+              child: Text(lang.yes.toUpperCase()),
+              onPressed: () async {
+                try {
+                  await service.delete(id);
+                  Navigator.of(context).pop(true);
+                  widget.tableKey?.currentState?.refreshPage();
+                  await showSnackBar2(context, lang.delete);
+                } catch (error, stacktrace) {
+                  showServerError(context, error: error);
+                  print(stacktrace);
+                }
+              }),
+        ],
+      ),
     );
   }
 
   editSteps(Steps data, BuildContext context) async {
-    return WidgetMixin.showDialog2(
-      context,
-      label: lang.addSteps,
-      content: AddStepWidget(
-        step: data,
-        key: stepKey,
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.addSteps),
+        content: AddStepWidget(
+          step: data,
+          key: stepKey,
+        ),
+        actions: <Widget>[
+          getButtons(onSave: saveStep),
+        ],
       ),
-      actions: <Widget>[
-        getButtons(onSave: saveStep),
-      ],
     );
   }
 

@@ -1,4 +1,3 @@
-import 'package:notary_model/model/admin.dart';
 import 'package:notary_model/model/auth_result.dart';
 import 'package:notary_model/model/basic_user.dart';
 import 'package:notary_model/model/password_change.dart';

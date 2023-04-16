@@ -1,15 +1,11 @@
 import 'package:get_it/get_it.dart';
-import 'package:html/parser.dart';
 import 'package:flutter/material.dart';
-import 'package:http_error_handler/error_handler.dart';
 import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
-import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
-import 'package:notary_model/model/printed_doc_input.dart';
+import 'package:notary_admin/src/widgets/basic_state.dart';
+import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:webviewx/webviewx.dart';
-import '../../widgets/basic_state.dart';
-import '../../widgets/mixins/button_utils_mixin.dart';
 
 class PrintedDocViewHtml extends StatefulWidget {
   final String text;
@@ -27,17 +23,10 @@ class _PrintedDocViewHtmlState extends BasicState<PrintedDocViewHtml>
   late String text;
   final templateNameCrtl = TextEditingController();
   final _htmlDocument = BehaviorSubject.seeded('');
-  var toPrint = """
-   <script>
-      function display() {
-         window.print();
-      }
-   </script>
-""";
 
   @override
   void initState() {
-    text = toPrint + widget.text;
+    text = widget.text;
 
     _htmlDocument.where((event) => controllerWeb != null).listen((value) {
       controllerWeb!.loadContent(value, SourceType.html);

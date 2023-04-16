@@ -2,6 +2,10 @@ import 'package:notary_admin/src/pages/assistant/list_assistant_page.dart';
 import 'package:notary_admin/src/pages/customer/list_customer_page.dart';
 import 'package:notary_admin/src/pages/files/download_file.dart';
 import 'package:notary_admin/src/pages/files/list_files_customer.dart';
+import 'package:notary_admin/src/pages/assistant/assistant_page.dart';
+import 'package:notary_admin/src/pages/customer/customer_page.dart';
+import 'package:notary_admin/src/pages/file-spec/file_spec_page.dart';
+import 'package:notary_admin/src/pages/files/files_page.dart';
 import 'package:notary_admin/src/pages/login_page.dart';
 import 'package:notary_admin/src/pages/printed_docs/printed_docs_page.dart';
 import 'package:notary_admin/src/pages/profile_page.dart';
@@ -14,7 +18,6 @@ import 'package:notary_admin/src/pages/step_group/step_group_page.dart';
 import 'package:notary_admin/src/pages/steps/steps_page.dart';
 import 'package:notary_admin/src/pages/templates/load_template.dart';
 import 'package:notary_admin/src/pages/archiving/archive_page.dart';
-import 'package:notary_admin/src/pages/archiving/add_archive_page.dart';
 import 'package:notary_admin/src/utils/injector.dart';
 import 'package:notary_admin/src/widgets/mixins/lang.dart';
 import 'package:notary_model/model/basic_user.dart';
@@ -22,8 +25,6 @@ import 'package:rapidoc_utils/widgets/image_utils.dart';
 import 'package:rapidoc_utils/widgets/menu_drawer.dart';
 import 'package:rapidoc_utils/widgets/route_guard_widget.dart';
 import 'package:rapidoc_utils/widgets/template_builder.dart';
-
-import '../pages/file-spec/file_spec_List.dart';
 
 class WidgetUtils {
   static Widget wrapRoute(
@@ -141,7 +142,7 @@ Widget createDrawer(BuildContext context) {
         onTap: () => {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ListCustomerPage()),
+            MaterialPageRoute(builder: (context) => CustomerPage()),
           )
         },
       ),
@@ -152,7 +153,7 @@ Widget createDrawer(BuildContext context) {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ListAssistantPage(),
+              builder: (context) => AssistantPage(),
             ),
           );
         },
@@ -181,13 +182,13 @@ Widget createDrawer(BuildContext context) {
         title: (lang.fileSpec),
         icon: Icons.file_download,
         onTap: () => Navigator.push(
-            context, MaterialPageRoute(builder: ((context) => FileSpecList()))),
+            context, MaterialPageRoute(builder: ((context) => FileSpecPage()))),
       ),
       DrawerMenuItem(
         title: lang.listFilesCustomer,
         icon: Icons.file_present_rounded,
-        onTap: () => Navigator.push(context,
-            MaterialPageRoute(builder: (context) => ListFilesCustomer())),
+        onTap: () => Navigator.push(
+            context, MaterialPageRoute(builder: (context) => FilesPage())),
       ),
       DrawerMenuItem(
         title: lang.savedTemplates,

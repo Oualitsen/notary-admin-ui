@@ -7,10 +7,8 @@ import 'package:notary_admin/src/services/assistant/admin_assistant_service.dart
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
-import 'package:notary_model/model/admin.dart';
 import 'package:notary_model/model/assistant_input.dart';
 import 'package:notary_model/model/role.dart';
-import 'package:rxdart/src/subjects/subject.dart';
 import 'package:rxdart/subjects.dart';
 
 class AddAssistantPage extends StatefulWidget {
@@ -122,8 +120,6 @@ class _AddAssistantPageState extends BasicState<AddAssistantPage>
           if (credentials != null) {
             assistantCredentials = credentials;
             save();
-          } else {
-            print("@@@@@@@@@@@@@ error");
           }
         }
         break;
@@ -152,9 +148,9 @@ class _AddAssistantPageState extends BasicState<AddAssistantPage>
       var res = await service.saveAssistant(input);
       await showSnackBar2(context, lang.updatedSuccessfully);
       Navigator.of(context).pop(res);
-    } catch (error, stackTrace) {
+    } catch (error, stacktrace) {
       showServerError(context, error: error);
-      print("@@@@@@@@@@@@@@@@@@@ \n $stackTrace");
+      print(stacktrace);
       throw error;
     } finally {
       progressSubject.add(false);

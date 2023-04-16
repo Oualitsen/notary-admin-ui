@@ -3,8 +3,14 @@ import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
+import 'package:notary_admin/src/pages/archiving/add_archive_page.dart';
+import 'package:notary_admin/src/pages/archiving/files_archived_table_widget.dart';
+import 'package:notary_admin/src/pages/customer/customer_selection_dialog.dart';
 import 'package:notary_admin/src/pages/file-spec/document/replace_document_widget.dart';
+import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget.dart';
 import 'package:notary_admin/src/pages/printed_docs/printed_doc_view.dart';
+import 'package:notary_admin/src/pages/search/date_range_picker_widget.dart';
+import 'package:notary_admin/src/pages/search/search_filter_table_widget.dart';
 import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
 import 'package:notary_admin/src/services/files/files_service.dart';
 import 'package:notary_admin/src/utils/widget_mixin_new.dart';
@@ -12,13 +18,12 @@ import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/files.dart';
 import 'package:notary_model/model/steps.dart';
-import 'package:rxdart/subjects.dart';
-
+import 'package:rxdart/rxdart.dart';
 
 class FilesTableWidget extends StatefulWidget {
   final GlobalKey? tableKey;
-
-  const FilesTableWidget({super.key, this.tableKey});
+  final String? seachValue;
+  const FilesTableWidget({super.key, this.tableKey, this.seachValue});
 
   @override
   State<FilesTableWidget> createState() => _FilesTableWidgetState();
@@ -26,44 +31,68 @@ class FilesTableWidget extends StatefulWidget {
 
 class _FilesTableWidgetState extends BasicState<FilesTableWidget>
     with WidgetUtilsMixin {
+  //services
   final filesService = GetIt.instance.get<FilesService>();
   final servicePrintDocument = GetIt.instance.get<PrintedDocService>();
+  //key
   final tableKey = GlobalKey<LazyPaginatedDataTableState>();
-  List<DataColumn> columns = [];
-  bool initialized = false;
-  final columnSpacing = 65.0;
-  late List<String> items;
-  final dropDownValueStream = BehaviorSubject.seeded("");
   final fileNameKey = GlobalKey<FormState>();
-  final templateNameCrtl = TextEditingController();
-  void init() {
-    if (!initialized) {
-      items = [lang.editName, lang.editContent, lang.print, lang.delete];
-      dropDownValueStream.add(items.first);
-      initialized = true;
-    }
+  final searchFilterKey = GlobalKey<SearchFilterTableWidgetState>();
+  //controllers
+  final templateNameCtrl = TextEditingController();
+  final filesCodeSearchCtrl = TextEditingController();
+  final filesSpecSearchCtrl = TextEditingController();
+  //streams
+  final dropDownValueStream = BehaviorSubject.seeded("");
+  final searchFilterStream = BehaviorSubject<SearchFilter?>();
+  final subject = BehaviorSubject.seeded(SearchParams2(
+      customers: [],
+      fileSpecName: "",
+      number: "",
+      range: DateRange(endDate: null, startDate: null)));
+  final searchParamsStream = BehaviorSubject.seeded(SearchParams(
+    customerIds: "",
+    endDate: -1,
+    fileSpecName: "",
+    number: "",
+    startDate: -1,
+  ));
+
+  //variables
+  List<DataColumn> columns = [];
+  final columnSpacing = 60.0;
+
+  @override
+  void initState() {
+    subject.listen((data) {
+      searchFilterKey.currentState?.refresh(subject.value);
+      tableKey.currentState?.refreshPage();
+    });
+    searchParamsStream.listen((data) {
+      if (data.number.isEmpty) {
+        filesCodeSearchCtrl.text = "";
+      }
+      if (data.fileSpecName.isEmpty) {
+        filesSpecSearchCtrl.text = "";
+      }
+
+      tableKey.currentState?.refreshPage();
+    });
+
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    init();
-    columns = [
-      DataColumn(label: Text(lang.createdFileSpec)),
-      DataColumn(label: Text(lang.filesNumber)),
-      DataColumn(label: Text(lang.fileSpec)),
-      DataColumn(label: Text(lang.state)),
-      DataColumn(label: Text(lang.customer)),
-      DataColumn(label: Text(lang.template)),
-      DataColumn(label: Text(lang.listDocumentsFileSpec)),
-      DataColumn(label: Text(lang.delete)),
-      DataColumn(label: Text(lang.archive)),
-    ];
+    columns = getColumns();
     return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
       child: Column(
         children: [
-          TextFormField(
-            decoration: InputDecoration(hintText: lang.search),
+          SearchFilterTableWidget(
+            key: searchFilterKey,
+            onSearchParamsChanged: (p0) {
+              searchParamsStream.add(p0);
+            },
           ),
           LazyPaginatedDataTable(
             getData: getData,
@@ -79,11 +108,45 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   }
 
   Future<List<Files>> getData(PageInfo page) {
-    return filesService.getFilesAll(
-        pageIndex: page.pageIndex, pageSize: page.pageSize);
+    try {
+      var params = searchParamsStream.value;
+      if (params.customerIds.isNotEmpty ||
+          params.number.isNotEmpty ||
+          params.fileSpecName.isNotEmpty ||
+          params.startDate != -1 ||
+          params.endDate != -1) {
+        return filesService.searchFiles(
+          number: params.number,
+          filesSpecName: params.fileSpecName,
+          customerIds: params.customerIds,
+          startDate: params.startDate,
+          endDate: params.endDate,
+        );
+      }
+      return filesService.getFilesAll(
+          pageIndex: page.pageIndex, pageSize: page.pageSize);
+    } catch (error, stacktrace) {
+      print(stacktrace);
+      showServerError(context, error: error);
+      throw error;
+    }
   }
- 
+
   Future<int> getTotal() {
+    var params = searchParamsStream.value;
+    if (params.customerIds.isNotEmpty ||
+        params.number.isNotEmpty ||
+        params.fileSpecName.isNotEmpty ||
+        params.startDate != -1 ||
+        params.endDate != -1) {
+      return filesService.countSearchFiles(
+        number: params.number,
+        filesSpecName: params.fileSpecName,
+        customerIds: params.customerIds,
+        startDate: params.startDate,
+        endDate: params.endDate,
+      );
+    }
     return filesService.getFilesCount();
   }
 
@@ -93,11 +156,10 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
       DataCell(Text(data.number)),
       DataCell(Text(data.specification.name)),
       DataCell(
-        TextButton(
-          onPressed: (() => updateCurrentStep(data)),
-          child: Text(data.currentStep.name),
-        ),
-        showEditIcon: true,
+        TextButton.icon(
+            label: Text(data.currentStep.name),
+            onPressed: (() => updateCurrentStep(data)),
+            icon: Icon(Icons.edit)),
       ),
       DataCell(TextButton(
           onPressed: () => customerDetails(data),
@@ -108,14 +170,15 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
             onPressed: (() => onPrint(data.printedDocId))),
       ),
       DataCell(
-          TextButton(
-              onPressed: () => updateDocumentFolderCustomer(data),
-              child: Text(lang.listDocumentsFileSpec)),
-          showEditIcon: true),
-      DataCell(TextButton(
-          onPressed: () => deleteFiles(data), child: Text(lang.delete))),
+        TextButton.icon(
+            label: Text(lang.listDocumentsFileSpec),
+            onPressed: () async => await updateDocumentFolderCustomer(data),
+            icon: Icon(Icons.edit)),
+      ),
       DataCell(TextButton(
           onPressed: () => archiveFiles(data), child: Text(lang.archive))),
+      DataCell(TextButton(
+          onPressed: () => deleteFiles(data), child: Text(lang.delete))),
     ];
     return DataRow(cells: cellList);
   }
@@ -130,48 +193,54 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
     WidgetMixin.showDialog2(
       context,
       label: lang.selectStep.toUpperCase(),
-      content: SizedBox(
-        height: 400,
-        width: 400,
-        child: InfiniteScrollListView(
-          elementBuilder: (context, element, index, animation) {
-            return ListTile(
-              leading: CircleAvatar(
-                child: Text("${(index + 1)}"),
-              ),
-              title: Text("${element.name}"),
-              subtitle: element.id == data.currentStep.id
-                  ? Text("${lang.currentStep}")
-                  : null,
-              onTap: () async {
-                await confirmStep(data.id, element);
-                Navigator.pop(context);
-              },
-            );
-          },
-          pageLoader: ((index) {
-            if (index == 0) {
-              return Future.value(data.specification.steps);
-            } else
-              return Future.value(<Steps>[]);
-          }),
-        ),
+      content: InfiniteScrollListView(
+        elementBuilder: (context, element, index, animation) {
+          return ListTile(
+            leading: element.id == data.currentStep.id
+                ? CircleAvatar(
+                    backgroundColor: Colors.lightBlue,
+                    child: Text(
+                      "${(index + 1)}",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  )
+                : CircleAvatar(child: Text("${(index + 1)}")),
+            title: Text("${element.name}"),
+            subtitle: element.id == data.currentStep.id
+                ? Text("${lang.currentStep}")
+                : null,
+            onTap: () async {
+              await confirmStep(data.id, element);
+              Navigator.pop(context);
+            },
+          );
+        },
+        pageLoader: ((index) {
+          if (index == 0) {
+            return Future.value(data.specification.steps);
+          } else
+            return Future.value(<Steps>[]);
+        }),
       ),
     );
   }
 
-  Future<void> confirmStep(String id, Steps newStep) async {
-    return WidgetMixin.showDialog2(
-      context,
-      label: lang.confirm,
-      content: Text(lang.confirmChangingState),
-      actions: <Widget>[
-        TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: Text(lang.no.toUpperCase())),
-        TextButton(
+  Future confirmStep(String id, Steps newStep) async {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.confirm),
+        content: Text(lang.confirmChangingState),
+        actions: <Widget>[
+          TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: Text(lang.no.toUpperCase())),
+          TextButton(
             onPressed: () async {
               try {
                 progressSubject.add(true);
@@ -186,8 +255,10 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
                 progressSubject.add(false);
               }
             },
-            child: Text(lang.yes.toUpperCase())),
-      ],
+            child: Text(lang.yes.toUpperCase()),
+          ),
+        ],
+      ),
     );
   }
 
@@ -195,18 +266,6 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
     try {
       var doc = await servicePrintDocument.getPrintedDocsById(docId);
       push(context, PrintedDocViewHtml(title: doc.name, text: doc.htmlData));
-    } catch (error, stacktrace) {
-      showServerError(context, error: error);
-      print(stacktrace);
-    }
-  }
-
-  Future<void> archive(Files data) async {
-    try {
-      await filesService.archiveFiles(data.id);
-      tableKey.currentState?.refreshPage();
-      showSnackBar2(context, lang.savedSuccessfully);
-      return Future.value();
     } catch (error, stacktrace) {
       showServerError(context, error: error);
       print(stacktrace);
@@ -222,7 +281,6 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
         content: WidgetMixin.ListCustomers(
           context,
           listCustomers: customersList,
-          width: 300,
         ),
       );
     } catch (error, stacktrace) {
@@ -232,52 +290,44 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   }
 
   archiveFiles(Files data) {
-    WidgetMixin.showDialog2(
-      context,
-      label: lang.confirm,
-      content: Text(lang.confirmArchiveFiles),
-      actions: <Widget>[
-        TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: Text(lang.no.toUpperCase())),
-        TextButton(
-            onPressed: () async {
-              await archive(data);
-              Navigator.of(context).pop(true);
-              tableKey.currentState?.refreshPage();
-            },
-            child: Text(lang.yes.toUpperCase())),
-      ],
-    );
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute(
+            builder: (context) => AddArchivePage(
+              files: data,
+            ),
+          ),
+        )
+        .then((_) => tableKey.currentState?.refreshPage());
   }
 
   deleteFiles(Files data) {
-    WidgetMixin.showDialog2(
-      context,
-      label: lang.confirm,
-      content: Text(lang.confirmDelete),
-      actions: <Widget>[
-        TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: Text(lang.no.toUpperCase())),
-        TextButton(
-            onPressed: () async {
-              try {
-                await filesService.deleteFile(data.id);
-              } catch (error, stacktrace) {
-                showServerError(context, error: error);
-                print(stacktrace);
-              }
-              Navigator.of(context).pop(true);
-              tableKey.currentState?.refreshPage();
-              await showSnackBar2(context, lang.delete);
-            },
-            child: Text(lang.yes.toUpperCase())),
-      ],
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.confirm),
+        content: Text(lang.confirmDelete),
+        actions: <Widget>[
+          TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: Text(lang.no.toUpperCase())),
+          TextButton(
+              onPressed: () async {
+                try {
+                  await filesService.deleteFile(data.id);
+                } catch (error, stacktrace) {
+                  showServerError(context, error: error);
+                  print(stacktrace);
+                }
+                Navigator.of(context).pop(true);
+                tableKey.currentState?.refreshPage();
+                await showSnackBar2(context, lang.delete);
+              },
+              child: Text(lang.yes.toUpperCase())),
+        ],
+      ),
     );
   }
 
@@ -285,7 +335,187 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
     return WidgetMixin.showDialog2(
       context,
       label: lang.listDocumentsFileSpec,
-      content: ReplaceDocumentWidget(files: file),
+      content: ListView.builder(
+        itemCount: file.specification.partsSpecs.length,
+        itemBuilder: (context, index) {
+          var element = file.specification.partsSpecs[index];
+          var uploaded = file.uploadedFiles
+              .where((e) => e.partSpecId == element.id)
+              .toList()
+              .length;
+          return ListTile(
+            leading: CircleAvatar(child: Text("${(index + 1)}")),
+            title: Text("${element.name}"),
+            trailing: Wrap(
+              spacing: 5,
+              children: [
+                Text("${uploaded} / ${element.documentSpec.length}"),
+                Icon(Icons.edit),
+              ],
+            ),
+            onTap: (() {
+              Navigator.of(context).pop();
+              var listPathDocuments =
+                  file.specification.partsSpecs[index].documentSpec
+                      .map((e) => PathsDocuments(
+                            idParts: element.id,
+                            idDocument: e.id,
+                            document: null,
+                            selected: isUploaded(file, e.id),
+                            namePickedDocument: null,
+                            path: null,
+                            nameDocument: e.name,
+                          ))
+                      .toList();
+
+              Navigator.of(context)
+                  .push(
+                MaterialPageRoute(
+                  builder: (context) => ReplaceDocumentWidget(
+                    pathDocumentsList: listPathDocuments,
+                    filesId: file.id,
+                  ),
+                ),
+              )
+                  .then((value) {
+                tableKey.currentState?.refreshPage();
+              });
+            }),
+          );
+        },
+      ),
     );
   }
+
+  bool isUploaded(Files file, String docSpecId) {
+    var isUploaded = false;
+    for (var doc in file.uploadedFiles) {
+      if (doc.docSpecId == docSpecId) {
+        isUploaded = true;
+      }
+    }
+    return isUploaded;
+  }
+
+  List<DataColumn> getColumns() {
+    var columns = [
+      DataColumn(
+          label: InkWell(
+        child: Row(
+          children: [Text(lang.creationDate), Icon(Icons.search)],
+        ),
+        onTap: () {
+          searchFilterStream.add(SearchFilter.ARCHIVNG_DATE);
+          showDialog(
+            context: context,
+            builder: ((context) {
+              return DateRangePickerWidget(
+                onSave: (range) {
+                  var value = subject.value;
+                  value.range = range;
+                  subject.add(value);
+                },
+                range: subject.value.range,
+              );
+            }),
+          );
+        },
+      )),
+      DataColumn(
+        label: columnWidget(
+          lang.filesNumber,
+          SearchFilter.NUMBER,
+        ),
+      ),
+      DataColumn(
+        label: columnWidget(
+          lang.specification,
+          SearchFilter.FILES_SPEC_NAME,
+        ),
+      ),
+      DataColumn(label: Text(lang.state)),
+      DataColumn(
+        label: InkWell(
+            child: Row(
+              children: [Text(lang.customerList), Icon(Icons.search)],
+            ),
+            onTap: () {
+              searchFilterStream.add(SearchFilter.CUSTOMER_NAME);
+              showDialog(
+                context: context,
+                builder: (context) => CustomerSelectionDialog(
+                  onSave: (selectedCustomer) {
+                    var value = subject.value;
+                    value.customers = selectedCustomer;
+                    subject.add(value);
+
+                    Navigator.pop(context);
+                  },
+                ),
+              );
+            }),
+      ),
+      DataColumn(label: Text(lang.template)),
+      DataColumn(label: Text(lang.listDocumentsFileSpec)),
+      DataColumn(label: Text(lang.archive)),
+      DataColumn(label: Text(lang.delete)),
+    ];
+    return columns;
+  }
+
+  Widget columnWidget(String label, SearchFilter filter) {
+    var controller = filter == SearchFilter.NUMBER
+        ? filesCodeSearchCtrl
+        : filesSpecSearchCtrl;
+
+    return StreamBuilder<SearchFilter?>(
+        stream: searchFilterStream,
+        builder: (context, snapshot) {
+          if (snapshot.data == filter || controller.text.isNotEmpty) {
+            return Container(
+              width: 100,
+              child: TextFormField(
+                autofocus: true,
+                onFieldSubmitted: (value) {
+                  var val = subject.value;
+                  filter == SearchFilter.NUMBER
+                      ? val.number = value
+                      : val.fileSpecName = value;
+                  subject.add(val);
+                },
+                controller: controller,
+                decoration: InputDecoration(
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      searchFilterStream.add(null);
+                      controller.clear();
+                      controller.text = "";
+                      var val = subject.value;
+                      filter == SearchFilter.NUMBER
+                          ? val.number = ""
+                          : val.fileSpecName = "";
+                      subject.add(val);
+                    },
+                    icon: Icon(Icons.close),
+                  ),
+                ),
+              ),
+            );
+          }
+
+          return InkWell(
+            child: Row(
+              children: [Text(label), Icon(Icons.search)],
+            ),
+            onTap: () => searchFilterStream.add(filter),
+          );
+        });
+  }
+}
+
+enum SearchFilter {
+  ARCHIVNG_DATE,
+  NUMBER,
+  FILES_SPEC_NAME,
+  CUSTOMER_NAME,
 }

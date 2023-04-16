@@ -182,7 +182,7 @@ class _FilesArchiveService implements FilesArchiveService {
     )
             .compose(
               _dio.options,
-              '/admin/archive/archive-date',
+              '/admin/archive/date',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -212,7 +212,7 @@ class _FilesArchiveService implements FilesArchiveService {
     )
         .compose(
           _dio.options,
-          '/admin/archive/archive-date/count',
+          '/admin/archive/date/count',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -222,25 +222,96 @@ class _FilesArchiveService implements FilesArchiveService {
   }
 
   @override
-  Future<PrintedDoc> getPrintedDocsById(archiveId) async {
+  Future<List<String>> getDocumentsName(archiveId) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
-    final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<PrintedDoc>(Options(
+    final _result =
+        await _dio.fetch<List<dynamic>>(_setStreamType<List<String>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
     )
             .compose(
               _dio.options,
-              '/admin/archive/printed-doc/${archiveId}',
+              '/admin/archive/documents/${archiveId}',
               queryParameters: queryParameters,
               data: _data,
             )
             .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
-    final value = PrintedDoc.fromJson(_result.data!);
+    final value = _result.data!.cast<String>();
+    return value;
+  }
+
+  @override
+  Future<List<FilesArchive>> searchFilesArchive({
+    required number,
+    required filesSpecName,
+    required customerIds,
+    required startDate,
+    required endDate,
+  }) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'number': number,
+      r'filesSpecName': filesSpecName,
+      r'customerIds': customerIds,
+      r'startDate': startDate,
+      r'endDate': endDate,
+    };
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio
+        .fetch<List<dynamic>>(_setStreamType<List<FilesArchive>>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/admin/archive/search',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    var value = _result.data!
+        .map((dynamic i) => FilesArchive.fromJson(i as Map<String, dynamic>))
+        .toList();
+    return value;
+  }
+
+  @override
+  Future<int> countSearchFilesArchive({
+    required number,
+    required filesSpecName,
+    required customerIds,
+    required startDate,
+    required endDate,
+  }) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'number': number,
+      r'filesSpecName': filesSpecName,
+      r'customerIds': customerIds,
+      r'startDate': startDate,
+      r'endDate': endDate,
+    };
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.fetch<int>(_setStreamType<int>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          '/admin/archive/search/count',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = _result.data!;
     return value;
   }
 

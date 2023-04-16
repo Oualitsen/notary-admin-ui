@@ -13,7 +13,8 @@ import 'package:rxdart/src/subjects/subject.dart';
 
 class CustomerTableWidget extends StatefulWidget {
   final GlobalKey<LazyPaginatedDataTableState>? tableKey;
-  CustomerTableWidget({super.key, this.tableKey});
+  final String? searchValue;
+  CustomerTableWidget({super.key, this.tableKey, required this.searchValue});
 
   @override
   State<CustomerTableWidget> createState() => _CustomerTableWidgetState();
@@ -65,12 +66,23 @@ class _CustomerTableWidgetState extends BasicState<CustomerTableWidget>
   }
 
   Future<List<Customer>> getData(PageInfo page) {
-    return service.getCustomers(
-        pageIndex: page.pageIndex, pageSize: page.pageSize);
+    if (widget.searchValue == null || widget.searchValue!.isEmpty) {
+      return service.getCustomers(
+          pageIndex: page.pageIndex, pageSize: page.pageSize);
+    }
+
+    return service.searchCustomers(
+      name: widget.searchValue!,
+      index: page.pageIndex,
+      size: page.pageSize,
+    );
   }
 
   Future<int> getTotal() {
-    return service.getCustomersCount();
+    if (widget.searchValue == null || widget.searchValue!.isEmpty) {
+      return service.getCustomersCount();
+    }
+    return service.searchCount(name: widget.searchValue!);
   }
 
   DataRow dataToRow(Customer data, int indexInCurrentPage) {
@@ -123,29 +135,31 @@ class _CustomerTableWidgetState extends BasicState<CustomerTableWidget>
   List<Subject> get subjects => [];
 
   deleteCustomer(Customer data) {
-    WidgetMixin.showDialog2(
-      context,
-      label: lang.confirm,
-      content: Text(lang.confirmDelete),
-      actions: <Widget>[
-        TextButton(
-          child: Text(lang.no.toUpperCase()),
-          onPressed: () => Navigator.of(context).pop(false),
-        ),
-        TextButton(
-            child: Text(lang.yes.toUpperCase()),
-            onPressed: () async {
-              try {
-                await service.deleteCustomer(data.id);
-                Navigator.of(context).pop(true);
-                tableKey.currentState?.refreshPage();
-                await showSnackBar2(context, lang.delete);
-              } catch (error, stacktrace) {
-                showServerError(context, error: error);
-                print(stacktrace);
-              }
-            }),
-      ],
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(lang.confirm),
+        content: Text(lang.confirmDelete),
+        actions: <Widget>[
+          TextButton(
+            child: Text(lang.no.toUpperCase()),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TextButton(
+              child: Text(lang.yes.toUpperCase()),
+              onPressed: () async {
+                try {
+                  await service.deleteCustomer(data.id);
+                  Navigator.of(context).pop(true);
+                  tableKey.currentState?.refreshPage();
+                  await showSnackBar2(context, lang.delete);
+                } catch (error, stacktrace) {
+                  showServerError(context, error: error);
+                  print(stacktrace);
+                }
+              }),
+        ],
+      ),
     );
   }
 }
