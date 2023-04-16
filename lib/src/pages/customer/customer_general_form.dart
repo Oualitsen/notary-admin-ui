@@ -16,13 +16,18 @@ class CustomerGeneralForm extends StatefulWidget {
 
 class CustomerGeneralFormState extends BasicState<CustomerGeneralForm>
     with WidgetUtilsMixin {
+  //key
   final generalInfoInputKey = GlobalKey<FormState>();
+  //controller
   final firstNameCtrl = TextEditingController();
   final lastNameCtrl = TextEditingController();
-  final selectedDay = BehaviorSubject<DateTime>();
   final dateOfBirthCtrl = TextEditingController();
+  //stream
+  final selectedDay = BehaviorSubject<DateTime>();
   final gender = BehaviorSubject<Gender?>();
+  //variables
   bool initialized = false;
+
   void init() {
     if (initialized) {
       return;

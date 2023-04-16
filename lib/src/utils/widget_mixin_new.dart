@@ -52,7 +52,7 @@ class WidgetMixin {
   }
 
   static uploadFiles(BuildContext context, String filesId,
-      List<PathsDocuments> _pathDocuments) async {
+      List<DocumentUploadInfos> _pathDocuments) async {
     final serviceUploadDocument = GetIt.instance.get<UploadService>();
     var uri = "/admin/files/upload/${filesId}/";
     try {

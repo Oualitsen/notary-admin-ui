@@ -5,7 +5,6 @@ import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/pages/customer/add_customer_page.dart';
 import 'package:notary_admin/src/pages/customer/customer_detail_page.dart';
 import 'package:notary_admin/src/services/admin/customer_service.dart';
-import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/customer.dart';
@@ -25,7 +24,7 @@ class _CustomerTableWidgetState extends BasicState<CustomerTableWidget>
   final service = GetIt.instance.get<CustomerService>();
   bool initialized = false;
   final columnSpacing = 65.0;
-  List<DataColumn> columns = [];
+  late List<DataColumn> columns;
   late GlobalKey<LazyPaginatedDataTableState> tableKey;
 
   @override
@@ -33,11 +32,6 @@ class _CustomerTableWidgetState extends BasicState<CustomerTableWidget>
     tableKey = widget.tableKey != null
         ? widget.tableKey!
         : GlobalKey<LazyPaginatedDataTableState>();
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
     columns = [
       DataColumn(label: Text(lang.firstName.toUpperCase())),
       DataColumn(label: Text(lang.lastName.toUpperCase())),
@@ -49,6 +43,11 @@ class _CustomerTableWidgetState extends BasicState<CustomerTableWidget>
       DataColumn(label: Text(lang.customerDetails.toUpperCase())),
       DataColumn(label: Text(lang.delete.toUpperCase()))
     ];
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: LazyPaginatedDataTable<Customer>(

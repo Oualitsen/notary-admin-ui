@@ -20,12 +20,17 @@ class AddAssistantPage extends StatefulWidget {
 
 class _AddAssistantPageState extends BasicState<AddAssistantPage>
     with WidgetUtilsMixin {
+  //services
+  final service = GetIt.instance.get<AdminAssistantService>();
+  //key
   final assistantCredentilasKey = GlobalKey<AssistantCredentailsInputState>();
   final assistantDetailsKey = GlobalKey<AssistantDetailsInputState>();
+  //stream
   final _currentStepStream = BehaviorSubject.seeded(0);
+  //variables
   late AssistantDetails assistantDetails;
   late AssistantCredentials assistantCredentials;
-  final service = GetIt.instance.get<AdminAssistantService>();
+
   @override
   Widget build(BuildContext context) {
     return WidgetUtils.wrapRoute(
@@ -39,7 +44,6 @@ class _AddAssistantPageState extends BasicState<AddAssistantPage>
           builder: (context, snapshot) {
             int activeState = snapshot.data ?? 0;
             return Stepper(
-              //type: getStepperType(type),
               physics: ScrollPhysics(),
               currentStep: activeState,
               onStepTapped: (step) => tapped(step),
@@ -69,7 +73,6 @@ class _AddAssistantPageState extends BasicState<AddAssistantPage>
                   content: Column(children: [
                     AssistantCredentailsInput(
                       key: assistantCredentilasKey,
-                      //      assistant: widget.assistant,
                     ),
                     SizedBox(height: 16),
                     getButtons(

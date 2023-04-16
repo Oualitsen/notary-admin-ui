@@ -19,7 +19,6 @@ import 'package:notary_admin/src/services/files/pdf_service.dart';
 import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
-import 'package:notary_model/model/customer.dart';
 import 'package:notary_model/model/files_archive.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/rxdart.dart';

@@ -357,7 +357,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
               Navigator.of(context).pop();
               var listPathDocuments =
                   file.specification.partsSpecs[index].documentSpec
-                      .map((e) => PathsDocuments(
+                      .map((e) => DocumentUploadInfos(
                             idParts: element.id,
                             idDocument: e.id,
                             document: null,

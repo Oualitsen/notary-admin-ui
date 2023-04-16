@@ -24,15 +24,21 @@ class AssistantTableWidget extends StatefulWidget {
 
 class AssistantTableWidgetState extends BasicState<AssistantTableWidget>
     with WidgetUtilsMixin {
+  //services
   final service = GetIt.instance.get<AdminAssistantService>();
+  //key
+  final assistantKey = GlobalKey<AssistantDetailsInputState>();
+  final formKeyNewPassword = GlobalKey<FormState>();
+  //contoller
+  final newPwdCtr = TextEditingController();
+  //variablese
   bool initialized = false;
   final columnSpacing = 65.0;
-  List<DataColumn> columns = [];
-  final assistantKey = GlobalKey<AssistantDetailsInputState>();
-  final _formKeyNewPassword = GlobalKey<FormState>();
-  final newPwdCtr = TextEditingController();
-  @override
-  Widget build(BuildContext context) {
+  late List<DataColumn> columns;
+
+  init() {
+    if (initialized) return;
+    initialized = true;
     columns = [
       DataColumn(label: Text(lang.firstName.toUpperCase())),
       DataColumn(label: Text(lang.lastName.toUpperCase())),
@@ -42,7 +48,11 @@ class AssistantTableWidgetState extends BasicState<AssistantTableWidget>
       DataColumn(label: Text(lang.resetPassword.toUpperCase())),
       DataColumn(label: Text(lang.delete.toUpperCase()))
     ];
+  }
 
+  @override
+  Widget build(BuildContext context) {
+    init();
     return SingleChildScrollView(
       child: LazyPaginatedDataTable<Admin>(
           key: widget.tableKey,
@@ -189,7 +199,7 @@ class AssistantTableWidgetState extends BasicState<AssistantTableWidget>
       label: lang.resetPassword.toUpperCase(),
       height: 100,
       content: Form(
-        key: _formKeyNewPassword,
+        key: formKeyNewPassword,
         child: PasswordInput(
           controller: newPwdCtr,
           label: Text(lang.newPassword),
@@ -209,7 +219,7 @@ class AssistantTableWidgetState extends BasicState<AssistantTableWidget>
   }
 
   setPasswordAssistant(Admin assistant) async {
-    if (_formKeyNewPassword.currentState!.validate()) {
+    if (formKeyNewPassword.currentState!.validate()) {
       progressSubject.add(true);
       try {
         await service.ResetPasswordAssistant(assistant.id, newPwdCtr.text);

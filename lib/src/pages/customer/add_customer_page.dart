@@ -24,11 +24,15 @@ class AddCustomerPage extends StatefulWidget {
 
 class _AddCustomerPageState extends BasicState<AddCustomerPage>
     with WidgetUtilsMixin {
+  //service
   final service = GetIt.instance.get<CustomerService>();
+  //stream
   final _currentStepStream = BehaviorSubject.seeded(0);
+  //key
   final customerGeneralInfoKey = GlobalKey<CustomerGeneralFormState>();
   final addressInputKey = GlobalKey<AddressInputWidgetState>();
   final idCardInputKey = GlobalKey<IdCardWidgetState>();
+  //variables
   CustomerGeneralInfo? customerGeneralInfo;
   Address? address;
   IdCard? idCard;
@@ -207,8 +211,6 @@ class _AddCustomerPageState extends BasicState<AddCustomerPage>
       } finally {
         progressSubject.add(false);
       }
-    } else {
-      showSnackBar2(context, "ERRRRRROOOOORRRR");
     }
   }
 

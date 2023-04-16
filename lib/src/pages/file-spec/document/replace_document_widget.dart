@@ -9,7 +9,7 @@ import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:rxdart/subjects.dart';
 
 class ReplaceDocumentWidget extends StatefulWidget {
-  final List<PathsDocuments> pathDocumentsList;
+  final List<DocumentUploadInfos> pathDocumentsList;
   final String filesId;
   const ReplaceDocumentWidget({
     super.key,
@@ -143,7 +143,7 @@ class _ReplaceDocumentWidgetState extends BasicState<ReplaceDocumentWidget>
         var list = updateDocumentsStream.value;
         if (updateDocumentsStream.value.asMap().containsKey(index)) {
           var element = updateDocumentsStream.value[index].pathDocument;
-          var pathDoc = PathsDocuments(
+          var pathDoc = DocumentUploadInfos(
             idParts: element.idParts,
             idDocument: element.idDocument,
             document: pickedBytes,
@@ -197,7 +197,7 @@ class _ReplaceDocumentWidgetState extends BasicState<ReplaceDocumentWidget>
 }
 
 class UpdateDocuments {
-  final PathsDocuments pathDocument;
+  final DocumentUploadInfos pathDocument;
   final bool updated;
 
   UpdateDocuments({required this.pathDocument, this.updated = false});

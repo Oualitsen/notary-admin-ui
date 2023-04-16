@@ -21,11 +21,15 @@ class CustomerDetailsPage extends StatefulWidget {
 
 class _CustomerDetailsPageState extends BasicState<CustomerDetailsPage>
     with WidgetUtilsMixin {
+  //services
+  final service = GetIt.instance.get<CustomerService>();
+  //stream
+  final customerFilesStream = BehaviorSubject<List<Files>>();
+  //variables
   late Customer customer;
   late List<Tab> myTabs;
-  final customerFilesStream = BehaviorSubject<List<Files>>();
-  final service = GetIt.instance.get<CustomerService>();
   bool initialized = false;
+
   void init() {
     if (initialized) return;
     initialized = true;

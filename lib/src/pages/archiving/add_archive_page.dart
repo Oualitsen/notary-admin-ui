@@ -33,7 +33,6 @@ class AddArchivePage extends StatefulWidget {
 
 class _AddArchivePageState extends BasicState<AddArchivePage>
     with WidgetUtilsMixin {
-  int currentStep = 0;
   //services
   final fileSpecService = GetIt.instance.get<FileSpecService>();
   final archiveFilesService = GetIt.instance.get<FilesArchiveService>();
@@ -54,9 +53,11 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
   final _numberFileCtrl = TextEditingController();
   final archvingDateCtrl = TextEditingController();
   //var
+  int currentStep = 0;
   bool initialized = false;
   List<DocumentsInfo> documentsInfolist = <DocumentsInfo>[];
   late FilesArchive archive;
+
   void init() async {
     if (initialized) return;
     initialized = true;

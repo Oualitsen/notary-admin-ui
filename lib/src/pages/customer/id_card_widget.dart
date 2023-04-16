@@ -15,13 +15,18 @@ class IdCardWidget extends StatefulWidget {
 }
 
 class IdCardWidgetState extends BasicState<IdCardWidget> with WidgetUtilsMixin {
+  //key
   final _formKey = GlobalKey<FormState>();
+  //controller
   final idCardIdCtrl = TextEditingController();
   final expiryDateCtrl = TextEditingController();
   final frontImageUrlCtrl = TextEditingController();
   final backImageUrlCtrl = TextEditingController();
+  //stream
   final selectedDay = BehaviorSubject<DateTime>();
+  //variable
   bool initialized = false;
+
   void init() {
     if (initialized) {
       return;

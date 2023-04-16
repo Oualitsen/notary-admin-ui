@@ -43,25 +43,19 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
   final serviceTemplateDocument = GetIt.instance.get<TemplateDocumentService>();
   final serviceUploadDocument = GetIt.instance.get<UploadService>();
   //Stream
-  final _currentStepStream = BehaviorSubject.seeded(0);
-  final _printedDocInputStream = BehaviorSubject<PrintedDocInput>();
-  final _listcustomerStream = BehaviorSubject.seeded(<Customer>[]);
-  final _folderValidateStream = BehaviorSubject.seeded(false);
-  final _filesSpecStream = BehaviorSubject<FilesSpec>();
+  final currentStepStream = BehaviorSubject.seeded(0);
+  final printedDocInputStream = BehaviorSubject<PrintedDocInput>();
+  final listcustomerStream = BehaviorSubject.seeded(<Customer>[]);
+  final folderValidateStream = BehaviorSubject.seeded(false);
+  final filesSpecStream = BehaviorSubject<FilesSpec>();
   final additionalDocumentsStream = BehaviorSubject.seeded(<UploadData>[]);
-  final _pathDocumentsStream = BehaviorSubject.seeded(<PathsDocuments>[]);
+  final _pathDocumentsStream = BehaviorSubject.seeded(<DocumentUploadInfos>[]);
   //Key
-  final GlobalKey<FormState> _selectFileSpecKey = GlobalKey();
+  final selectFileSpecKey = GlobalKey<FormState>();
   final listKey = GlobalKey<InfiniteScrollListViewState>();
-
   //controlers
   final _selectFileSpecCtrl = TextEditingController();
   final _numberFileCtrl = TextEditingController();
-  //var
-  @override
-  void initState() {
-    _folderValidateStream.add(false);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,8 +65,8 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
           title: Text(lang.addfolder),
         ),
         body: StreamBuilder<int>(
-            stream: _currentStepStream,
-            initialData: _currentStepStream.value,
+            stream: currentStepStream,
+            initialData: currentStepStream.value,
             builder: (context, snapshot) {
               int activeState = snapshot.data ?? 0;
               return Stepper(
@@ -94,7 +88,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                     content: Column(
                       children: [
                         StreamBuilder<List<Customer>>(
-                            stream: _listcustomerStream,
+                            stream: listcustomerStream,
                             builder: (context, snapshot) {
                               if (!snapshot.hasData) {
                                 return SizedBox.shrink();
@@ -102,7 +96,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                               //
                               return WidgetMixin.ListCustomers(
                                 context,
-                                listCustomers: _listcustomerStream.value,
+                                listCustomers: listcustomerStream.value,
                               );
                             }),
                         getButtons(
@@ -120,8 +114,8 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                     content: Column(
                       children: [
                         StreamBuilder<FilesSpec>(
-                            stream: _filesSpecStream,
-                            initialData: _filesSpecStream.valueOrNull,
+                            stream: filesSpecStream,
+                            initialData: filesSpecStream.valueOrNull,
                             builder: (context, snapshot) {
                               if (snapshot.hasData == false) {
                                 return SizedBox.shrink();
@@ -156,7 +150,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                           width: 20,
                         ),
                         StreamBuilder<int>(
-                            stream: _currentStepStream,
+                            stream: currentStepStream,
                             builder: (context, snapshot) {
                               if (snapshot.hasData == false) {
                                 return SizedBox.shrink();
@@ -176,7 +170,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         StreamBuilder<PrintedDocInput>(
-                            stream: _printedDocInputStream,
+                            stream: printedDocInputStream,
                             builder: (context, snapshot) {
                               if (snapshot.hasData == false) {
                                 return Text(
@@ -189,7 +183,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                               );
                             }),
                         StreamBuilder<bool>(
-                            stream: _folderValidateStream,
+                            stream: folderValidateStream,
                             initialData: false,
                             builder: (context, snapshot) {
                               if (snapshot.hasData == false) {
@@ -215,7 +209,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                           width: 20,
                         ),
                         StreamBuilder<int>(
-                            stream: _currentStepStream,
+                            stream: currentStepStream,
                             builder: (context, snapshot) {
                               if (snapshot.hasData == false) {
                                 return SizedBox.shrink();
@@ -277,30 +271,30 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
   }
 
   tapped(int step) {
-    _currentStepStream.add(step);
+    currentStepStream.add(step);
   }
 
   previous() {
-    int value = _currentStepStream.value;
+    int value = currentStepStream.value;
     value > 0 ? value -= 1 : value = 0;
-    _currentStepStream.add(value);
+    currentStepStream.add(value);
   }
 
   continued() async {
-    var value = _currentStepStream.value;
+    var value = currentStepStream.value;
 
     switch (value) {
       case 0:
         {
-          if (_selectFileSpecKey.currentState?.validate() ?? false) {
-            _currentStepStream.add(_currentStepStream.value + 1);
+          if (selectFileSpecKey.currentState?.validate() ?? false) {
+            currentStepStream.add(currentStepStream.value + 1);
           }
         }
         break;
       case 1:
         {
-          if (_listcustomerStream.value.isNotEmpty) {
-            _currentStepStream.add(_currentStepStream.value + 1);
+          if (listcustomerStream.value.isNotEmpty) {
+            currentStepStream.add(currentStepStream.value + 1);
           } else {
             await showSnackBar2(context, lang.noCustomer);
           }
@@ -309,18 +303,18 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
         break;
       case 2:
         {
-          _currentStepStream.add(_currentStepStream.value + 1);
+          currentStepStream.add(currentStepStream.value + 1);
         }
         break;
       case 3:
-        _currentStepStream.add(_currentStepStream.value + 1);
+        currentStepStream.add(currentStepStream.value + 1);
 
         break;
     }
   }
 
   StepState getState(int currentState) {
-    final value = _currentStepStream.value;
+    final value = currentStepStream.value;
     if (value >= currentState) {
       return StepState.complete;
     } else {
@@ -336,18 +330,18 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
   save() async {
     try {
       progressSubject.add(true);
-      if (_selectFileSpecKey.currentState!.validate() &&
-          _listcustomerStream.value.isNotEmpty &&
-          _folderValidateStream.value) {
+      if (selectFileSpecKey.currentState!.validate() &&
+          listcustomerStream.value.isNotEmpty &&
+          folderValidateStream.value) {
         var listCustomersIds =
-            _listcustomerStream.value.map((e) => e.id).toList();
+            listcustomerStream.value.map((e) => e.id).toList();
         var input = FilesInput(
           id: null,
           number: _numberFileCtrl.text,
           customerIds: listCustomersIds,
           uploadedFiles: [],
-          specification: _filesSpecStream.value,
-          printedDocInput: _printedDocInputStream.value,
+          specification: filesSpecStream.value,
+          printedDocInput: printedDocInputStream.value,
           additionalDocumentIds: [],
         );
         var files = await serviceFiles.saveFiles(input);
@@ -389,7 +383,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
               title: Text("${element.name}"),
               onTap: () {
                 _selectFileSpecCtrl.text = element.name;
-                _filesSpecStream.add(element);
+                filesSpecStream.add(element);
                 Navigator.of(context).pop(true);
               },
             );
@@ -403,12 +397,12 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
     try {
       var finalList = <String>[];
       var list = await serviceTemplateDocument
-          .formGenerating(_filesSpecStream.value.templateId);
+          .formGenerating(filesSpecStream.value.templateId);
       for (var res in list) {
         finalList.add(res.replaceAll(RegExp(r' '), "_"));
       }
       var data = await serviceTemplateDocument
-          .replacements(_filesSpecStream.value.templateId);
+          .replacements(filesSpecStream.value.templateId);
 
       Navigator.push<PrintedDocInput>(
           context,
@@ -418,8 +412,8 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                     text: data,
                   ))).then((value) {
         if (value != null) {
-          _printedDocInputStream.add(value);
-          _folderValidateStream.add(true);
+          printedDocInputStream.add(value);
+          folderValidateStream.add(true);
         }
       });
     } catch (error, stacktrace) {
@@ -455,7 +449,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
 
   Widget generalFormWidget() {
     return Form(
-        key: _selectFileSpecKey,
+        key: selectFileSpecKey,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
@@ -503,7 +497,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
           width: 20,
         ),
         StreamBuilder<int>(
-            stream: _currentStepStream,
+            stream: currentStepStream,
             builder: (context, snapshot) {
               if (snapshot.hasData == false) {
                 return SizedBox.shrink();
@@ -526,8 +520,8 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
       context: context,
       builder: (context) => CustomerSelectionDialog(
         onSave: (selectedCustomer) {
-          _listcustomerStream.add(selectedCustomer);
-          if (_listcustomerStream.value.isEmpty) {
+          listcustomerStream.add(selectedCustomer);
+          if (listcustomerStream.value.isEmpty) {
             showSnackBar2(context, lang.noCustomer);
           }
           Navigator.pop(context);

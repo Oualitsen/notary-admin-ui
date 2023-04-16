@@ -8,20 +8,21 @@ import 'package:notary_model/model/document_spec_input.dart';
 import 'package:rxdart/rxdart.dart';
 
 class AddDocument extends StatefulWidget {
-  const AddDocument({
-    super.key,
-  });
+  const AddDocument({super.key});
 
   @override
   State<AddDocument> createState() => _AddDocumentState();
 }
 
 class _AddDocumentState extends BasicState<AddDocument> with WidgetUtilsMixin {
-  final _isOriginalDocumentStream = BehaviorSubject.seeded(false);
-  final _isRequiredDocumentStream = BehaviorSubject.seeded(false);
-  final _isDoubleSidedStream = BehaviorSubject.seeded(false);
-  final GlobalKey<FormState> key = GlobalKey<FormState>();
-  final _nameDocumentCtrl = TextEditingController();
+  //stream
+  final isOriginalDocumentStream = BehaviorSubject.seeded(false);
+  final isRequiredDocumentStream = BehaviorSubject.seeded(false);
+  final isDoubleSidedStream = BehaviorSubject.seeded(false);
+  //key
+  final formKey = GlobalKey<FormState>();
+  //controller
+  final nameDocumentCtrl = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +31,7 @@ class _AddDocumentState extends BasicState<AddDocument> with WidgetUtilsMixin {
             title: Text(lang.addDocumentsSpec),
           ),
           body: Form(
-            key: key,
+            key: formKey,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: ListView(
@@ -39,7 +40,7 @@ class _AddDocumentState extends BasicState<AddDocument> with WidgetUtilsMixin {
                     height: 16,
                   ),
                   TextFormField(
-                    controller: _nameDocumentCtrl,
+                    controller: nameDocumentCtrl,
                     decoration: getDecoration(lang.name, true),
                     validator: (text) {
                       return ValidationUtils.requiredField(text, context);
@@ -47,43 +48,43 @@ class _AddDocumentState extends BasicState<AddDocument> with WidgetUtilsMixin {
                   ),
                   SizedBox(height: 16),
                   StreamBuilder<bool>(
-                      stream: _isOriginalDocumentStream,
-                      initialData: _isOriginalDocumentStream.value,
+                      stream: isOriginalDocumentStream,
+                      initialData: isOriginalDocumentStream.value,
                       builder: (context, snapshot) {
                         return CheckboxListTile(
                           title: Text(lang.isOriginal),
-                          value: _isOriginalDocumentStream.value,
+                          value: isOriginalDocumentStream.value,
                           onChanged: (value) {
                             if (value != null) {
-                              _isOriginalDocumentStream.add(value);
+                              isOriginalDocumentStream.add(value);
                             }
                           },
                         );
                       }),
                   StreamBuilder<bool>(
-                      stream: _isRequiredDocumentStream,
-                      initialData: _isRequiredDocumentStream.value,
+                      stream: isRequiredDocumentStream,
+                      initialData: isRequiredDocumentStream.value,
                       builder: (context, snapshot) {
                         return CheckboxListTile(
                           title: Text(lang.isRequired),
-                          value: _isRequiredDocumentStream.value,
+                          value: isRequiredDocumentStream.value,
                           onChanged: (value) {
                             if (value != null) {
-                              _isRequiredDocumentStream.add(value);
+                              isRequiredDocumentStream.add(value);
                             }
                           },
                         );
                       }),
                   StreamBuilder<bool>(
-                      stream: _isDoubleSidedStream,
-                      initialData: _isDoubleSidedStream.value,
+                      stream: isDoubleSidedStream,
+                      initialData: isDoubleSidedStream.value,
                       builder: (context, snapshot) {
                         return CheckboxListTile(
                           title: Text(lang.isDoubleSided),
-                          value: _isDoubleSidedStream.value,
+                          value: isDoubleSidedStream.value,
                           onChanged: (value) {
                             if (value != null) {
-                              _isDoubleSidedStream.add(value);
+                              isDoubleSidedStream.add(value);
                             }
                           },
                         );
@@ -98,13 +99,13 @@ class _AddDocumentState extends BasicState<AddDocument> with WidgetUtilsMixin {
 
   save() async {
     try {
-      if (key.currentState!.validate()) {
+      if (formKey.currentState!.validate()) {
         final doc = DocumentSpecInput(
             id: null,
-            name: _nameDocumentCtrl.text,
-            optional: _isOriginalDocumentStream.value,
-            original: _isRequiredDocumentStream.value,
-            doubleSided: _isDoubleSidedStream.value);
+            name: nameDocumentCtrl.text,
+            optional: isOriginalDocumentStream.value,
+            original: isRequiredDocumentStream.value,
+            doubleSided: isDoubleSidedStream.value);
         Navigator.of(context).pop(doc);
       }
     } catch (error, stackTrace) {

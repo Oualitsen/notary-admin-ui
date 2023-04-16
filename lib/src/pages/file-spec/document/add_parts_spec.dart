@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:notary_admin/src/pages/file-spec/document/add_document.dart';
-import 'package:notary_admin/src/pages/file-spec/document/document_table_widget.dart';
+import 'package:notary_admin/src/pages/file-spec/document/documents_widget.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
@@ -18,10 +18,13 @@ class AddPartsSpecPage extends StatefulWidget {
 
 class AddPartsSpecPageState extends BasicState<AddPartsSpecPage>
     with WidgetUtilsMixin {
-  final GlobalKey<FormState> key = GlobalKey<FormState>();
+  //key
+  final formKey = GlobalKey<FormState>();
+  //controller
   final partsNameCtrl = TextEditingController();
-  final _listDocumentsInputStream =
-      BehaviorSubject.seeded(<DocumentSpecInput>[]);
+  //stream
+  final documentInputsStream = BehaviorSubject.seeded(<DocumentSpecInput>[]);
+
   @override
   Widget build(BuildContext context) {
     return WidgetUtils.wrapRoute(
@@ -33,7 +36,7 @@ class AddPartsSpecPageState extends BasicState<AddPartsSpecPage>
           child: Column(
             children: [
               Form(
-                key: key,
+                key: formKey,
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
@@ -46,8 +49,8 @@ class AddPartsSpecPageState extends BasicState<AddPartsSpecPage>
                 ),
               ),
               StreamBuilder<List<DocumentSpecInput>>(
-                  stream: _listDocumentsInputStream,
-                  initialData: _listDocumentsInputStream.value,
+                  stream: documentInputsStream,
+                  initialData: documentInputsStream.value,
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
                       return SizedBox.shrink();
@@ -55,7 +58,7 @@ class AddPartsSpecPageState extends BasicState<AddPartsSpecPage>
                     return DocumentsWidget(
                       listDocument: snapshot.data!,
                       onChanged: (List<DocumentSpecInput> listDoc) {
-                        _listDocumentsInputStream.add(listDoc);
+                        documentInputsStream.add(listDoc);
                       },
                     );
                   }),
@@ -65,9 +68,9 @@ class AddPartsSpecPageState extends BasicState<AddPartsSpecPage>
                   MaterialPageRoute(builder: (context) => AddDocument()),
                 ).then((value) {
                   if (value != null) {
-                    var list = _listDocumentsInputStream.value;
+                    var list = documentInputsStream.value;
                     list.add(value);
-                    _listDocumentsInputStream.add(list);
+                    documentInputsStream.add(list);
                   }
                 }),
                 child: Text(lang.addDocumentsSpec),
@@ -88,14 +91,14 @@ class AddPartsSpecPageState extends BasicState<AddPartsSpecPage>
   List<Subject> get subjects => [];
 
   onSave() {
-    if (key.currentState!.validate() &&
-        _listDocumentsInputStream.value.isNotEmpty) {
+    if (formKey.currentState!.validate() &&
+        documentInputsStream.value.isNotEmpty) {
       var partsSpecInput = PartsSpecInput(
           id: null,
-          documentSpecInputs: _listDocumentsInputStream.value,
+          documentSpecInputs: documentInputsStream.value,
           name: partsNameCtrl.text);
       Navigator.of(context).pop(partsSpecInput);
-    } else if (_listDocumentsInputStream.value.isEmpty) {
+    } else if (documentInputsStream.value.isEmpty) {
       showSnackBar2(context, lang.noDocument);
     }
   }

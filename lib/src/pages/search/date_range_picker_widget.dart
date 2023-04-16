@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:notary_admin/src/pages/files/files_table_widget.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:rxdart/subjects.dart';
@@ -14,6 +13,7 @@ class DateRangePickerWidget extends StatefulWidget {
 
 class _DateRangePickerWidgetState extends BasicState<DateRangePickerWidget>
     with WidgetUtilsMixin {
+  //stream
   final startDateStream = BehaviorSubject<DateTime?>();
   final endDateStream = BehaviorSubject<DateTime?>();
   //input controller
@@ -73,9 +73,7 @@ class _DateRangePickerWidgetState extends BasicState<DateRangePickerWidget>
               ),
             ],
           ),
-          SizedBox(
-            height: 20,
-          ),
+          SizedBox(height: 20),
           Row(
             children: [
               Expanded(

@@ -132,7 +132,7 @@ class _StepsSelectionState extends BasicState<StepsSelection>
     var input = stepsKey.currentState?.read();
     if (input != null) {
       try {
-        var res = await service.saveStep(input);
+        await service.saveStep(input);
         Navigator.of(context).pop();
         listKey.currentState?.reload();
       } catch (error, stacktrace) {
