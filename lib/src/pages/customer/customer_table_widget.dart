@@ -32,6 +32,13 @@ class _CustomerTableWidgetState extends BasicState<CustomerTableWidget>
     tableKey = widget.tableKey != null
         ? widget.tableKey!
         : GlobalKey<LazyPaginatedDataTableState>();
+
+    super.initState();
+  }
+
+  init() {
+    if (initialized) return;
+    initialized = true;
     columns = [
       DataColumn(label: Text(lang.firstName.toUpperCase())),
       DataColumn(label: Text(lang.lastName.toUpperCase())),
@@ -43,11 +50,11 @@ class _CustomerTableWidgetState extends BasicState<CustomerTableWidget>
       DataColumn(label: Text(lang.customerDetails.toUpperCase())),
       DataColumn(label: Text(lang.delete.toUpperCase()))
     ];
-    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    init();
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: LazyPaginatedDataTable<Customer>(

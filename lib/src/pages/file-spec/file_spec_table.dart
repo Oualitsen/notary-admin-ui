@@ -50,6 +50,7 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
 
   @override
   Widget build(BuildContext context) {
+    init();
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: LazyPaginatedDataTable<FilesSpec>(
