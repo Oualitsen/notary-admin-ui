@@ -46,7 +46,6 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
   final archiveService = GetIt.instance.get<FilesArchiveService>();
   final pdfService = GetIt.instance.get<PdfService>();
   //key
-  final searchFilterKey = GlobalKey<SearchFilterTableWidgetState>();
   final fileNameKey = GlobalKey<FormState>();
   //stream
   final dropDownValueStream = BehaviorSubject.seeded("");
@@ -57,13 +56,7 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
       fileSpecName: "",
       number: "",
       range: DateRange(endDate: null, startDate: null)));
-  final searchParamsStream = BehaviorSubject.seeded(SearchParams(
-    customerIds: "",
-    endDate: -1,
-    fileSpecName: "",
-    number: "",
-    startDate: -1,
-  ));
+
   //input controller
   final templateNameCrtl = TextEditingController();
   final filesCodeSearchCtrl = TextEditingController();
@@ -76,10 +69,6 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
   @override
   void initState() {
     subject.listen((data) {
-      searchFilterKey.currentState?.refresh(subject.value);
-      widget.tableKey.currentState?.refreshPage();
-    });
-    searchParamsStream.listen((data) {
       if (data.number.isEmpty) {
         filesCodeSearchCtrl.text = "";
       }
@@ -105,12 +94,19 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
     return SingleChildScrollView(
       child: Column(
         children: [
-          SearchFilterTableWidget(
-            key: searchFilterKey,
-            onSearchParamsChanged: (p0) {
-              searchParamsStream.add(p0);
-            },
-          ),
+          StreamBuilder<SearchParams2>(
+              stream: subject,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return SizedBox.shrink();
+                }
+                return SearchFilterTableWidget(
+                  searchParam: snapshot.data!,
+                  onSearchParamsChanged: (p0) {
+                    subject.add(p0);
+                  },
+                );
+              }),
           Padding(
             padding: const EdgeInsets.all(15.0),
             child: LazyPaginatedDataTable(
@@ -130,7 +126,7 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
   Future<List<FilesArchive>> getData(PageInfo page) {
     try {
       {
-        var params = searchParamsStream.value;
+        var params = _getParams(subject.value);
         if (params.customerIds.isNotEmpty ||
             params.number.isNotEmpty ||
             params.fileSpecName.isNotEmpty ||
@@ -158,7 +154,7 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
 
   Future<int> getTotal() {
     try {
-      var params = searchParamsStream.value;
+      var params = _getParams(subject.value);
       if (params.customerIds.isNotEmpty ||
           params.number.isNotEmpty ||
           params.fileSpecName.isNotEmpty ||
@@ -457,6 +453,25 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
             onTap: () => searchFilterStream.add(filter),
           );
         });
+  }
+
+  SearchParams _getParams(SearchParams2 searchParam2) {
+    var startDate = -1;
+    var endDate = -1;
+    if (searchParam2.range.startDate != null) {
+      startDate = searchParam2.range.startDate!.millisecondsSinceEpoch;
+    }
+    if (searchParam2.range.endDate != null) {
+      endDate = searchParam2.range.endDate!.millisecondsSinceEpoch;
+    }
+    var searchParams = SearchParams(
+      number: searchParam2.number,
+      fileSpecName: searchParam2.fileSpecName,
+      customerIds: searchParam2.customers.map((e) => e.id).join(","),
+      startDate: startDate,
+      endDate: endDate,
+    );
+    return searchParams;
   }
 }
 

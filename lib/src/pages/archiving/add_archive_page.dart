@@ -5,7 +5,6 @@ import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:notary_admin/src/pages/customer/customer_selection_dialog.dart';
-import 'package:notary_admin/src/pages/customer/customer_selection_page.dart';
 import 'package:notary_admin/src/pages/templates/upload_template.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
 import 'package:notary_admin/src/services/files/files_archive_service.dart';
@@ -299,7 +298,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
       builder: (context) => CustomerSelectionDialog(
         onSave: (selectedCustomer) {
           _listcustomerStream.add(selectedCustomer);
-          Navigator.pop(context);
+          Navigator.of(context).pop();
         },
       ),
     );

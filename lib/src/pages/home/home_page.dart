@@ -3,6 +3,7 @@ import 'package:flutter_responsive_tools/device_screen_type.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/pages/customer/customer_table_widget.dart';
 import 'package:notary_admin/src/pages/search/search_widget.dart';
+import 'package:notary_admin/src/pages/templates/quil_html_editor.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
@@ -51,6 +52,15 @@ class HomePageState extends BasicState<HomePage>
                   label: Text(lang.reload),
                   icon: Icon(Icons.refresh),
                 ),
+                ElevatedButton(
+                    onPressed: () {
+                      push(
+                          context,
+                          QuillHtmlEditorPage(
+                            text: "initial",
+                          ));
+                    },
+                    child: Text("html"))
               ],
             ),
           ],

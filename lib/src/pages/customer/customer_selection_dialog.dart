@@ -89,7 +89,10 @@ class _CustomerSelectionDialogState extends BasicState<CustomerSelectionDialog>
                 ),
               ),
               getButtons(
-                onSave: () => widget.onSave!(customerList),
+                onSave: () {
+                  widget.onSave!(customerList);
+                  Navigator.of(context).pop();
+                },
               )
             ],
           ),

@@ -37,7 +37,6 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   //key
   final tableKey = GlobalKey<LazyPaginatedDataTableState>();
   final fileNameKey = GlobalKey<FormState>();
-  final searchFilterKey = GlobalKey<SearchFilterTableWidgetState>();
   //controllers
   final templateNameCtrl = TextEditingController();
   final filesCodeSearchCtrl = TextEditingController();
@@ -50,13 +49,6 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
       fileSpecName: "",
       number: "",
       range: DateRange(endDate: null, startDate: null)));
-  final searchParamsStream = BehaviorSubject.seeded(SearchParams(
-    customerIds: "",
-    endDate: -1,
-    fileSpecName: "",
-    number: "",
-    startDate: -1,
-  ));
 
   //variables
   List<DataColumn> columns = [];
@@ -65,14 +57,12 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   @override
   void initState() {
     subject.listen((data) {
-      searchFilterKey.currentState?.refresh(subject.value);
-      tableKey.currentState?.refreshPage();
-    });
-    searchParamsStream.listen((data) {
       if (data.number.isEmpty) {
         filesCodeSearchCtrl.text = "";
+        searchFilterStream.add(null);
       }
       if (data.fileSpecName.isEmpty) {
+        searchFilterStream.add(null);
         filesSpecSearchCtrl.text = "";
       }
 
@@ -88,12 +78,19 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
     return SingleChildScrollView(
       child: Column(
         children: [
-          SearchFilterTableWidget(
-            key: searchFilterKey,
-            onSearchParamsChanged: (p0) {
-              searchParamsStream.add(p0);
-            },
-          ),
+          StreamBuilder<SearchParams2>(
+              stream: subject,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return SizedBox.shrink();
+                }
+                return SearchFilterTableWidget(
+                  searchParam: snapshot.data!,
+                  onSearchParamsChanged: (p0) {
+                    subject.add(p0);
+                  },
+                );
+              }),
           LazyPaginatedDataTable(
             getData: getData,
             getTotal: getTotal,
@@ -109,7 +106,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
 
   Future<List<Files>> getData(PageInfo page) {
     try {
-      var params = searchParamsStream.value;
+      var params = _getParams(subject.value);
       if (params.customerIds.isNotEmpty ||
           params.number.isNotEmpty ||
           params.fileSpecName.isNotEmpty ||
@@ -133,7 +130,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   }
 
   Future<int> getTotal() {
-    var params = searchParamsStream.value;
+    var params = _getParams(subject.value);
     if (params.customerIds.isNotEmpty ||
         params.number.isNotEmpty ||
         params.fileSpecName.isNotEmpty ||
@@ -510,6 +507,25 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
             onTap: () => searchFilterStream.add(filter),
           );
         });
+  }
+
+  SearchParams _getParams(SearchParams2 searchParam2) {
+    var startDate = -1;
+    var endDate = -1;
+    if (searchParam2.range.startDate != null) {
+      startDate = searchParam2.range.startDate!.millisecondsSinceEpoch;
+    }
+    if (searchParam2.range.endDate != null) {
+      endDate = searchParam2.range.endDate!.millisecondsSinceEpoch;
+    }
+    var searchParams = SearchParams(
+      number: searchParam2.number,
+      fileSpecName: searchParam2.fileSpecName,
+      customerIds: searchParam2.customers.map((e) => e.id).join(","),
+      startDate: startDate,
+      endDate: endDate,
+    );
+    return searchParams;
   }
 }
 
