@@ -146,28 +146,28 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
       DataCell(Text(data.specification.name)),
       DataCell(
         TextButton.icon(
-            label: Text(data.currentStep.name),
+            label: Text(data.currentStep.name.toUpperCase()),
             onPressed: (() => updateCurrentStep(data)),
             icon: Icon(Icons.edit)),
       ),
       DataCell(TextButton(
           onPressed: () => customerDetails(data),
-          child: Text(lang.customerList))),
+          child: Text(lang.customerList.toUpperCase()))),
       DataCell(
         TextButton(
-            child: Text(lang.print),
+            child: Text(lang.print.toUpperCase()),
             onPressed: (() => onPrint(data.printedDocId))),
       ),
       DataCell(
         TextButton.icon(
-            label: Text(lang.listDocumentsFileSpec),
+            label: Text(lang.listDocumentsFileSpec.toUpperCase()),
             onPressed: () async => await updateDocumentFolderCustomer(data),
             icon: Icon(Icons.edit)),
       ),
       DataCell(TextButton(
-          onPressed: () => archiveFiles(data), child: Text(lang.archive))),
+          onPressed: () => archiveFiles(data), child: Text(lang.archive.toUpperCase()))),
       DataCell(TextButton(
-          onPressed: () => deleteFiles(data), child: Text(lang.delete))),
+          onPressed: () => deleteFiles(data), child: Text(lang.delete.toUpperCase()))),
     ];
     return DataRow(cells: cellList);
   }

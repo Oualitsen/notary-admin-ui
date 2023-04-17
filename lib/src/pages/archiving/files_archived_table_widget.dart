@@ -106,16 +106,13 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
                   },
                 );
               }),
-          Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: LazyPaginatedDataTable(
-              getData: getData,
-              getTotal: getTotal,
-              columns: columns,
-              dataToRow: dataToRow,
-              sortAscending: true,
-              key: widget.tableKey,
-            ),
+          LazyPaginatedDataTable(
+            getData: getData,
+            getTotal: getTotal,
+            columns: columns,
+            dataToRow: dataToRow,
+            sortAscending: true,
+            key: widget.tableKey,
           ),
         ],
       ),
@@ -177,16 +174,16 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
       DataCell(Text(data.specification.name)),
       DataCell(TextButton(
           onPressed: () => customerDetails(data),
-          child: Text(lang.customerList))),
+          child: Text(lang.customerList.toUpperCase()))),
       DataCell(
         TextButton(
             onPressed: () => documentList(data),
-            child: Text(lang.listDocumentsFileSpec)),
+            child: Text(lang.listDocumentsFileSpec.toUpperCase())),
       ),
       DataCell(
         TextButton(
           onPressed: () => deleteFiles(data),
-          child: Text(lang.delete),
+          child: Text(lang.delete.toUpperCase()),
         ),
       ),
     ];

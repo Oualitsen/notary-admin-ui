@@ -101,7 +101,7 @@ class _CustomerTableWidgetState extends BasicState<CustomerTableWidget>
       DataCell(Text(lang.formatAddress(data.address))),
       DataCell(
         TextButton(
-          child: Text(lang.edit),
+          child: Text(lang.edit.toUpperCase()),
           onPressed: () {
             push(context, AddCustomerPage(customer: data))
                 .listen((_) => tableKey.currentState?.refreshPage());
@@ -110,7 +110,7 @@ class _CustomerTableWidgetState extends BasicState<CustomerTableWidget>
       ),
       DataCell(
         TextButton(
-          child: Text(lang.customerDetails),
+          child: Text(lang.customerDetails.toUpperCase()),
           onPressed: () {
             Navigator.push(
               context,
@@ -126,7 +126,7 @@ class _CustomerTableWidgetState extends BasicState<CustomerTableWidget>
         TextButton(
           onPressed: () => deleteCustomer(data),
           child: Text(
-            lang.delete,
+            lang.delete.toUpperCase()
           ),
         ),
       )

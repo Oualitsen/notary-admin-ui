@@ -85,11 +85,11 @@ class _UploadDocumentsWidgetState extends BasicState<UploadDocumentsWidget>
                               pathDocumentsStream.value[index].selected == true
                                   ? OutlinedButton(
                                       onPressed: () => _delete(index),
-                                      child: Text(lang.delete),
+                                      child: Text(lang.delete.toUpperCase()),
                                     )
                                   : SizedBox.shrink(),
                               ElevatedButton(
-                                child: Text(lang.uploadFile),
+                                child: Text(lang.uploadFile.toUpperCase()),
                                 onPressed: () => pickFile(index),
                               ),
                             ],

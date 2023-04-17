@@ -91,7 +91,7 @@ class _FormConvertMapState extends BasicState<FormConvertMap>
                       onPressed: () async {
                         convertToMap();
                       },
-                      child: Text(lang.submit),
+                      child: Text(lang.submit.toUpperCase()),
                     ),
                   ),
                 ],

@@ -32,7 +32,7 @@ class _StepsPageState extends BasicState<StepsPage> with WidgetUtilsMixin {
             onPressed: () {
               addNewStep(context);
             },
-            child: Text(lang.addSteps),
+            child: Text(lang.addSteps.toUpperCase()),
           ),
           body: Padding(
               padding: EdgeInsets.all(20),

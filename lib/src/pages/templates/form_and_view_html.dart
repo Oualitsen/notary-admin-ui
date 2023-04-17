@@ -63,17 +63,25 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
           title: Text(lang.template),
           actions: [
             Tooltip(
-              message: lang.print,
-              child: IconButton(
+              message: lang.print.toUpperCase(),
+              child: TextButton.icon(
+                label: Text(
+                  lang.print.toUpperCase(),
+                  style: TextStyle(color: Theme.of(context).canvasColor),
+                ),
                 onPressed: () {
                   controllerWeb?.callJsMethod("display", []);
                 },
-                icon: Icon(Icons.print),
+                icon: Icon(Icons.print, color: Theme.of(context).canvasColor),
               ),
             ),
             Tooltip(
               message: lang.save,
-              child: IconButton(
+              child: TextButton.icon(
+                label: Text(
+                  lang.save.toUpperCase(),
+                  style: TextStyle(color: Theme.of(context).canvasColor),
+                ),
                 onPressed: (() {
                   saveCopy();
                 }),
@@ -130,7 +138,7 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
                     onPressed: (() {
                       saveCopy();
                     }),
-                    child: Text(lang.save),
+                    child: Text(lang.save.toUpperCase()),
                   ),
                 ],
               ),

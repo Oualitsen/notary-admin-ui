@@ -70,7 +70,7 @@ class _CustomerDetailsPageState extends BasicState<CustomerDetailsPage>
                         context,
                         AddCustomerPage(customer: customer),
                       )),
-                  label: Text(lang.edit),
+                  label: Text(lang.edit.toUpperCase()),
                   icon: Icon(Icons.edit),
                 ),
               ),

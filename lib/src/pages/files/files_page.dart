@@ -37,9 +37,8 @@ class _FilesPageState extends BasicState<FilesPage> with WidgetUtilsMixin {
                       tableKey.currentState?.add(value);
                     }
                   }),
-              child: Text(lang.addFiles)),
-          body:
-              Padding(padding: EdgeInsets.all(20.0), child: FilesTableWidget()),
+              child: Text(lang.addFiles.toUpperCase())),
+          body: FilesTableWidget(),
         ));
   }
 

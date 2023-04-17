@@ -45,7 +45,7 @@ class SearchWidgetState extends BasicState<SearchWidget> with WidgetUtilsMixin {
                   if (widget.type == DeviceScreenType.desktop) ...[
                     ...widget.moreActions ?? [],
                     createSearchButton(lang.search.toUpperCase(),
-                        Theme.of(context).primaryColor),
+                        Theme.of(context).canvasColor),
                   ],
                   if (widget.type != DeviceScreenType.desktop) ...[
                     ...widget.moreActions ?? [],
@@ -75,7 +75,7 @@ class SearchWidgetState extends BasicState<SearchWidget> with WidgetUtilsMixin {
             Icons.search,
             color: color,
           ),
-          label: Text(label, style: TextStyle(color: color))),
+          label: Text(label.toUpperCase(), style: TextStyle(color: color))),
     );
   }
 

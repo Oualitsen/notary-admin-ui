@@ -60,7 +60,7 @@ class _CustomerPageState extends BasicState<CustomerPage>
               }
             });
           },
-          child: Text(lang.addCustomer),
+          child: Text(lang.addCustomer.toUpperCase()),
         ),
         body: StreamBuilder<String>(
             stream: searchValueStream,

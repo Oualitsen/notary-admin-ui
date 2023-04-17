@@ -188,7 +188,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                                       deleteStep(index);
                                     },
                                     icon: Icon(Icons.delete),
-                                    label: Text(lang.delete)),
+                                    label: Text(lang.delete.toUpperCase())),
                               );
                             }).toList()),
                             SizedBox(height: 16),
@@ -197,7 +197,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                               children: [
                                 TextButton(
                                     onPressed: previous,
-                                    child: Text(lang.previous)),
+                                    child: Text(lang.previous.toUpperCase())),
                                 SizedBox(
                                   width: 20,
                                 ),
@@ -205,7 +205,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                                     onPressed: snapshot.data!.isNotEmpty
                                         ? continued
                                         : null,
-                                    child: Text(lang.next)),
+                                    child: Text(lang.next.toUpperCase())),
                               ],
                             ),
                           ],
@@ -277,14 +277,14 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                               children: [
                                 TextButton(
                                     onPressed: previous,
-                                    child: Text(lang.previous)),
+                                    child: Text(lang.previous.toUpperCase())),
                                 SizedBox(
                                   width: 20,
                                 ),
                                 ElevatedButton(
                                     onPressed:
                                         snapshot.data!.isNotEmpty ? save : null,
-                                    child: Text(lang.submit)),
+                                    child: Text(lang.submit.toUpperCase())),
                               ],
                             ),
                           ],

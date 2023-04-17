@@ -55,7 +55,6 @@ class _ProfilePageState extends BasicState<ProfilePage>
                 iconTheme: const IconThemeData(color: Colors.black),
                 elevation: 0.0,
                 backgroundColor: Colors.transparent,
-                actions: [],
               ),
               body: Padding(
                 padding: const EdgeInsets.all(16),

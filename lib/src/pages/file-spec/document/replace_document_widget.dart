@@ -92,11 +92,11 @@ class _ReplaceDocumentWidgetState extends BasicState<ReplaceDocumentWidget>
                         children: [
                           snapshot.data![index].pathDocument.selected
                               ? OutlinedButton(
-                                  child: Text(lang.remplaceFile),
+                                  child: Text(lang.remplaceFile.toUpperCase()),
                                   onPressed: () => pickFile(index),
                                 )
                               : ElevatedButton(
-                                  child: Text(lang.uploadFile),
+                                  child: Text(lang.uploadFile.toUpperCase()),
                                   onPressed: () => pickFile(index),
                                 ),
                         ],
@@ -119,7 +119,7 @@ class _ReplaceDocumentWidgetState extends BasicState<ReplaceDocumentWidget>
                   }
                   return ElevatedButton(
                       onPressed: snapshot.data! == true ? submitFiles : null,
-                      child: Text(lang.submit));
+                      child: Text(lang.submit.toUpperCase()));
                 },
               ),
             ],

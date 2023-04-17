@@ -87,9 +87,7 @@ class _CustomerSelectionDialogState extends BasicState<CustomerSelectionDialog>
                     )).then(
                   (value) => listKey.currentState?.reload(),
                 ),
-                child: Text(
-                  lang.addCustomer,
-                ),
+                child: Text(lang.addCustomer.toUpperCase()),
               ),
               getButtons(
                 onSave: () {

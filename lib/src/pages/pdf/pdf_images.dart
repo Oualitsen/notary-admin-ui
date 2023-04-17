@@ -61,7 +61,7 @@ class _PdfImagesState extends BasicState<PdfImages> with WidgetUtilsMixin {
               ElevatedButton.icon(
                   icon: Icon(Icons.download),
                   onPressed: (() => downloadPdf(widget.id)),
-                  label: Text(lang.download)),
+                  label: Text(lang.download.toUpperCase())),
             ],
           ),
           body: StreamBuilder<String>(
