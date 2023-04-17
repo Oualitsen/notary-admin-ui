@@ -91,17 +91,17 @@ class AssistantTableWidgetState extends BasicState<AssistantTableWidget>
       DataCell(Text(lang.genderName(data.gender))),
       DataCell(
         TextButton(
-          child: Text(lang.edit),
+          child: Text(lang.edit.toUpperCase()),
           onPressed: (() => editAssistant(context, data)),
         ),
       ),
       DataCell(
         TextButton(
-            child: Text(lang.reset), onPressed: (() => resetPassword(data))),
+            child: Text(lang.reset.toUpperCase()), onPressed: (() => resetPassword(data))),
       ),
       DataCell(
         TextButton(
-          child: Text(lang.delete),
+          child: Text(lang.delete.toUpperCase()),
           onPressed: () {
             deleteConfirmation(data.id);
           },

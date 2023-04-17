@@ -86,8 +86,12 @@ class _ArchivePageState extends BasicState<ArchivePage> with WidgetUtilsMixin {
             ),
             SizedBox(width: 5),
             ElevatedButton(
-              onPressed: (() => push(context, AddArchivePage())),
-              child: Text(lang.addArchive),
+              onPressed: (() => push(
+                  context,
+                  AddArchivePage(
+                    initDate: DateTime(_selectedYearStream.value),
+                  ))),
+              child: Text(lang.addArchive.toUpperCase()),
             )
           ],
         ),

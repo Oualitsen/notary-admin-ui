@@ -73,7 +73,7 @@ class AddPartsSpecPageState extends BasicState<AddPartsSpecPage>
                     documentInputsStream.add(list);
                   }
                 }),
-                child: Text(lang.addDocumentsSpec),
+                child: Text(lang.addDocumentsSpec.toUpperCase()),
               ),
               SizedBox(height: 16),
               getButtons(onSave: onSave),

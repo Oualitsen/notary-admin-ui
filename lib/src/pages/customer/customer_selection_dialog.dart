@@ -10,10 +10,12 @@ import 'package:notary_model/model/selection_type.dart';
 import 'package:rxdart/rxdart.dart';
 
 class CustomerSelectionDialog extends StatefulWidget {
+  final List<Customer> initialCustomers;
   final Function(List<Customer> selectedCustomer)? onSave;
   const CustomerSelectionDialog({
     super.key,
     required this.onSave,
+    required this.initialCustomers,
   });
 
   @override
@@ -61,6 +63,7 @@ class _CustomerSelectionDialogState extends BasicState<CustomerSelectionDialog>
             stream: searchValueStream,
             builder: (context, snapshot) {
               return CustomerSelection(
+                initialCustomers: widget.initialCustomers,
                 searchValue: snapshot.data,
                 listKey: listKey,
                 selectionType: SelectionType.MULTIPLE,
@@ -84,9 +87,7 @@ class _CustomerSelectionDialogState extends BasicState<CustomerSelectionDialog>
                     )).then(
                   (value) => listKey.currentState?.reload(),
                 ),
-                child: Text(
-                  lang.addCustomer,
-                ),
+                child: Text(lang.addCustomer.toUpperCase()),
               ),
               getButtons(
                 onSave: () {

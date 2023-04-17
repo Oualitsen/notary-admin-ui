@@ -56,7 +56,7 @@ class _LoadTemplatePageState extends BasicState<LoadTemplatePage>
           appBar: AppBar(title: Text(lang.template)),
           floatingActionButton: ElevatedButton(
             onPressed: loadFiles,
-            child: Text(lang.addFiles),
+            child: Text(lang.addFiles.toUpperCase()),
           ),
           body: InfiniteScrollListView<TemplateDocument>(
             key: key,

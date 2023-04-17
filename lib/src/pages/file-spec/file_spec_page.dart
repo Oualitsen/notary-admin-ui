@@ -54,7 +54,7 @@ class _FileSpecPageState extends BasicState<FileSpecPage>
                 tableKey.currentState?.refreshPage();
               });
             },
-            child: Text(lang.addFileSpec),
+            child: Text(lang.addFileSpec.toUpperCase()),
           ),
           body: StreamBuilder<String>(
               stream: searchValueStream,

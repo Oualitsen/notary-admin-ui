@@ -13,12 +13,14 @@ class CustomerSelection extends StatefulWidget {
   final Function(List<Customer> selectedCustomers) onSelect;
   final GlobalKey<InfiniteScrollListViewState>? listKey;
   final String? searchValue;
+  final List<Customer> initialCustomers;
   const CustomerSelection(
       {super.key,
       this.searchValue,
       this.selectionType = SelectionType.MULTIPLE,
       this.listKey,
-      required this.onSelect});
+      required this.onSelect,
+      required this.initialCustomers});
 
   @override
   State<CustomerSelection> createState() => _CustomerSelectionState();
@@ -29,6 +31,12 @@ class _CustomerSelectionState extends BasicState<CustomerSelection>
   final service = GetIt.instance.get<CustomerService>();
   final listKey = GlobalKey<InfiniteScrollListViewState>();
   final selectedCustomerStream = BehaviorSubject.seeded(<Customer>[]);
+  @override
+  void initState() {
+    selectedCustomerStream.add(widget.initialCustomers);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return widget.selectionType == SelectionType.MULTIPLE

@@ -97,7 +97,7 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
       DataCell(
         TextButton(
           onPressed: () => stepsList(context, data),
-          child: Text(lang.steps),
+          child: Text(lang.steps.toUpperCase()),
         ),
       ),
       DataCell(
@@ -113,13 +113,13 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
               if (value != null) {}
             });
           },
-          child: Text(lang.edit),
+          child: Text(lang.edit.toUpperCase()),
         ),
       ),
       DataCell(
         TextButton(
           onPressed: () => deleteFileSpec(data),
-          child: Text(lang.delete),
+          child: Text(lang.delete.toUpperCase()),
         ),
       ),
     ];

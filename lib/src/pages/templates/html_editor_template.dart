@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -33,25 +34,23 @@ class _HtmlEditorTemplateState extends BasicState<HtmlEditorTemplate>
       child: Scaffold(
         appBar: AppBar(
           title: Text(widget.template.name),
-          elevation: 0,
-          actions: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton.icon(
-                onPressed: onSave,
-                label: Text(lang.save),
-                icon: Icon(Icons.save),
-              ),
-            ),
-          ],
         ),
-        body: SingleChildScrollView(
-          child: HtmlEditor(
-            controller: controller,
-            htmlEditorOptions: HtmlEditorOptions(
-              initialText: widget.template.htmlData,
+        body: HtmlEditor(
+          controller: controller,
+          htmlEditorOptions: HtmlEditorOptions(
+            initialText: widget.template.htmlData,
+            spellCheck: true,
+            autoAdjustHeight: false,
+          ),
+          htmlToolbarOptions: HtmlToolbarOptions(customToolbarButtons: [
+            ElevatedButton.icon(
+              onPressed: onSave,
+              label: Text(lang.save.toUpperCase()),
+              icon: Icon(Icons.save),
             ),
-            otherOptions: OtherOptions(height: 800),
+          ]),
+          otherOptions: OtherOptions(
+            height: double.infinity,
           ),
         ),
       ),
@@ -68,7 +67,6 @@ class _HtmlEditorTemplateState extends BasicState<HtmlEditorTemplate>
       }
       var res = await service.updateHtmlData(widget.template.id, newHtmlData);
       await showSnackBar2(context, lang.updatedSuccessfully);
-      Navigator.of(context).pop(res);
     } catch (error, stackTrace) {
       print(stackTrace);
       showServerError(context, error: error);

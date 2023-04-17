@@ -71,7 +71,7 @@ class _AssistantPageState extends BasicState<AssistantPage>
                   },
                 );
               },
-              child: Text(lang.addAssistant),
+              child: Text(lang.addAssistant.toUpperCase()),
             ),
             body: StreamBuilder<String>(
                 stream: searchValueStream,

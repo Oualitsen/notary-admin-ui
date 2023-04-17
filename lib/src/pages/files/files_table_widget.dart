@@ -4,7 +4,6 @@ import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/pages/archiving/add_archive_page.dart';
-import 'package:notary_admin/src/pages/archiving/files_archived_table_widget.dart';
 import 'package:notary_admin/src/pages/customer/customer_selection_dialog.dart';
 import 'package:notary_admin/src/pages/file-spec/document/replace_document_widget.dart';
 import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget.dart';
@@ -43,7 +42,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   final filesSpecSearchCtrl = TextEditingController();
   //streams
   final dropDownValueStream = BehaviorSubject.seeded("");
-  final searchFilterStream = BehaviorSubject<SearchFilter?>();
+  final searchFilterStream = BehaviorSubject<bool?>();
   final subject = BehaviorSubject.seeded(SearchParams2(
       customers: [],
       fileSpecName: "",
@@ -64,6 +63,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
       if (data.fileSpecName.isEmpty) {
         searchFilterStream.add(null);
         filesSpecSearchCtrl.text = "";
+        searchFilterStream.add(null);
       }
 
       tableKey.currentState?.refreshPage();
@@ -84,6 +84,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
                 if (!snapshot.hasData) {
                   return SizedBox.shrink();
                 }
+
                 return SearchFilterTableWidget(
                   searchParam: snapshot.data!,
                   onSearchParamsChanged: (p0) {
@@ -106,12 +107,10 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
 
   Future<List<Files>> getData(PageInfo page) {
     try {
-      var params = _getParams(subject.value);
-      if (params.customerIds.isNotEmpty ||
-          params.number.isNotEmpty ||
-          params.fileSpecName.isNotEmpty ||
-          params.startDate != -1 ||
-          params.endDate != -1) {
+
+      var params = WidgetMixin.getParams(subject.value);
+      if (params != null) {
+
         return filesService.searchFiles(
           number: params.number,
           filesSpecName: params.fileSpecName,
@@ -130,12 +129,10 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   }
 
   Future<int> getTotal() {
-    var params = _getParams(subject.value);
-    if (params.customerIds.isNotEmpty ||
-        params.number.isNotEmpty ||
-        params.fileSpecName.isNotEmpty ||
-        params.startDate != -1 ||
-        params.endDate != -1) {
+
+    var params = WidgetMixin.getParams(subject.value);
+    if (params != null) {
+
       return filesService.countSearchFiles(
         number: params.number,
         filesSpecName: params.fileSpecName,
@@ -154,28 +151,28 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
       DataCell(Text(data.specification.name)),
       DataCell(
         TextButton.icon(
-            label: Text(data.currentStep.name),
+            label: Text(data.currentStep.name.toUpperCase()),
             onPressed: (() => updateCurrentStep(data)),
             icon: Icon(Icons.edit)),
       ),
       DataCell(TextButton(
           onPressed: () => customerDetails(data),
-          child: Text(lang.customerList))),
+          child: Text(lang.customerList.toUpperCase()))),
       DataCell(
         TextButton(
-            child: Text(lang.print),
+            child: Text(lang.print.toUpperCase()),
             onPressed: (() => onPrint(data.printedDocId))),
       ),
       DataCell(
         TextButton.icon(
-            label: Text(lang.listDocumentsFileSpec),
+            label: Text(lang.listDocumentsFileSpec.toUpperCase()),
             onPressed: () async => await updateDocumentFolderCustomer(data),
             icon: Icon(Icons.edit)),
       ),
       DataCell(TextButton(
-          onPressed: () => archiveFiles(data), child: Text(lang.archive))),
+          onPressed: () => archiveFiles(data), child: Text(lang.archive.toUpperCase()))),
       DataCell(TextButton(
-          onPressed: () => deleteFiles(data), child: Text(lang.delete))),
+          onPressed: () => deleteFiles(data), child: Text(lang.delete.toUpperCase()))),
     ];
     return DataRow(cells: cellList);
   }
@@ -402,7 +399,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
           children: [Text(lang.creationDate), Icon(Icons.search)],
         ),
         onTap: () {
-          searchFilterStream.add(SearchFilter.ARCHIVNG_DATE);
+          searchFilterStream.add(null);
           showDialog(
             context: context,
             builder: ((context) {
@@ -421,13 +418,13 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
       DataColumn(
         label: columnWidget(
           lang.filesNumber,
-          SearchFilter.NUMBER,
+          true,
         ),
       ),
       DataColumn(
         label: columnWidget(
           lang.specification,
-          SearchFilter.FILES_SPEC_NAME,
+          false,
         ),
       ),
       DataColumn(label: Text(lang.state)),
@@ -437,16 +434,15 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
               children: [Text(lang.customerList), Icon(Icons.search)],
             ),
             onTap: () {
-              searchFilterStream.add(SearchFilter.CUSTOMER_NAME);
+              searchFilterStream.add(null);
               showDialog(
                 context: context,
                 builder: (context) => CustomerSelectionDialog(
+                  initialCustomers: subject.value.customers,
                   onSave: (selectedCustomer) {
                     var value = subject.value;
                     value.customers = selectedCustomer;
                     subject.add(value);
-
-                    Navigator.pop(context);
                   },
                 ),
               );
@@ -460,12 +456,10 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
     return columns;
   }
 
-  Widget columnWidget(String label, SearchFilter filter) {
-    var controller = filter == SearchFilter.NUMBER
-        ? filesCodeSearchCtrl
-        : filesSpecSearchCtrl;
+  Widget columnWidget(String label, bool filter) {
+    var controller = filter ? filesCodeSearchCtrl : filesSpecSearchCtrl;
 
-    return StreamBuilder<SearchFilter?>(
+    return StreamBuilder<bool?>(
         stream: searchFilterStream,
         builder: (context, snapshot) {
           if (snapshot.data == filter || controller.text.isNotEmpty) {
@@ -475,9 +469,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
                 autofocus: true,
                 onFieldSubmitted: (value) {
                   var val = subject.value;
-                  filter == SearchFilter.NUMBER
-                      ? val.number = value
-                      : val.fileSpecName = value;
+                  filter ? val.number = value : val.fileSpecName = value;
                   subject.add(val);
                 },
                 controller: controller,
@@ -488,9 +480,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
                       controller.clear();
                       controller.text = "";
                       var val = subject.value;
-                      filter == SearchFilter.NUMBER
-                          ? val.number = ""
-                          : val.fileSpecName = "";
+                      filter ? val.number = "" : val.fileSpecName = "";
                       subject.add(val);
                     },
                     icon: Icon(Icons.close),
@@ -527,11 +517,4 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
     );
     return searchParams;
   }
-}
-
-enum SearchFilter {
-  ARCHIVNG_DATE,
-  NUMBER,
-  FILES_SPEC_NAME,
-  CUSTOMER_NAME,
 }

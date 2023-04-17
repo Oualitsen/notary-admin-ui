@@ -67,13 +67,13 @@ class _StepsTableWidgetState extends BasicState<StepsTableWidget>
       DataCell(
         TextButton(
           onPressed: () => editSteps(data, context),
-          child: Text(lang.edit),
+          child: Text(lang.edit.toUpperCase()),
         ),
       ),
       DataCell(
         TextButton(
           onPressed: () => deleteSteps(data.id),
-          child: Text(lang.delete),
+          child: Text(lang.delete.toUpperCase()),
         ),
       ),
     ];

@@ -42,7 +42,7 @@ class _StepsSelectionState extends BasicState<StepsSelection>
                   ),
                 );
               },
-              child: Text(lang.addSteps))
+              child: Text(lang.addSteps.toUpperCase()))
         ],
       ),
       floatingActionButton: ElevatedButton(

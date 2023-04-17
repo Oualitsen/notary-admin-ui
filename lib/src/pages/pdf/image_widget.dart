@@ -45,13 +45,13 @@ class _ImageWidgetState extends BasicState<ImageWidget> with WidgetUtilsMixin {
                     onPressed: () {
                       rotate(false);
                     },
-                    child: Text(lang.rotateLeft),
+                    child: Text(lang.rotateLeft.toUpperCase()),
                   ),
                   TextButton(
                     onPressed: () {
                       rotate(true);
                     },
-                    child: Text(lang.rotateRight),
+                    child: Text(lang.rotateRight.toUpperCase()),
                   ),
                 ],
               ),

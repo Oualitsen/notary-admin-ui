@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:notary_admin/src/pages/customer/customer_detail_page.dart';
+import 'package:notary_admin/src/pages/search/search_filter_table_widget.dart';
 import 'package:notary_admin/src/pages/templates/upload_template.dart';
 import 'package:notary_admin/src/services/upload_service.dart';
 import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget.dart';
@@ -151,5 +152,31 @@ class WidgetMixin {
       showServerError(context, error: error);
       throw error;
     } finally {}
+  }
+
+  static SearchParams? getParams(SearchParams2 searchParam2) {
+    var startDate = -1;
+    var endDate = -1;
+    if (searchParam2.range.startDate != null) {
+      startDate = searchParam2.range.startDate!.millisecondsSinceEpoch;
+    }
+    if (searchParam2.range.endDate != null) {
+      endDate = searchParam2.range.endDate!.millisecondsSinceEpoch;
+    }
+    var searchParams = SearchParams(
+      number: searchParam2.number,
+      fileSpecName: searchParam2.fileSpecName,
+      customerIds: searchParam2.customers.map((e) => e.id).join(","),
+      startDate: startDate,
+      endDate: endDate,
+    );
+    if (searchParams.customerIds.isNotEmpty ||
+        searchParams.number.isNotEmpty ||
+        searchParams.fileSpecName.isNotEmpty ||
+        searchParams.startDate != -1 ||
+        searchParams.endDate != -1) {
+      return searchParams;
+    }
+    return null;
   }
 }

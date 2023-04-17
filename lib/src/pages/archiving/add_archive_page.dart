@@ -40,7 +40,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
 
   //Stream
   final _currentStepStream = BehaviorSubject.seeded(0);
-  final _listcustomerStream = BehaviorSubject.seeded(<Customer>[]);
+  final customersStream = BehaviorSubject.seeded(<Customer>[]);
   final _filesSpecStream = BehaviorSubject<FilesSpec>();
   final selectedDay = BehaviorSubject.seeded(DateTime.now());
   final scannedDocumentsStream = BehaviorSubject.seeded(<UploadData>[]);
@@ -70,7 +70,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
       _selectFileSpecCtrl.text = files.specification.name;
       _numberFileCtrl.text = files.number;
       var customers = await getCustomers(files.id);
-      _listcustomerStream.add(customers);
+      customersStream.add(customers);
       archvingDateCtrl.text = lang.formatDateDate(selectedDay.value);
     }
   }
@@ -189,7 +189,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
         break;
 
       case 1:
-        if (_listcustomerStream.value.isNotEmpty) {
+        if (customersStream.value.isNotEmpty) {
           _currentStepStream.add(_currentStepStream.value + 1);
         }
         break;
@@ -215,7 +215,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
     try {
       progressSubject.add(true);
       if (_selectFileSpecKey.currentState!.validate() &&
-          _listcustomerStream.value.isNotEmpty) {
+          customersStream.value.isNotEmpty) {
         var uploadedList = <String>[];
         if (widget.files != null) {
           uploadedList = documentsInfolist.map((e) => e.id).toList();
@@ -224,7 +224,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
             id: null,
             number: _numberFileCtrl.text,
             specification: _filesSpecStream.value,
-            customers: _listcustomerStream.value,
+            customers: customersStream.value,
             uploadedFiles: uploadedList,
             archvingDate: selectedDay.value.millisecondsSinceEpoch);
 
@@ -296,8 +296,10 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
     showDialog(
       context: context,
       builder: (context) => CustomerSelectionDialog(
+        initialCustomers: customersStream.value,
         onSave: (selectedCustomer) {
-          _listcustomerStream.add(selectedCustomer);
+          customersStream.add(selectedCustomer);
+
           Navigator.of(context).pop();
         },
       ),
@@ -480,7 +482,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
     return Column(
       children: [
         StreamBuilder<List<Customer>>(
-            stream: _listcustomerStream,
+            stream: customersStream,
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return SizedBox.shrink();
@@ -488,7 +490,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
               //
               return WidgetMixin.ListCustomers(
                 context,
-                listCustomers: _listcustomerStream.value,
+                listCustomers: customersStream.value,
               );
             }),
         SizedBox(height: 16),
