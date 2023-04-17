@@ -134,3 +134,19 @@ class SearchParams2 {
     required this.range,
   });
 }
+
+class SearchParams {
+  final String number;
+  final String fileSpecName;
+  final String customerIds;
+  final int startDate;
+  final int endDate;
+
+  SearchParams({
+    required this.number,
+    required this.fileSpecName,
+    required this.customerIds,
+    required this.startDate,
+    required this.endDate,
+  });
+}

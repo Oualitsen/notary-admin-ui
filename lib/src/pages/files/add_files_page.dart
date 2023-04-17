@@ -45,7 +45,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
   //Stream
   final currentStepStream = BehaviorSubject.seeded(0);
   final printedDocInputStream = BehaviorSubject<PrintedDocInput>();
-  final listcustomerStream = BehaviorSubject.seeded(<Customer>[]);
+  final customersStream = BehaviorSubject.seeded(<Customer>[]);
   final folderValidateStream = BehaviorSubject.seeded(false);
   final filesSpecStream = BehaviorSubject<FilesSpec>();
   final additionalDocumentsStream = BehaviorSubject.seeded(<UploadData>[]);
@@ -88,7 +88,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                     content: Column(
                       children: [
                         StreamBuilder<List<Customer>>(
-                            stream: listcustomerStream,
+                            stream: customersStream,
                             builder: (context, snapshot) {
                               if (!snapshot.hasData) {
                                 return SizedBox.shrink();
@@ -96,7 +96,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                               //
                               return WidgetMixin.ListCustomers(
                                 context,
-                                listCustomers: listcustomerStream.value,
+                                listCustomers: customersStream.value,
                               );
                             }),
                         getButtons(
@@ -293,7 +293,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
         break;
       case 1:
         {
-          if (listcustomerStream.value.isNotEmpty) {
+          if (customersStream.value.isNotEmpty) {
             currentStepStream.add(currentStepStream.value + 1);
           } else {
             await showSnackBar2(context, lang.noCustomer);
@@ -331,10 +331,9 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
     try {
       progressSubject.add(true);
       if (selectFileSpecKey.currentState!.validate() &&
-          listcustomerStream.value.isNotEmpty &&
+          customersStream.value.isNotEmpty &&
           folderValidateStream.value) {
-        var listCustomersIds =
-            listcustomerStream.value.map((e) => e.id).toList();
+        var listCustomersIds = customersStream.value.map((e) => e.id).toList();
         var input = FilesInput(
           id: null,
           number: _numberFileCtrl.text,
@@ -519,9 +518,10 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
     showDialog(
       context: context,
       builder: (context) => CustomerSelectionDialog(
+        initialCustomers: customersStream.value,
         onSave: (selectedCustomer) {
-          listcustomerStream.add(selectedCustomer);
-          if (listcustomerStream.value.isEmpty) {
+          customersStream.add(selectedCustomer);
+          if (customersStream.value.isEmpty) {
             showSnackBar2(context, lang.noCustomer);
           }
           Navigator.pop(context);
