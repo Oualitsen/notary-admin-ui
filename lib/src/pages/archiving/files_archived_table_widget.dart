@@ -94,7 +94,9 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
       child: Column(
         children: [
           StreamBuilder<SearchParams2>(
+
               stream: searchValueStream,
+
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return SizedBox.shrink();
@@ -102,6 +104,7 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
                 return SearchFilterTableWidget(
                   searchParam: snapshot.data!,
                   onSearchParamsChanged: (p0) {
+
                     searchValueStream.add(p0);
                   },
                 );
@@ -113,6 +116,7 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
             dataToRow: dataToRow,
             sortAscending: true,
             key: widget.tableKey,
+
           ),
         ],
       ),
@@ -122,8 +126,10 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
   Future<List<FilesArchive>> getData(PageInfo page) {
     try {
       {
+
         var params = WidgetMixin.getParams(searchValueStream.value);
         if (params != null) {
+
           return archiveService.searchFilesArchive(
             number: params.number,
             filesSpecName: params.fileSpecName,
@@ -146,8 +152,10 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
 
   Future<int> getTotal() {
     try {
+
       var params = WidgetMixin.getParams(searchValueStream.value);
       if (params != null) {
+
         return archiveService.countSearchFilesArchive(
           number: params.number,
           filesSpecName: params.fileSpecName,
@@ -436,5 +444,24 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
             onTap: () => searchFilterStream.add(filter),
           );
         });
+  }
+
+  SearchParams _getParams(SearchParams2 searchParam2) {
+    var startDate = -1;
+    var endDate = -1;
+    if (searchParam2.range.startDate != null) {
+      startDate = searchParam2.range.startDate!.millisecondsSinceEpoch;
+    }
+    if (searchParam2.range.endDate != null) {
+      endDate = searchParam2.range.endDate!.millisecondsSinceEpoch;
+    }
+    var searchParams = SearchParams(
+      number: searchParam2.number,
+      fileSpecName: searchParam2.fileSpecName,
+      customerIds: searchParam2.customers.map((e) => e.id).join(","),
+      startDate: startDate,
+      endDate: endDate,
+    );
+    return searchParams;
   }
 }

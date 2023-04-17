@@ -61,6 +61,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
         searchFilterStream.add(null);
       }
       if (data.fileSpecName.isEmpty) {
+        searchFilterStream.add(null);
         filesSpecSearchCtrl.text = "";
         searchFilterStream.add(null);
       }
@@ -106,8 +107,10 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
 
   Future<List<Files>> getData(PageInfo page) {
     try {
+
       var params = WidgetMixin.getParams(subject.value);
       if (params != null) {
+
         return filesService.searchFiles(
           number: params.number,
           filesSpecName: params.fileSpecName,
@@ -126,8 +129,10 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   }
 
   Future<int> getTotal() {
+
     var params = WidgetMixin.getParams(subject.value);
     if (params != null) {
+
       return filesService.countSearchFiles(
         number: params.number,
         filesSpecName: params.fileSpecName,
@@ -492,5 +497,24 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
             onTap: () => searchFilterStream.add(filter),
           );
         });
+  }
+
+  SearchParams _getParams(SearchParams2 searchParam2) {
+    var startDate = -1;
+    var endDate = -1;
+    if (searchParam2.range.startDate != null) {
+      startDate = searchParam2.range.startDate!.millisecondsSinceEpoch;
+    }
+    if (searchParam2.range.endDate != null) {
+      endDate = searchParam2.range.endDate!.millisecondsSinceEpoch;
+    }
+    var searchParams = SearchParams(
+      number: searchParam2.number,
+      fileSpecName: searchParam2.fileSpecName,
+      customerIds: searchParam2.customers.map((e) => e.id).join(","),
+      startDate: startDate,
+      endDate: endDate,
+    );
+    return searchParams;
   }
 }

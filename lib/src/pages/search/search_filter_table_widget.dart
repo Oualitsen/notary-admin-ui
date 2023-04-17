@@ -22,6 +22,7 @@ class SearchFilterTableWidget extends StatelessWidget {
     var filesSpec = searchParam.fileSpecName;
     var customers = searchParam.customers;
     var range = searchParam.range;
+
     return Container(
       padding: EdgeInsets.all(10.0),
       height: 55,
@@ -149,6 +150,7 @@ class SearchFilterTableWidget extends StatelessWidget {
       ),
     );
   }
+
 }
 
 class SearchParams2 {

@@ -299,6 +299,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
         initialCustomers: customersStream.value,
         onSave: (selectedCustomer) {
           customersStream.add(selectedCustomer);
+
           Navigator.of(context).pop();
         },
       ),

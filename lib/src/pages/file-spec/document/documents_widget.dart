@@ -60,6 +60,7 @@ class _DocumentsWidgetState extends BasicState<DocumentsWidget>
                         onPressed: () async =>
                             await deleteDocument(docSpec, index),
                         child: Text(lang.delete.toUpperCase()),
+
                       )
                     : null,
               );

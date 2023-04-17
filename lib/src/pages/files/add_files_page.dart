@@ -46,6 +46,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
   final currentStepStream = BehaviorSubject.seeded(0);
   final printedDocInputStream = BehaviorSubject<PrintedDocInput>();
   final customersStream = BehaviorSubject.seeded(<Customer>[]);
+
   final folderValidateStream = BehaviorSubject.seeded(false);
   final filesSpecStream = BehaviorSubject<FilesSpec>();
   final additionalDocumentsStream = BehaviorSubject.seeded(<UploadData>[]);
@@ -88,7 +89,9 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                     content: Column(
                       children: [
                         StreamBuilder<List<Customer>>(
+
                             stream: customersStream,
+
                             builder: (context, snapshot) {
                               if (!snapshot.hasData) {
                                 return SizedBox.shrink();
@@ -96,7 +99,9 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                               //
                               return WidgetMixin.ListCustomers(
                                 context,
+
                                 listCustomers: customersStream.value,
+
                               );
                             }),
                         getButtons(
@@ -293,7 +298,9 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
         break;
       case 1:
         {
+
           if (customersStream.value.isNotEmpty) {
+
             currentStepStream.add(currentStepStream.value + 1);
           } else {
             await showSnackBar2(context, lang.noCustomer);
@@ -334,6 +341,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
           customersStream.value.isNotEmpty &&
           folderValidateStream.value) {
         var listCustomersIds = customersStream.value.map((e) => e.id).toList();
+
         var input = FilesInput(
           id: null,
           number: _numberFileCtrl.text,
@@ -520,8 +528,10 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
       builder: (context) => CustomerSelectionDialog(
         initialCustomers: customersStream.value,
         onSave: (selectedCustomer) {
+
           customersStream.add(selectedCustomer);
           if (customersStream.value.isEmpty) {
+
             showSnackBar2(context, lang.noCustomer);
           }
           Navigator.pop(context);

@@ -27,7 +27,7 @@ dependencies:
   cookie_jar: ^3.0.0
   html_editor_enhanced: ^2.5.1
   flutter_downloader: ^1.10.2
-  
+
   notary_model:
     path: ../notary_model
   http_error_handler: ^0.0.1
@@ -36,7 +36,7 @@ dependencies:
   rapidoc_utils:
     path: ../rapidoc_utils
   devicelocale: ^0.6.0
- # quill_html_editor: ^2.1.8
+
   webviewx: ^0.2.2
     
 dev_dependencies:

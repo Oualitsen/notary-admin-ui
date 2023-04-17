@@ -334,6 +334,11 @@
   "completeTemplate": "Complete template",
   "noTemplateInstance": "No Document Generated",
   "additionalDocuments": "Additional documents",
+  "lowerBound" : "Lower Bound",
+  "upperBound" :"Upper bound",
+  "name":"Name",
+  "value":"Value",
+  "percentage":"Percentage",
   "addDocumentsSpec": "Add documents",
   "part": "Part",
   "listPart": "Parts",
@@ -350,4 +355,5 @@
   "rotateLeft": "Rotate Left",
   "rotateRight": "Rotate Right",
   "selectDateRange": "Select a date range"
+
 }
