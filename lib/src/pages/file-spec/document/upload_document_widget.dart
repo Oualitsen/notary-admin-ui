@@ -6,7 +6,7 @@ import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:rxdart/rxdart.dart';
 
 class UploadDocumentsWidget extends StatefulWidget {
-  final List<PathsDocuments> pathDocuments;
+  final List<DocumentUploadInfos> pathDocuments;
   UploadDocumentsWidget({
     super.key,
     required this.pathDocuments,
@@ -18,7 +18,7 @@ class UploadDocumentsWidget extends StatefulWidget {
 
 class _UploadDocumentsWidgetState extends BasicState<UploadDocumentsWidget>
     with WidgetUtilsMixin {
-  final pathDocumentsStream = BehaviorSubject.seeded(<PathsDocuments>[]);
+  final pathDocumentsStream = BehaviorSubject.seeded(<DocumentUploadInfos>[]);
   bool isAllUploaded = false;
   bool initialized = false;
 
@@ -36,7 +36,7 @@ class _UploadDocumentsWidgetState extends BasicState<UploadDocumentsWidget>
     init();
     return Scaffold(
       appBar: AppBar(title: Text("${lang.listDocumentsFileSpec}")),
-      body: StreamBuilder<List<PathsDocuments>>(
+      body: StreamBuilder<List<DocumentUploadInfos>>(
           stream: pathDocumentsStream,
           builder: (context, snapshot) {
             if (!snapshot.hasData) return SizedBox.shrink();
@@ -121,7 +121,7 @@ class _UploadDocumentsWidgetState extends BasicState<UploadDocumentsWidget>
                     child: Text(lang.no.toUpperCase())),
                 TextButton(
                     onPressed: () {
-                      var pathDoc = PathsDocuments(
+                      var pathDoc = DocumentUploadInfos(
                         idParts: widget.pathDocuments[index].idParts,
                         idDocument: widget.pathDocuments[index].idDocument,
                         document: null,
@@ -152,7 +152,7 @@ class _UploadDocumentsWidgetState extends BasicState<UploadDocumentsWidget>
       }
 
       if (pickedBytes != null || pickedPath != null) {
-        var pathDoc = PathsDocuments(
+        var pathDoc = DocumentUploadInfos(
           idParts: widget.pathDocuments[index].idParts,
           idDocument: widget.pathDocuments[index].idDocument,
           document: pickedBytes,
@@ -182,7 +182,7 @@ class _UploadDocumentsWidgetState extends BasicState<UploadDocumentsWidget>
   List<Subject> get subjects => [];
 }
 
-class PathsDocuments {
+class DocumentUploadInfos {
   final String idParts;
   final String idDocument;
   final String nameDocument;
@@ -192,7 +192,7 @@ class PathsDocuments {
   final String? path;
   final BehaviorSubject<double> progress;
 
-  PathsDocuments(
+  DocumentUploadInfos(
       {this.namePickedDocument,
       required this.idParts,
       required this.nameDocument,

@@ -27,16 +27,22 @@ class FormAndViewHtml extends StatefulWidget {
 
 class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
     with WidgetUtilsMixin {
-  WebViewXController? controllerWeb;
+  //services
   final printedDocService = GetIt.instance.get<PrintedDocService>();
+  //key
   final _formKey = GlobalKey<FormState>();
   final fileNameKey = GlobalKey<FormState>();
+  //controller
   final templateNameCrtl = TextEditingController();
   final _htmlDocument = BehaviorSubject.seeded('');
+  //stream
   final webStream = BehaviorSubject.seeded(false);
+  //variables
+  WebViewXController? controllerWeb;
   late List<String> listFormField;
   late String text;
   var textFormCtrlList = <TextEditingController>[];
+
   @override
   void initState() {
     text = widget.text;

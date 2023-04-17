@@ -22,13 +22,19 @@ class PrintedDocumentsPage extends StatefulWidget {
 
 class _PrintedDocumentsPageState extends BasicState<PrintedDocumentsPage>
     with WidgetUtilsMixin {
+  //service
   final service = GetIt.instance.get<PrintedDocService>();
-  final key = GlobalKey<InfiniteScrollListViewState<PrintedDoc>>();
+  //key
+  final printedDocListkey =
+      GlobalKey<InfiniteScrollListViewState<PrintedDoc>>();
+  final fileNameKey = GlobalKey<FormState>();
+  //controller
   final templateNameCrtl = TextEditingController();
+  //stream
+  final dropDownValueStream = BehaviorSubject.seeded("");
+  //variables
   late List<String> items;
   bool initialized = false;
-  final dropDownValueStream = BehaviorSubject.seeded("");
-  final fileNameKey = GlobalKey<FormState>();
 
   void init() {
     if (!initialized) {
@@ -46,7 +52,7 @@ class _PrintedDocumentsPageState extends BasicState<PrintedDocumentsPage>
             title: Text(lang.savedTemplates),
           ),
           body: InfiniteScrollListView<PrintedDoc>(
-            key: key,
+            key: printedDocListkey,
             comparator: ((a, b) => b.creationDate - a.creationDate),
             elementBuilder: (BuildContext context, template, index, animation) {
               return ListTile(
@@ -80,7 +86,7 @@ class _PrintedDocumentsPageState extends BasicState<PrintedDocumentsPage>
       MaterialPageRoute(
         builder: (context) => HtmlEditorPrintedDoc(template: template),
       ),
-    ).then((value) => key.currentState?.reload());
+    ).then((value) => printedDocListkey.currentState?.reload());
   }
 
   @override
@@ -97,7 +103,7 @@ class _PrintedDocumentsPageState extends BasicState<PrintedDocumentsPage>
         editName(doc).then((value) {
           if (value != null && value.isNotEmpty) {
             onSave(doc, value);
-            key.currentState?.reload();
+            printedDocListkey.currentState?.reload();
           }
         });
       }
@@ -138,7 +144,7 @@ class _PrintedDocumentsPageState extends BasicState<PrintedDocumentsPage>
     try {
       var res = await service.updateName(doc.id, newName);
       await showSnackBar2(context, lang.updatedSuccessfully);
-      key.currentState?.add(res);
+      printedDocListkey.currentState?.add(res);
     } catch (error, stacktrace) {
       print(stacktrace);
       showServerError(context, error: error);
@@ -179,7 +185,7 @@ class _PrintedDocumentsPageState extends BasicState<PrintedDocumentsPage>
     progressSubject.add(true);
     try {
       await service.delete(doc.id);
-      key.currentState?.reload();
+      printedDocListkey.currentState?.reload();
       await showSnackBar2(context, lang.delete);
     } catch (error, stacktrace) {
       print(stacktrace);

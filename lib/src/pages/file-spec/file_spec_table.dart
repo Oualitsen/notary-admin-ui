@@ -25,14 +25,19 @@ class FileSpecTable extends StatefulWidget {
 
 class _FileSpecTableState extends BasicState<FileSpecTable>
     with WidgetUtilsMixin {
+  //service
   final service = GetIt.instance.get<FileSpecService>();
+  final stepService = GetIt.instance.get<StepsService>();
+  //key
+  final stepKey = GlobalKey<AddStepWidgetState>();
+  //variables
   final columnSpacing = 65.0;
   bool initialized = false;
-  List<DataColumn> columns = [];
-  final stepService = GetIt.instance.get<StepsService>();
-  final stepKey = GlobalKey<AddStepWidgetState>();
-  @override
-  Widget build(BuildContext context) {
+  late List<DataColumn> columns;
+
+  init() {
+    if (initialized) return;
+    initialized = true;
     columns = [
       DataColumn(label: Text(lang.creationDate)),
       DataColumn(label: Text(lang.name)),
@@ -41,6 +46,11 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
       DataColumn(label: Text(lang.edit)),
       DataColumn(label: Text(lang.delete)),
     ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    init();
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: LazyPaginatedDataTable<FilesSpec>(

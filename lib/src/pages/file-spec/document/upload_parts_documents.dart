@@ -8,7 +8,7 @@ import 'package:rxdart/subjects.dart';
 
 class UploadPartsDocumentsWidget extends StatefulWidget {
   final FilesSpec filesSpec;
-  final Function(List<PathsDocuments> pathDocumentList) onNext;
+  final Function(List<DocumentUploadInfos> pathDocumentList) onNext;
   const UploadPartsDocumentsWidget(
       {super.key, required this.filesSpec, required this.onNext});
   @override
@@ -29,7 +29,7 @@ class _UploadPartsDocumentsWidgetState
             maxUpload: element.documentSpec.length,
             uploaded: 0,
             pathsDocuments: element.documentSpec
-                .map((e) => PathsDocuments(
+                .map((e) => DocumentUploadInfos(
                       idParts: element.id,
                       idDocument: e.id,
                       document: null,
@@ -65,7 +65,7 @@ class _UploadPartsDocumentsWidgetState
                       alignment: Alignment.centerLeft,
                       child: Text("${widget.filesSpec.partsSpecs[index].name}"),
                     ),
-                    onTap: (() => push<List<PathsDocuments>>(
+                    onTap: (() => push<List<DocumentUploadInfos>>(
                           context,
                           UploadDocumentsWidget(
                             pathDocuments: snapshot.data![index].pathsDocuments,
@@ -98,7 +98,7 @@ class _UploadPartsDocumentsWidgetState
   List<Subject> get subjects => [];
 
   void change() {
-    var list = <PathsDocuments>[];
+    var list = <DocumentUploadInfos>[];
     uploadsStream.value
         .map((e) => e.pathsDocuments.map((e) => list.add(e)).toList())
         .toList();
@@ -110,7 +110,7 @@ class _UploadPartsDocumentsWidgetState
 class PartsDocument {
   final int maxUpload;
   final int uploaded;
-  final List<PathsDocuments> pathsDocuments;
+  final List<DocumentUploadInfos> pathsDocuments;
 
   PartsDocument({
     required this.maxUpload,

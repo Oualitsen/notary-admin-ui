@@ -16,23 +16,23 @@ class DocumentsWidget extends StatefulWidget {
 
 class _DocumentsWidgetState extends BasicState<DocumentsWidget>
     with WidgetUtilsMixin {
-  final columnSpacing = 30.0;
-  bool initialized = false;
-  final _listDocumentsStream = BehaviorSubject.seeded(<DocumentSpecInput>[]);
-  List<DataColumn> columns = [];
+  //stream
+  final documentListStream = BehaviorSubject.seeded(<DocumentSpecInput>[]);
+//variables
   late List<DocumentSpecInput> listDocument;
+
   @override
   void initState() {
     listDocument = widget.listDocument;
-    _listDocumentsStream.add(listDocument);
+    documentListStream.add(listDocument);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<DocumentSpecInput>>(
-        stream: _listDocumentsStream,
-        initialData: _listDocumentsStream.value,
+        stream: documentListStream,
+        initialData: documentListStream.value,
         builder: (context, snapshot) {
           if (snapshot.hasData == false) {
             return SizedBox.shrink();
@@ -104,11 +104,11 @@ class _DocumentsWidgetState extends BasicState<DocumentsWidget>
           TextButton(
             child: Text(lang.yes.toUpperCase()),
             onPressed: () async {
-              var list = _listDocumentsStream.value;
+              var list = documentListStream.value;
               list.removeAt(index);
-              _listDocumentsStream.add(list);
+              documentListStream.add(list);
               if (widget.onChanged != null) {
-                widget.onChanged!(_listDocumentsStream.value);
+                widget.onChanged!(documentListStream.value);
               }
               Navigator.of(context).pop(true);
             },

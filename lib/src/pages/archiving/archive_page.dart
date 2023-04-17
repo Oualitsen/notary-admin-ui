@@ -19,9 +19,11 @@ class ArchivePage extends StatefulWidget {
 }
 
 class _ArchivePageState extends BasicState<ArchivePage> with WidgetUtilsMixin {
+  //services
   final archiveService = GetIt.instance.get<FilesArchiveService>();
+  //stream
   final _selectedYearStream = BehaviorSubject.seeded(DateTime.now().year);
-
+  //key
   final listViewKey = GlobalKey();
   final tableKey = GlobalKey<LazyPaginatedDataTableState>();
 
