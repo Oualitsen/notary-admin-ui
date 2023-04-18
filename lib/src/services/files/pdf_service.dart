@@ -13,4 +13,7 @@ abstract class PdfService {
 
   @GET("/admin/pdf/image/ids/{pdfId}")
   Future<List<String>> getPdfImages(@Path("pdfId") String pdfId);
+
+  @GET("/admin/pdf/docx/{docxId}")
+  Future<String> wordToHtml(@Path("docxId") String docxId);
 }

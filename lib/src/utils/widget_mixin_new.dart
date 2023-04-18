@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:notary_admin/src/pages/customer/customer_detail_page.dart';
@@ -9,6 +11,11 @@ import 'package:notary_admin/src/services/upload_service.dart';
 import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget.dart';
 import 'package:notary_admin/src/widgets/mixins/lang.dart';
 import 'package:notary_model/model/customer.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:rapidoc_utils/utils/Utils.dart';
+import 'package:http/http.dart' as http;
+import 'package:universal_html/html.dart' as html;
 
 class WidgetMixin {
   static Future<T?> showDialog2<T>(BuildContext context,
@@ -178,5 +185,75 @@ class WidgetMixin {
       return searchParams;
     }
     return null;
+  }
+
+  static Future<bool> confirmDelete(BuildContext context) async {
+    var lang = getLang(context);
+    return await showAlertDialog(
+        context: context,
+        title: lang.confirm,
+        message: lang.confirmDelete,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(lang.cancel.toUpperCase()),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(lang.ok.toUpperCase()),
+          )
+        ]);
+  }
+
+  static download(BuildContext context, String uri, String name,
+      [Uint8List? myBytes = null, String? token = null]) async {
+    Map<String, String> headers = <String, String>{};
+    var bytes = myBytes;
+    if (token != null) {
+      headers["Authorization"] = "Bearer $token";
+    }
+    if (kIsWeb) {
+      if (bytes == null) {
+        final response = await http.get(
+          Uri.parse("$uri"),
+          headers: headers,
+        );
+        bytes = response.bodyBytes;
+      }
+      final content = base64Encode(bytes);
+      html.AnchorElement(
+          href:
+              "data:application/octet-stream;charset=utf-16le;base64,$content")
+        ..setAttribute("download", name)
+        ..click();
+    } else {
+      final status = await Permission.storage.request();
+      if (status.isGranted) {
+        final baseStorage = await getExternalStorageDirectory();
+        await FlutterDownloader.enqueue(
+            openFileFromNotification: true,
+            url: uri,
+            headers: headers,
+            savedDir: baseStorage!.path);
+      } else {
+        var lang = getLang(context);
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(lang.permissionDenied),
+            content: Text(lang.permissionText),
+            actions: [
+              TextButton(
+                child: Text(lang.openSettings),
+                onPressed: () {
+                  openAppSettings();
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          ),
+        );
+      }
+    }
   }
 }

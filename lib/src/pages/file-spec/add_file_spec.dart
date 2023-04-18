@@ -145,8 +145,8 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                       getButtons(
                         onSave: continued,
                         onCancel: previous,
-                        saveLabel: lang.next,
-                        cancelLabel: lang.previous,
+                        saveLabel: lang.next.toUpperCase(),
+                        cancelLabel: lang.previous.toUpperCase(),
                       ),
                     ],
                   ),

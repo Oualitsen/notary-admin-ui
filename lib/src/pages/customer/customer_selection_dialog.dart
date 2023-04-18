@@ -94,6 +94,7 @@ class _CustomerSelectionDialogState extends BasicState<CustomerSelectionDialog>
                   widget.onSave!(customerList);
                   Navigator.of(context).pop();
                 },
+                onCancel: (() => Navigator.of(context).pop()),
               )
             ],
           ),

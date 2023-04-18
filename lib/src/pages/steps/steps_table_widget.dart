@@ -4,6 +4,7 @@ import 'package:http_error_handler/error_handler.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/pages/steps/add_step_widget.dart';
 import 'package:notary_admin/src/services/admin/steps_service.dart';
+import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/step_input.dart';
@@ -73,7 +74,10 @@ class _StepsTableWidgetState extends BasicState<StepsTableWidget>
       DataCell(
         TextButton(
           onPressed: () => deleteSteps(data.id),
-          child: Text(lang.delete.toUpperCase()),
+          child: Text(
+            lang.delete.toUpperCase(),
+            style: TextStyle(color: Colors.red),
+          ),
         ),
       ),
     ];
@@ -87,32 +91,19 @@ class _StepsTableWidgetState extends BasicState<StepsTableWidget>
   List<Subject> get subjects => [];
 
   deleteSteps(String id) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(lang.confirm),
-        content: Text(lang.confirmDelete),
-        actions: <Widget>[
-          TextButton(
-            child: Text(lang.no.toUpperCase()),
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          TextButton(
-              child: Text(lang.yes.toUpperCase()),
-              onPressed: () async {
-                try {
-                  await service.delete(id);
-                  Navigator.of(context).pop(true);
-                  widget.tableKey?.currentState?.refreshPage();
-                  await showSnackBar2(context, lang.delete);
-                } catch (error, stacktrace) {
-                  showServerError(context, error: error);
-                  print(stacktrace);
-                }
-              }),
-        ],
-      ),
-    );
+    WidgetMixin.confirmDelete(context)
+        .asStream()
+        .where((event) => event == true)
+        .listen((_) async {
+      try {
+        await service.delete(id);
+        widget.tableKey?.currentState?.refreshPage();
+        await showSnackBar2(context, lang.delete);
+      } catch (error, stacktrace) {
+        showServerError(context, error: error);
+        print(stacktrace);
+      }
+    });
   }
 
   editSteps(Steps data, BuildContext context) async {

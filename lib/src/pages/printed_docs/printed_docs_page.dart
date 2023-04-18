@@ -114,25 +114,13 @@ class _PrintedDocumentsPageState extends BasicState<PrintedDocumentsPage>
         push(context, PrintedDocViewHtml(text: doc.htmlData));
       }
       if (value == items[3]) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text(lang.confirm),
-            content: Text(lang.confirmDelete),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(false);
-                  },
-                  child: Text(lang.no.toUpperCase())),
-              TextButton(
-                  onPressed: () async {
-                    Navigator.of(context).pop(true);
-                    await _delete(doc);
-                  },
-                  child: Text(lang.confirm.toUpperCase())),
-            ],
-          ),
+        WidgetMixin.confirmDelete(context)
+            .asStream()
+            .where((event) => event == true)
+            .listen(
+          (_) async {
+            await _delete(doc);
+          },
         );
       }
       ;

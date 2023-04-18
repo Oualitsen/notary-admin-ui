@@ -17,6 +17,7 @@ import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/files.dart';
 import 'package:notary_model/model/steps.dart';
+import 'package:rapidoc_utils/utils/Utils.dart';
 import 'package:rxdart/rxdart.dart';
 
 class FilesTableWidget extends StatefulWidget {
@@ -107,10 +108,8 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
 
   Future<List<Files>> getData(PageInfo page) {
     try {
-
       var params = WidgetMixin.getParams(subject.value);
       if (params != null) {
-
         return filesService.searchFiles(
           number: params.number,
           filesSpecName: params.fileSpecName,
@@ -129,10 +128,8 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   }
 
   Future<int> getTotal() {
-
     var params = WidgetMixin.getParams(subject.value);
     if (params != null) {
-
       return filesService.countSearchFiles(
         number: params.number,
         filesSpecName: params.fileSpecName,
@@ -149,19 +146,14 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
       DataCell(Text(lang.formatDate(data.creationDate))),
       DataCell(Text(data.number)),
       DataCell(Text(data.specification.name)),
+      DataCell(TextButton(
+          onPressed: () => customerDetails(data),
+          child: Text(lang.customerList.toUpperCase()))),
       DataCell(
         TextButton.icon(
             label: Text(data.currentStep.name.toUpperCase()),
             onPressed: (() => updateCurrentStep(data)),
             icon: Icon(Icons.edit)),
-      ),
-      DataCell(TextButton(
-          onPressed: () => customerDetails(data),
-          child: Text(lang.customerList.toUpperCase()))),
-      DataCell(
-        TextButton(
-            child: Text(lang.print.toUpperCase()),
-            onPressed: (() => onPrint(data.printedDocId))),
       ),
       DataCell(
         TextButton.icon(
@@ -169,10 +161,20 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
             onPressed: () async => await updateDocumentFolderCustomer(data),
             icon: Icon(Icons.edit)),
       ),
+      DataCell(
+        TextButton(
+            child: Text(lang.print.toUpperCase()),
+            onPressed: (() => onPrint(data.printedDocId))),
+      ),
       DataCell(TextButton(
-          onPressed: () => archiveFiles(data), child: Text(lang.archive.toUpperCase()))),
+          onPressed: () => archiveFiles(data),
+          child: Text(lang.archive.toUpperCase()))),
       DataCell(TextButton(
-          onPressed: () => deleteFiles(data), child: Text(lang.delete.toUpperCase()))),
+          onPressed: () => deleteFiles(data),
+          child: Text(
+            lang.delete.toUpperCase(),
+            style: TextStyle(color: Colors.red),
+          ))),
     ];
     return DataRow(cells: cellList);
   }
@@ -296,32 +298,21 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   }
 
   deleteFiles(Files data) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(lang.confirm),
-        content: Text(lang.confirmDelete),
-        actions: <Widget>[
-          TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              child: Text(lang.no.toUpperCase())),
-          TextButton(
-              onPressed: () async {
-                try {
-                  await filesService.deleteFile(data.id);
-                } catch (error, stacktrace) {
-                  showServerError(context, error: error);
-                  print(stacktrace);
-                }
-                Navigator.of(context).pop(true);
-                tableKey.currentState?.refreshPage();
-                await showSnackBar2(context, lang.delete);
-              },
-              child: Text(lang.yes.toUpperCase())),
-        ],
-      ),
+    WidgetMixin.confirmDelete(context)
+        .asStream()
+        .where((event) => event == true)
+        .listen(
+      (_) async {
+        try {
+          await filesService.deleteFile(data.id);
+          showSnackBar2(context, lang.deletedSuccessfully);
+        } catch (error, stacktrace) {
+          showServerError(context, error: error);
+          print(stacktrace);
+        }
+        tableKey.currentState?.refreshPage();
+        await showSnackBar2(context, lang.delete);
+      },
     );
   }
 
@@ -427,7 +418,6 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
           false,
         ),
       ),
-      DataColumn(label: Text(lang.state)),
       DataColumn(
         label: InkWell(
             child: Row(
@@ -448,8 +438,9 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
               );
             }),
       ),
-      DataColumn(label: Text(lang.template)),
+      DataColumn(label: Text(lang.state)),
       DataColumn(label: Text(lang.listDocumentsFileSpec)),
+      DataColumn(label: Text(lang.template)),
       DataColumn(label: Text(lang.archive)),
       DataColumn(label: Text(lang.delete)),
     ];
@@ -497,24 +488,5 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
             onTap: () => searchFilterStream.add(filter),
           );
         });
-  }
-
-  SearchParams _getParams(SearchParams2 searchParam2) {
-    var startDate = -1;
-    var endDate = -1;
-    if (searchParam2.range.startDate != null) {
-      startDate = searchParam2.range.startDate!.millisecondsSinceEpoch;
-    }
-    if (searchParam2.range.endDate != null) {
-      endDate = searchParam2.range.endDate!.millisecondsSinceEpoch;
-    }
-    var searchParams = SearchParams(
-      number: searchParam2.number,
-      fileSpecName: searchParam2.fileSpecName,
-      customerIds: searchParam2.customers.map((e) => e.id).join(","),
-      startDate: startDate,
-      endDate: endDate,
-    );
-    return searchParams;
   }
 }

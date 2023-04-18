@@ -89,9 +89,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                     content: Column(
                       children: [
                         StreamBuilder<List<Customer>>(
-
                             stream: customersStream,
-
                             builder: (context, snapshot) {
                               if (!snapshot.hasData) {
                                 return SizedBox.shrink();
@@ -99,16 +97,14 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                               //
                               return WidgetMixin.ListCustomers(
                                 context,
-
                                 listCustomers: customersStream.value,
-
                               );
                             }),
                         getButtons(
                             onSave: continued,
                             onCancel: previous,
-                            saveLabel: lang.next,
-                            cancelLabel: lang.previous),
+                            saveLabel: lang.next.toUpperCase(),
+                            cancelLabel: lang.previous.toUpperCase()),
                       ],
                     ),
                     isActive: activeState == 1,
@@ -139,8 +135,8 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                         getButtons(
                           onSave: continued,
                           onCancel: previous,
-                          saveLabel: lang.next,
-                          cancelLabel: lang.previous,
+                          saveLabel: lang.next.toUpperCase(),
+                          cancelLabel: lang.previous.toUpperCase(),
                         )
                       ],
                     ),
@@ -197,8 +193,8 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                               return getButtons(
                                 onSave: snapshot.data! ? continued : null,
                                 onCancel: previous,
-                                saveLabel: lang.next,
-                                cancelLabel: lang.previous,
+                                saveLabel: lang.next.toUpperCase(),
+                                cancelLabel: lang.previous.toUpperCase(),
                               );
                             }),
                       ],
@@ -261,8 +257,8 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                         getButtons(
                             onSave: save,
                             onCancel: previous,
-                            saveLabel: lang.submit,
-                            cancelLabel: lang.previous)
+                            saveLabel: lang.submit.toUpperCase(),
+                            cancelLabel: lang.previous.toUpperCase())
                       ],
                     ),
                     isActive: activeState == 4,
@@ -298,9 +294,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
         break;
       case 1:
         {
-
           if (customersStream.value.isNotEmpty) {
-
             currentStepStream.add(currentStepStream.value + 1);
           } else {
             await showSnackBar2(context, lang.noCustomer);
@@ -491,7 +485,9 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
               height: 20,
             ),
             getButtons(
-                onSave: continued, skipCancel: true, saveLabel: lang.next)
+                onSave: continued,
+                skipCancel: true,
+                saveLabel: lang.next.toUpperCase())
           ],
         ));
   }
@@ -528,13 +524,10 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
       builder: (context) => CustomerSelectionDialog(
         initialCustomers: customersStream.value,
         onSave: (selectedCustomer) {
-
           customersStream.add(selectedCustomer);
           if (customersStream.value.isEmpty) {
-
             showSnackBar2(context, lang.noCustomer);
           }
-          Navigator.pop(context);
         },
       ),
     );

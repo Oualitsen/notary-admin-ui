@@ -111,7 +111,7 @@ class _PdfImagesState extends BasicState<PdfImages> with WidgetUtilsMixin {
       },
       body: json.encode(widget.imageIds),
     );
-    final bytes = response.bodyBytes;
+    Uint8List bytes = response.bodyBytes;
     if (kIsWeb) {
       final content = base64Encode(bytes);
       html.AnchorElement(

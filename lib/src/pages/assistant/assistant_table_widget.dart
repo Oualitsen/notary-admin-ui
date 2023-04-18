@@ -97,11 +97,15 @@ class AssistantTableWidgetState extends BasicState<AssistantTableWidget>
       ),
       DataCell(
         TextButton(
-            child: Text(lang.reset.toUpperCase()), onPressed: (() => resetPassword(data))),
+            child: Text(lang.reset.toUpperCase()),
+            onPressed: (() => resetPassword(data))),
       ),
       DataCell(
         TextButton(
-          child: Text(lang.delete.toUpperCase()),
+          child: Text(
+            lang.delete.toUpperCase(),
+            style: TextStyle(color: Colors.red),
+          ),
           onPressed: () {
             deleteConfirmation(data.id);
           },
@@ -117,38 +121,22 @@ class AssistantTableWidgetState extends BasicState<AssistantTableWidget>
   @override
   List<Subject> get subjects => [];
   void deleteConfirmation(String assistantId) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(lang.confirm),
-        content: Text(lang.confirmDelete),
-        actions: <Widget>[
-          TextButton(
-            child: Text(lang.no.toUpperCase()),
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          TextButton(
-            child: Text(lang.yes.toUpperCase()),
-            onPressed: (() => delete(assistantId)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void delete(String assistantId) async {
-    progressSubject.add(true);
-    try {
-      await service.deleteAssistant(assistantId);
-      Navigator.of(context).pop(false);
-      widget.tableKey?.currentState?.refreshPage();
-      showSnackBar2(context, lang.deletedSuccessfully);
-    } catch (error, stacktrace) {
-      showServerError(context, error: error);
-      print(stacktrace);
-    } finally {
-      progressSubject.add(false);
-    }
+    WidgetMixin.confirmDelete(context)
+        .asStream()
+        .where((event) => event == true)
+        .listen((_) async {
+      progressSubject.add(true);
+      try {
+        await service.deleteAssistant(assistantId);
+        widget.tableKey?.currentState?.refreshPage();
+        showSnackBar2(context, lang.deletedSuccessfully);
+      } catch (error, stacktrace) {
+        showServerError(context, error: error);
+        print(stacktrace);
+      } finally {
+        progressSubject.add(false);
+      }
+    });
   }
 
   void editAssistant(BuildContext context, Admin assistant) async {
