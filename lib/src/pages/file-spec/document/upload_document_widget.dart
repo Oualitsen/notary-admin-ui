@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:rxdart/rxdart.dart';
@@ -108,37 +109,26 @@ class _UploadDocumentsWidgetState extends BasicState<UploadDocumentsWidget>
   }
 
   _delete(int index) {
-    showDialog(
-        context: context,
-        builder: (BuildContext) => AlertDialog(
-              title: Text(lang.confirm),
-              content: Text(lang.confirmDelete),
-              actions: [
-                TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(false);
-                    },
-                    child: Text(lang.no.toUpperCase())),
-                TextButton(
-                    onPressed: () {
-                      var pathDoc = DocumentUploadInfos(
-                        idParts: widget.pathDocuments[index].idParts,
-                        idDocument: widget.pathDocuments[index].idDocument,
-                        document: null,
-                        selected: false,
-                        namePickedDocument: null,
-                        nameDocument: widget.pathDocuments[index].nameDocument,
-                        path: null,
-                      );
-                      var list = pathDocumentsStream.value;
-                      list.removeAt(index);
-                      list.insert(index, pathDoc);
-                      pathDocumentsStream.add(list);
-                      Navigator.of(context).pop(true);
-                    },
-                    child: Text(lang.confirm.toUpperCase())),
-              ],
-            ));
+    WidgetMixin.confirmDelete(context)
+        .asStream()
+        .where((event) => event == true)
+        .listen(
+      (_) {
+        var pathDoc = DocumentUploadInfos(
+          idParts: widget.pathDocuments[index].idParts,
+          idDocument: widget.pathDocuments[index].idDocument,
+          document: null,
+          selected: false,
+          namePickedDocument: null,
+          nameDocument: widget.pathDocuments[index].nameDocument,
+          path: null,
+        );
+        var list = pathDocumentsStream.value;
+        list.removeAt(index);
+        list.insert(index, pathDoc);
+        pathDocumentsStream.add(list);
+      },
+    );
   }
 
   pickFile(int index) async {

@@ -4,9 +4,6 @@ import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/pages/customer/add_customer_page.dart';
 import 'package:notary_admin/src/pages/customer/customer_table_widget.dart';
 import 'package:notary_admin/src/pages/search/search_widget.dart';
-
-import 'package:notary_admin/src/pages/html/quil_html_editor.dart';
-
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';

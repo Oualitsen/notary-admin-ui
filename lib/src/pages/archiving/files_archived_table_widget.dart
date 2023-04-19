@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -10,7 +9,10 @@ import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/db_services/token_db_service.dart';
 import 'package:notary_admin/src/init.dart';
 import 'package:notary_admin/src/pages/customer/customer_selection_dialog.dart';
-import 'package:notary_admin/src/pages/pdf/pdf_images.dart';
+import 'package:notary_admin/src/pages/download/docx_file_reader_page.dart';
+import 'package:notary_admin/src/pages/download/pdf_images.dart';
+import 'package:notary_admin/src/pages/download/read_download_documents_page.dart';
+import 'package:notary_admin/src/pages/download/txt_file_reader_page.dart';
 import 'package:notary_admin/src/pages/search/date_range_picker_widget.dart';
 import 'package:notary_admin/src/pages/search/search_filter_table_widget.dart';
 import 'package:notary_admin/src/services/files/files_archive_service.dart';
@@ -19,7 +21,6 @@ import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/files_archive.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:http/http.dart' as http;
 import 'package:universal_html/html.dart' as html;
@@ -94,9 +95,7 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
       child: Column(
         children: [
           StreamBuilder<SearchParams2>(
-
               stream: searchValueStream,
-
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return SizedBox.shrink();
@@ -104,7 +103,6 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
                 return SearchFilterTableWidget(
                   searchParam: snapshot.data!,
                   onSearchParamsChanged: (p0) {
-
                     searchValueStream.add(p0);
                   },
                 );
@@ -116,7 +114,6 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
             dataToRow: dataToRow,
             sortAscending: true,
             key: widget.tableKey,
-
           ),
         ],
       ),
@@ -126,10 +123,8 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
   Future<List<FilesArchive>> getData(PageInfo page) {
     try {
       {
-
         var params = WidgetMixin.getParams(searchValueStream.value);
         if (params != null) {
-
           return archiveService.searchFilesArchive(
             number: params.number,
             filesSpecName: params.fileSpecName,
@@ -152,10 +147,8 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
 
   Future<int> getTotal() {
     try {
-
       var params = WidgetMixin.getParams(searchValueStream.value);
       if (params != null) {
-
         return archiveService.countSearchFilesArchive(
           number: params.number,
           filesSpecName: params.fileSpecName,
@@ -191,7 +184,10 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
       DataCell(
         TextButton(
           onPressed: () => deleteFiles(data),
-          child: Text(lang.delete.toUpperCase()),
+          child: Text(
+            lang.delete.toUpperCase(),
+            style: TextStyle(color: Colors.red),
+          ),
         ),
       ),
     ];
@@ -221,32 +217,21 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
   }
 
   deleteFiles(FilesArchive data) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(lang.confirm),
-        content: Text(lang.confirmDelete),
-        actions: <Widget>[
-          TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              child: Text(lang.no.toUpperCase())),
-          TextButton(
-              onPressed: () async {
-                try {
-                  await archiveService.delete(data.id);
-                } catch (error, stacktrace) {
-                  showServerError(context, error: error);
-                  print(stacktrace);
-                }
-                Navigator.of(context).pop(true);
-                widget.tableKey.currentState?.refreshPage();
-                await showSnackBar2(context, lang.delete);
-              },
-              child: Text(lang.yes.toUpperCase())),
-        ],
-      ),
+    WidgetMixin.confirmDelete(context)
+        .asStream()
+        .where((event) => event == true)
+        .listen(
+      (_) async {
+        try {
+          await archiveService.delete(data.id);
+        } catch (error, stacktrace) {
+          showServerError(context, error: error);
+          print(stacktrace);
+        }
+        Navigator.of(context).pop(true);
+        widget.tableKey.currentState?.refreshPage();
+        await showSnackBar2(context, lang.delete);
+      },
     );
   }
 
@@ -285,60 +270,68 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
   }
 
   downloadDocument(String name, String id) async {
-    if (name.endsWith(".pdf")) {
-      try {
-        var imageIds = await pdfService.getPdfImages(id);
-        push(context, PdfImages(name: name, id: id, imageIds: imageIds));
-      } catch (error, stacktrace) {
-        print(stacktrace);
-        showServerError(context, error: error);
-        throw error;
-      }
-    } else {
-      String? authToken = await tokenService.getToken();
-      final response = await http.get(
-        Uri.parse("${getUrlBase()}/admin/grid/download/${id}"),
-        headers: {"Authorization": "Bearer $authToken"},
-      );
-      final bytes = response.bodyBytes;
-
-      if (kIsWeb) {
-        final content = base64Encode(bytes);
-        final anchor = html.AnchorElement(
-            href:
-                "data:application/octet-stream;charset=utf-16le;base64,$content")
-          ..setAttribute("download", name)
-          ..click();
-      } else {
-        saveBytesToFile(bytes);
-      }
-    }
-  }
-
-  Future<void> saveBytesToFile(List<int> bytes) async {
-    var status = await Permission.storage.request();
-    if (status.isGranted) {
-      await FilePicker.platform.getDirectoryPath(
-        dialogTitle: lang.directoryDialog,
-      );
-    } else {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(lang.permissionDenied),
-          content: Text(lang.permissionText),
-          actions: [
-            getButtons(
-              saveLabel: lang.openSettings,
-              onSave: () {
-                openAppSettings();
-                Navigator.of(context).pop();
-              },
-            )
-          ],
-        ),
-      );
-    }
+    push(context, ReadAndDownloadDocumentsPage(id: id, name: name));
+    // var extension = name.split('.').last;
+    // final imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+    // if (imageExtensions.contains(extension)) {
+    //   push(
+    //       context,
+    //       ImagePage(
+    //         title: name,
+    //         token: authToken!,
+    //         imageId: id,
+    //       ));
+    // } else {
+    //   switch (extension) {
+    //     case "pdf":
+    //       {
+    //         try {
+    //           var imageIds = await pdfService.getPdfImages(id);
+    //           push(context, PdfImages(name: name, id: id, imageIds: imageIds));
+    //         } catch (error, stacktrace) {
+    //           print(stacktrace);
+    //           showServerError(context, error: error);
+    //           throw error;
+    //         }
+    //       }
+    //       break;
+    //     case "docx":
+    //       push(
+    //           context,
+    //           MyDocxFileReader(
+    //             title: name,
+    //             id: id,
+    //             isDocx: true,
+    //           ));
+    //       break;
+    //     case "txt":
+    //       push(
+    //           context,
+    //           MyByteFileReader(
+    //             title: name,
+    //             bytes: bytes,
+    //           ));
+    //       break;
+    //     case "html":
+    //       push(
+    //           context,
+    //           MyDocxFileReader(
+    //             title: name,
+    //             id: id,
+    //             bytes: bytes,
+    //           ));
+    //       break;
+    //     default:
+    //       WidgetMixin.download(
+    //         context,
+    //         uri: "",
+    //         name: name,
+    //         myBytes: bytes,
+    //         token: authToken,
+    //       );
+    //       break;
+    //   }
+    // }
   }
 
   List<DataColumn> getColumns() {
@@ -444,24 +437,5 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
             onTap: () => searchFilterStream.add(filter),
           );
         });
-  }
-
-  SearchParams _getParams(SearchParams2 searchParam2) {
-    var startDate = -1;
-    var endDate = -1;
-    if (searchParam2.range.startDate != null) {
-      startDate = searchParam2.range.startDate!.millisecondsSinceEpoch;
-    }
-    if (searchParam2.range.endDate != null) {
-      endDate = searchParam2.range.endDate!.millisecondsSinceEpoch;
-    }
-    var searchParams = SearchParams(
-      number: searchParam2.number,
-      fileSpecName: searchParam2.fileSpecName,
-      customerIds: searchParam2.customers.map((e) => e.id).join(","),
-      startDate: startDate,
-      endDate: endDate,
-    );
-    return searchParams;
   }
 }

@@ -8,9 +8,12 @@ abstract class PdfService {
   factory PdfService(Dio dio) = _PdfService;
 
   @POST("/admin/pdf/image/rotate/{imageId}")
-  Future<void> rotateImage(
+  Future<String> rotateImage(
       @Path("imageId") String imageId, @Query("angle") double angle);
 
   @GET("/admin/pdf/image/ids/{pdfId}")
   Future<List<String>> getPdfImages(@Path("pdfId") String pdfId);
+
+  @GET("/admin/pdf/docx/{docxId}")
+  Future<String> wordToHtml(@Path("docxId") String docxId);
 }

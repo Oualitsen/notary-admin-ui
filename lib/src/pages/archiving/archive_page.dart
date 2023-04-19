@@ -9,6 +9,7 @@ import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
+import 'package:notary_model/model/files_archive.dart';
 import 'package:rxdart/subjects.dart';
 
 class ArchivePage extends StatefulWidget {
@@ -86,11 +87,16 @@ class _ArchivePageState extends BasicState<ArchivePage> with WidgetUtilsMixin {
             ),
             SizedBox(width: 5),
             ElevatedButton(
-              onPressed: (() => push(
-                  context,
-                  AddArchivePage(
-                    initDate: DateTime(_selectedYearStream.value),
-                  ))),
+              onPressed: (() => push<FilesArchive?>(
+                    context,
+                    AddArchivePage(
+                      initDate: DateTime(_selectedYearStream.value),
+                    ),
+                  ).listen((event) {
+                    if (event != null) {
+                      tableKey.currentState?.refreshPage();
+                    }
+                  })),
               child: Text(lang.addArchive.toUpperCase()),
             )
           ],

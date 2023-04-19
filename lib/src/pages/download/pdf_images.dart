@@ -7,11 +7,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_it/get_it.dart';
+import 'package:http_error_handler/error_handler.dart';
 import 'package:notary_admin/src/db_services/token_db_service.dart';
 import 'package:notary_admin/src/init.dart';
-import 'package:notary_admin/src/pages/pdf/image_widget.dart';
+import 'package:notary_admin/src/pages/download/image_widget.dart';
 import 'package:notary_admin/src/services/files/files_archive_service.dart';
-import 'package:notary_admin/src/utils/widget_utils.dart';
+import 'package:notary_admin/src/services/files/pdf_service.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -23,12 +24,13 @@ import 'package:universal_html/html.dart' as html;
 class PdfImages extends StatefulWidget {
   final String name;
   final String id;
-  final List<String> imageIds;
-  const PdfImages(
-      {super.key,
-      required this.name,
-      required this.id,
-      required this.imageIds});
+  final Function(List<String> imageIds) onImageIdsChange;
+  const PdfImages({
+    super.key,
+    required this.name,
+    required this.id,
+    required this.onImageIdsChange,
+  });
 
   @override
   State<PdfImages> createState() => _PdfImagesState();
@@ -36,63 +38,61 @@ class PdfImages extends StatefulWidget {
 
 class _PdfImagesState extends BasicState<PdfImages> with WidgetUtilsMixin {
   final archiveService = GetIt.instance.get<FilesArchiveService>();
+  final pdfService = GetIt.instance.get<PdfService>();
+
   final tokenService = GetIt.instance.get<TokenDbService>();
-
-  late List<ImageRotationInfo> imageRotationInfo;
+  final imageIdsStream = BehaviorSubject.seeded(<String>[]);
   bool initialize = false;
-
-  init() {
+  final scrollController = ScrollController();
+  double scrollPosition = 0.0;
+  init() async {
     if (initialize) return;
     initialize = true;
-
-    imageRotationInfo =
-        widget.imageIds.map((id) => ImageRotationInfo(id, 0)).toList();
+    await getImageIds();
+    imageIdsStream.listen((value) {
+      widget.onImageIdsChange(value);
+    });
+    scrollController.addListener(() {
+      scrollPosition = scrollController.position.pixels;
+      // ...
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     init();
-    return WidgetUtils.wrapRoute(
-      (context, type) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Text("${widget.name}"),
-            actions: [
-              ElevatedButton.icon(
-                  icon: Icon(Icons.download),
-                  onPressed: (() => downloadPdf(widget.id)),
-                  label: Text(lang.download.toUpperCase())),
-            ],
-          ),
-          body: StreamBuilder<String>(
-            stream:
-                tokenService.getToken().asStream().map((event) => event ?? ""),
-            builder: (context, snapshot) {
-              var token = snapshot.data;
-              if (token == null) {
-                return SizedBox.shrink();
-              }
-              return SingleChildScrollView(
-                child: Center(
-                  child: Column(
+    return StreamBuilder<String>(
+      stream: tokenService.getToken().asStream().map((event) => event ?? ""),
+      builder: (context, snapshot) {
+        var token = snapshot.data;
+        if (token == null) {
+          return SizedBox.shrink();
+        }
+        return SingleChildScrollView(
+          controller: scrollController,
+          child: Center(
+            child: StreamBuilder<List<String>>(
+                stream: imageIdsStream,
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return SizedBox.shrink();
+                  }
+                  scrollController.jumpTo(scrollPosition);
+                  return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: widget.imageIds.map(
+                    children: snapshot.data!.map(
                       (id) {
                         return ImageWidget(
                           imageId: id,
                           token: token,
-                          onAngleChanged: (angle) {
-                            var index = imageRotationInfo
-                                .indexWhere((element) => element.id == id);
-                            imageRotationInfo[index].angle = angle;
+                          onAngleChanged: (imageId) {
+                            imageIdsStream.add(imageIdsStream.value);
                           },
                         );
                       },
                     ).toList(),
-                  ),
-                ),
-              );
-            },
+                  );
+                }),
           ),
         );
       },
@@ -109,9 +109,9 @@ class _PdfImagesState extends BasicState<PdfImages> with WidgetUtilsMixin {
         "Authorization": "Bearer $authToken",
         HttpHeaders.contentTypeHeader: 'application/json',
       },
-      body: json.encode(widget.imageIds),
+      body: json.encode(imageIdsStream.value),
     );
-    final bytes = response.bodyBytes;
+    Uint8List bytes = response.bodyBytes;
     if (kIsWeb) {
       final content = base64Encode(bytes);
       html.AnchorElement(
@@ -173,10 +173,15 @@ class _PdfImagesState extends BasicState<PdfImages> with WidgetUtilsMixin {
 
   @override
   List<Subject> get subjects => [];
-}
 
-class ImageRotationInfo {
-  String id;
-  double angle;
-  ImageRotationInfo(this.id, this.angle);
+  Future getImageIds() async {
+    try {
+      var imageIds = await pdfService.getPdfImages(widget.id);
+      imageIdsStream.add(imageIds);
+    } catch (error, stacktrace) {
+      print(stacktrace);
+      showServerError(context, error: error);
+      throw error;
+    }
+  }
 }

@@ -102,26 +102,6 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
                     isActive: activeState == 0,
                     state: getState(0),
                   ),
-                  Step(
-                    title: Row(
-                      children: [
-                        Text(lang.selectCustomer.toUpperCase()),
-                        SizedBox(width: 20),
-                        ButtonBar(
-                          children: [
-                            ElevatedButton(
-                              onPressed:
-                                  snapshot.data == 1 ? selectCustomers : null,
-                              child: Icon(Icons.add),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    content: selectCustomersWidget(),
-                    isActive: activeState == 1,
-                    state: getState(1),
-                  ),
                   if (widget.files != null)
                     Step(
                       title: Text(lang.listDocumentsFileSpec.toUpperCase()),
@@ -130,10 +110,13 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
                           getDocuments(),
                           SizedBox(height: 16),
                           getButtons(
-                            onSave: continued,
+                            onSave: (() {
+                              _currentStepStream
+                                  .add((_currentStepStream.value + 1));
+                            }),
                             onCancel: previous,
-                            cancelLabel: lang.previous,
-                            saveLabel: lang.next,
+                            cancelLabel: lang.previous.toUpperCase(),
+                            saveLabel: lang.next.toUpperCase(),
                           ),
                         ],
                       ),
@@ -143,19 +126,46 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
                   Step(
                     title: Row(
                       children: [
-                        Text(lang.additionalDocuments.toUpperCase()),
+                        Text(lang.scannedDocuments.toUpperCase()),
                         SizedBox(width: 20),
                         ButtonBar(children: [
                           ElevatedButton(
                             onPressed: widget.files != null
-                                ? (snapshot.data == 3 ? uploadTemplate : null)
-                                : (snapshot.data == 2 ? uploadTemplate : null),
+                                ? (snapshot.data == 2 ? uploadTemplate : null)
+                                : (snapshot.data == 1 ? uploadTemplate : null),
                             child: Icon(Icons.add_outlined),
                           ),
                         ]),
                       ],
                     ),
                     content: scannedDocumentWidget(),
+                    isActive: widget.files != null
+                        ? activeState == 2
+                        : activeState == 1,
+                    state: widget.files != null ? getState(2) : getState(1),
+                  ),
+                  Step(
+                    title: Row(
+                      children: [
+                        Text(lang.selectCustomer.toUpperCase()),
+                        SizedBox(width: 20),
+                        ButtonBar(
+                          children: [
+                            ElevatedButton(
+                              onPressed: widget.files != null
+                                  ? (snapshot.data == 3
+                                      ? selectCustomers
+                                      : null)
+                                  : (snapshot.data == 2
+                                      ? selectCustomers
+                                      : null),
+                              child: Icon(Icons.add),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    content: selectCustomersWidget(),
                     isActive: widget.files != null
                         ? activeState == 3
                         : activeState == 2,
@@ -179,26 +189,8 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
   }
 
   continued() async {
-    var value = _currentStepStream.value;
-
-    switch (value) {
-      case 0:
-        if (_selectFileSpecKey.currentState?.validate() ?? false) {
-          _currentStepStream.add(_currentStepStream.value + 1);
-        }
-        break;
-
-      case 1:
-        if (customersStream.value.isNotEmpty) {
-          _currentStepStream.add(_currentStepStream.value + 1);
-        }
-        break;
-
-      case 2:
-        if (widget.files != null) {
-          _currentStepStream.add(_currentStepStream.value + 1);
-        }
-        break;
+    if (_selectFileSpecKey.currentState?.validate() ?? false) {
+      _currentStepStream.add(_currentStepStream.value + 1);
     }
   }
 
@@ -214,8 +206,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
   void save() async {
     try {
       progressSubject.add(true);
-      if (_selectFileSpecKey.currentState!.validate() &&
-          customersStream.value.isNotEmpty) {
+      if (_selectFileSpecKey.currentState!.validate()) {
         var uploadedList = <String>[];
         if (widget.files != null) {
           uploadedList = documentsInfolist.map((e) => e.id).toList();
@@ -299,28 +290,28 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
         initialCustomers: customersStream.value,
         onSave: (selectedCustomer) {
           customersStream.add(selectedCustomer);
-
-          Navigator.of(context).pop();
         },
       ),
     );
   }
 
   void uploadTemplate() async {
-    var pickedFile = await FilePicker.platform.pickFiles();
-    if (pickedFile != null) {
-      var path = null;
-      if (!kIsWeb) {
-        path = pickedFile.files.first.path;
+    var pickedFiles = await FilePicker.platform.pickFiles(allowMultiple: true);
+    if (pickedFiles != null) {
+      for (var pickedFile in pickedFiles.files) {
+        var path = null;
+        if (!kIsWeb) {
+          path = pickedFile.path;
+        }
+        var data = UploadData(
+          data: pickedFile.bytes,
+          name: pickedFile.name,
+          path: path,
+        );
+        var list = scannedDocumentsStream.value;
+        list.add(data);
+        scannedDocumentsStream.add(list);
       }
-      var data = UploadData(
-        data: pickedFile.files.first.bytes,
-        name: pickedFile.files.first.name,
-        path: path,
-      );
-      var list = scannedDocumentsStream.value;
-      list.add(data);
-      scannedDocumentsStream.add(list);
     }
   }
 
@@ -412,7 +403,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
     }
     for (var i = 0; i < widget.files!.additionalDocumentIds.length; i++) {
       documentsInfolist.add(DocumentsInfo(
-          name: "${lang.additionalDocuments} ${(i + 1)}",
+          name: "${lang.scannedDocuments} ${(i + 1)}",
           id: widget.files!.additionalDocumentIds[i]));
     }
     var index = -1;
@@ -473,7 +464,9 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
                 }),
             SizedBox(height: 16),
             getButtons(
-                onSave: continued, skipCancel: true, saveLabel: lang.next)
+                onSave: continued,
+                skipCancel: true,
+                saveLabel: lang.next.toUpperCase())
           ],
         ));
   }
@@ -495,10 +488,11 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
             }),
         SizedBox(height: 16),
         getButtons(
-            onSave: continued,
-            onCancel: previous,
-            saveLabel: lang.next,
-            cancelLabel: lang.previous),
+          onSave: save,
+          onCancel: previous,
+          saveLabel: lang.submit.toUpperCase(),
+          cancelLabel: lang.previous.toUpperCase(),
+        ),
       ],
     );
   }
@@ -551,10 +545,14 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
             }).toList()),
             SizedBox(height: 16),
             getButtons(
-                onSave: scannedDocumentsStream.value.isNotEmpty ? save : null,
+                onSave: scannedDocumentsStream.value.isNotEmpty
+                    ? (() {
+                        _currentStepStream.add((_currentStepStream.value + 1));
+                      })
+                    : null,
                 onCancel: previous,
-                saveLabel: lang.submit,
-                cancelLabel: lang.previous),
+                saveLabel: lang.next.toUpperCase(),
+                cancelLabel: lang.previous.toUpperCase()),
           ],
         );
       },

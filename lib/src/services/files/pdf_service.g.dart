@@ -19,7 +19,7 @@ class _PdfService implements PdfService {
   String? baseUrl;
 
   @override
-  Future<void> rotateImage(
+  Future<String> rotateImage(
     imageId,
     angle,
   ) async {
@@ -27,7 +27,7 @@ class _PdfService implements PdfService {
     final queryParameters = <String, dynamic>{r'angle': angle};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
-    await _dio.fetch<void>(_setStreamType<void>(Options(
+    final _result = await _dio.fetch<String>(_setStreamType<String>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
@@ -39,7 +39,8 @@ class _PdfService implements PdfService {
           data: _data,
         )
         .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
-    return null;
+    final value = _result.data!;
+    return value;
   }
 
   @override
@@ -62,6 +63,28 @@ class _PdfService implements PdfService {
             )
             .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
     final value = _result.data!.cast<String>();
+    return value;
+  }
+
+  @override
+  Future<String> wordToHtml(docxId) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.fetch<String>(_setStreamType<String>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          '/admin/pdf/docx/${docxId}',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = _result.data!;
     return value;
   }
 

@@ -1,7 +1,4 @@
-import 'package:notary_admin/src/pages/assistant/list_assistant_page.dart';
-import 'package:notary_admin/src/pages/customer/list_customer_page.dart';
 import 'package:notary_admin/src/pages/files/download_file.dart';
-import 'package:notary_admin/src/pages/files/list_files_customer.dart';
 import 'package:notary_admin/src/pages/assistant/assistant_page.dart';
 import 'package:notary_admin/src/pages/customer/customer_page.dart';
 import 'package:notary_admin/src/pages/file-spec/file_spec_page.dart';
@@ -13,8 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_responsive_tools/device_screen_type.dart';
 import 'package:get_it/get_it.dart';
 import 'package:notary_admin/src/db_services/token_db_service.dart';
-import 'package:notary_admin/src/pages/range_input_widget.dart';
-import 'package:notary_admin/src/pages/step_group/step_group_page.dart';
 import 'package:notary_admin/src/pages/steps/steps_page.dart';
 import 'package:notary_admin/src/pages/templates/load_template.dart';
 import 'package:notary_admin/src/pages/archiving/archive_page.dart';

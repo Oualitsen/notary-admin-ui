@@ -220,7 +220,7 @@
   "editContract": "Edit contract",
   "editHolidays": "Edit holidays",
   "pleaseConfirm": " Please confirm",
-  "confirmDelete": "Are you sure you want to delete this item?",
+  "confirmDelete": "Do you want to delete this item ?",
   "createAnIntervention": "Create an Intervention",
   "isProCardRequired": "ProCard Required",
   "editPlanification": "Edit planification",
@@ -334,11 +334,11 @@
   "completeTemplate": "Complete template",
   "noTemplateInstance": "No Document Generated",
   "additionalDocuments": "Additional documents",
-  "lowerBound" : "Lower Bound",
-  "upperBound" :"Upper bound",
-  "name":"Name",
-  "value":"Value",
-  "percentage":"Percentage",
+  "lowerBound": "Lower Bound",
+  "upperBound": "Upper bound",
+  "name": "Name",
+  "value": "Value",
+  "percentage": "Percentage",
   "addDocumentsSpec": "Add documents",
   "part": "Part",
   "listPart": "Parts",
@@ -354,6 +354,8 @@
   "openSettings": "Open settings",
   "rotateLeft": "Rotate Left",
   "rotateRight": "Rotate Right",
-  "selectDateRange": "Select a date range"
-
+  "selectDateRange": "Select a date range",
+  "scannedDocuments": "Scanned documents",
+  "pleaseWait": "Please wait",
+  "noDataFound": "No Data Found"
 }

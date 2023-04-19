@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
+import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/widgets/widget_roles.dart';
 import 'package:notary_admin/src/pages/templates/html_editor_template.dart';
 import 'package:notary_admin/src/pages/templates/upload_template.dart';
@@ -166,32 +167,20 @@ class _LoadTemplatePageState extends BasicState<LoadTemplatePage>
         ).then((value) => key.currentState?.reload());
       }
       if (value == items[2]) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text(lang.confirm),
-            content: Text(lang.confirmDelete),
-            actions: <Widget>[
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(false);
-                  },
-                  child: Text(lang.no.toUpperCase())),
-              TextButton(
-                  onPressed: () async {
-                    try {
-                      await service.delete(template.id);
-                      key.currentState?.reload();
-                      showSnackBar2(context, lang.deletedSuccessfully);
-                      Navigator.of(context).pop(false);
-                    } catch (error, stackTrace) {
-                      print(stackTrace);
-                      showServerError(context, error: error);
-                    }
-                  },
-                  child: Text(lang.yes.toUpperCase())),
-            ],
-          ),
+        WidgetMixin.confirmDelete(context)
+            .asStream()
+            .where((event) => event == true)
+            .listen(
+          (_) async {
+            try {
+              await service.delete(template.id);
+              key.currentState?.reload();
+              showSnackBar2(context, lang.deletedSuccessfully);
+            } catch (error, stackTrace) {
+              print(stackTrace);
+              showServerError(context, error: error);
+            }
+          },
         );
       }
     }

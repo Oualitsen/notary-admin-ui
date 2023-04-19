@@ -119,7 +119,10 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
       DataCell(
         TextButton(
           onPressed: () => deleteFileSpec(data),
-          child: Text(lang.delete.toUpperCase()),
+          child: Text(
+            lang.delete.toUpperCase(),
+            style: TextStyle(color: Colors.red),
+          ),
         ),
       ),
     ];
@@ -169,32 +172,20 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
   }
 
   deleteFileSpec(FilesSpec data) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(lang.confirm),
-        content: Text(lang.confirmDelete),
-        actions: <Widget>[
-          TextButton(
-            child: Text(lang.no.toUpperCase()),
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          TextButton(
-            child: Text(lang.yes.toUpperCase()),
-            onPressed: () async {
-              try {
-                await service.deleteFileSpec(data.id);
-                Navigator.of(context).pop(true);
-                widget.tableKey?.currentState?.refreshPage();
-                await showSnackBar2(context, lang.delete);
-              } catch (error, stacktrace) {
-                showServerError(context, error: error);
-                print(stacktrace);
-              }
-            },
-          ),
-        ],
-      ),
+    WidgetMixin.confirmDelete(context)
+        .asStream()
+        .where((event) => event == true)
+        .listen(
+      (_) async {
+        try {
+          await service.deleteFileSpec(data.id);
+          widget.tableKey?.currentState?.refreshPage();
+          await showSnackBar2(context, lang.delete);
+        } catch (error, stacktrace) {
+          showServerError(context, error: error);
+          print(stacktrace);
+        }
+      },
     );
   }
 

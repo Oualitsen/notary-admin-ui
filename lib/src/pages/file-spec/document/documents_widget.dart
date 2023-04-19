@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:notary_admin/src/utils/widget_mixin_new.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/document_spec_input.dart';
@@ -59,8 +60,10 @@ class _DocumentsWidgetState extends BasicState<DocumentsWidget>
                     ? TextButton(
                         onPressed: () async =>
                             await deleteDocument(docSpec, index),
-                        child: Text(lang.delete.toUpperCase()),
-
+                        child: Text(
+                          lang.delete.toUpperCase(),
+                          style: TextStyle(color: Colors.red),
+                        ),
                       )
                     : null,
               );
@@ -91,31 +94,19 @@ class _DocumentsWidgetState extends BasicState<DocumentsWidget>
   @override
   List<Subject> get subjects => [];
 
-  Future deleteDocument(DocumentSpecInput documentSpecInput, int index) {
-    return showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(lang.confirm),
-        content: Text(lang.confirmDelete),
-        actions: <Widget>[
-          TextButton(
-            child: Text(lang.no.toUpperCase()),
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          TextButton(
-            child: Text(lang.yes.toUpperCase()),
-            onPressed: () async {
-              var list = documentListStream.value;
-              list.removeAt(index);
-              documentListStream.add(list);
-              if (widget.onChanged != null) {
-                widget.onChanged!(documentListStream.value);
-              }
-              Navigator.of(context).pop(true);
-            },
-          )
-        ],
-      ),
+  deleteDocument(DocumentSpecInput documentSpecInput, int index) {
+    WidgetMixin.confirmDelete(context)
+        .asStream()
+        .where((event) => event == true)
+        .listen(
+      (_) async {
+        var list = documentListStream.value;
+        list.removeAt(index);
+        documentListStream.add(list);
+        if (widget.onChanged != null) {
+          widget.onChanged!(documentListStream.value);
+        }
+      },
     );
   }
 }

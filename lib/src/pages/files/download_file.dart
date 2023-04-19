@@ -25,8 +25,8 @@ class _DowloadFileState extends BasicState<DowloadFile> with WidgetUtilsMixin {
   }
 
   @override
-  List<ChangeNotifier> get notifiers => throw UnimplementedError();
+  List<ChangeNotifier> get notifiers => [];
 
   @override
-  List<Subject> get subjects => throw UnimplementedError();
+  List<Subject> get subjects => [];
 }
