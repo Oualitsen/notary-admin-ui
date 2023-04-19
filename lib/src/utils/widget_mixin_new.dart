@@ -205,20 +205,19 @@ class WidgetMixin {
         ]);
   }
 
-  static download(BuildContext context, String uri, String name,
-      [Uint8List? myBytes = null, String? token = null]) async {
+  static download(
+    BuildContext context, {
+    required String uri,
+    required String name,
+    Uint8List? myBytes = null,
+    String? token = null,
+  }) async {
     Map<String, String> headers = <String, String>{};
     var bytes = myBytes;
-    if (token != null) {
-      headers["Authorization"] = "Bearer $token";
-    }
+
     if (kIsWeb) {
       if (bytes == null) {
-        final response = await http.get(
-          Uri.parse("$uri"),
-          headers: headers,
-        );
-        bytes = response.bodyBytes;
+        bytes = await getBytes(token, uri);
       }
       final content = base64Encode(bytes);
       html.AnchorElement(
@@ -254,6 +253,23 @@ class WidgetMixin {
           ),
         );
       }
+    }
+  }
+
+  static Future<Uint8List> getBytes(String? token, String uri) async {
+    try {
+      Map<String, String> headers = <String, String>{};
+      if (token != null) {
+        headers["Authorization"] = "Bearer $token";
+      }
+      final response = await http.get(
+        Uri.parse("$uri"),
+        headers: headers,
+      );
+      return response.bodyBytes;
+    } catch (error, stacktrace) {
+      print("@@@ error: $stacktrace");
+      throw error;
     }
   }
 }

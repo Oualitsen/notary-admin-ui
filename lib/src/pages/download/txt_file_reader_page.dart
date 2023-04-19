@@ -60,7 +60,7 @@ class _MyByteFileReaderState extends BasicState<MyByteFileReader> {
   Future download() async {
     try {
       String? authToken = await tokenService.getToken();
-      WidgetMixin.download(context, "", widget.title, widget.bytes, authToken);
+      //  WidgetMixin.download(context, "", widget.title, widget.bytes, authToken);
     } catch (error, stacktrace) {
       print(stacktrace);
       showServerError(context, error: error);

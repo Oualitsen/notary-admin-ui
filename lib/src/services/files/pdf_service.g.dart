@@ -19,7 +19,7 @@ class _PdfService implements PdfService {
   String? baseUrl;
 
   @override
-  Future<void> rotateImage(
+  Future<String> rotateImage(
     imageId,
     angle,
   ) async {
@@ -27,7 +27,7 @@ class _PdfService implements PdfService {
     final queryParameters = <String, dynamic>{r'angle': angle};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
-    await _dio.fetch<void>(_setStreamType<void>(Options(
+    final _result = await _dio.fetch<String>(_setStreamType<String>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
@@ -39,7 +39,8 @@ class _PdfService implements PdfService {
           data: _data,
         )
         .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
-    return null;
+    final value = _result.data!;
+    return value;
   }
 
   @override

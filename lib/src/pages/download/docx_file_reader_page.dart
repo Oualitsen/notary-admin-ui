@@ -110,7 +110,13 @@ class _MyDocxFileReaderState extends BasicState<MyDocxFileReader> {
     try {
       String? authToken = await tokenService.getToken();
       String uri = "${getUrlBase()}/admin/grid/download/${widget.id}";
-      WidgetMixin.download(context, uri, widget.title, widget.bytes, authToken);
+      WidgetMixin.download(
+        context,
+        uri: uri,
+        name: widget.title,
+        myBytes: widget.bytes,
+        token: authToken,
+      );
     } catch (error, stacktrace) {
       print(stacktrace);
       showServerError(context, error: error);

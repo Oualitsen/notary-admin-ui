@@ -9,10 +9,10 @@ import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/db_services/token_db_service.dart';
 import 'package:notary_admin/src/init.dart';
 import 'package:notary_admin/src/pages/customer/customer_selection_dialog.dart';
-import 'package:notary_admin/src/pages/pdf/docx_file_reader_page.dart';
-import 'package:notary_admin/src/pages/pdf/image_page.dart';
-import 'package:notary_admin/src/pages/pdf/pdf_images.dart';
-import 'package:notary_admin/src/pages/pdf/txt_file_reader_page.dart';
+import 'package:notary_admin/src/pages/download/docx_file_reader_page.dart';
+import 'package:notary_admin/src/pages/download/pdf_images.dart';
+import 'package:notary_admin/src/pages/download/read_download_documents_page.dart';
+import 'package:notary_admin/src/pages/download/txt_file_reader_page.dart';
 import 'package:notary_admin/src/pages/search/date_range_picker_widget.dart';
 import 'package:notary_admin/src/pages/search/search_filter_table_widget.dart';
 import 'package:notary_admin/src/services/files/files_archive_service.dart';
@@ -270,60 +270,68 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
   }
 
   downloadDocument(String name, String id) async {
-    var extension = name.split('.').last;
-
-    if (extension == "pdf") {
-      try {
-        var imageIds = await pdfService.getPdfImages(id);
-        push(context, PdfImages(name: name, id: id, imageIds: imageIds));
-      } catch (error, stacktrace) {
-        print(stacktrace);
-        showServerError(context, error: error);
-        throw error;
-      }
-    } else if (extension == "docx") {
-      push(
-          context,
-          MyDocxFileReader(
-            title: name,
-            id: id,
-            isDocx: true,
-          ));
-    } else {
-      String? authToken = await tokenService.getToken();
-      final imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
-      final response = await http.get(
-        Uri.parse("${getUrlBase()}/admin/grid/download/${id}"),
-        headers: {"Authorization": "Bearer $authToken"},
-      );
-      final bytes = response.bodyBytes;
-      if (name.endsWith(".txt")) {
-        push(
-            context,
-            MyByteFileReader(
-              title: name,
-              bytes: bytes,
-            ));
-      } else if (imageExtensions.contains(extension)) {
-        push(
-            context,
-            ImagePage(
-              title: name,
-              token: authToken!,
-              imageId: id,
-            ));
-      } else if (name.endsWith(".html")) {
-        push(
-            context,
-            MyDocxFileReader(
-              title: name,
-              id: id,
-              bytes: bytes,
-            ));
-      } else {
-        WidgetMixin.download(context, "", name, bytes, authToken);
-      }
-    }
+    push(context, ReadAndDownloadDocumentsPage(id: id, name: name));
+    // var extension = name.split('.').last;
+    // final imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+    // if (imageExtensions.contains(extension)) {
+    //   push(
+    //       context,
+    //       ImagePage(
+    //         title: name,
+    //         token: authToken!,
+    //         imageId: id,
+    //       ));
+    // } else {
+    //   switch (extension) {
+    //     case "pdf":
+    //       {
+    //         try {
+    //           var imageIds = await pdfService.getPdfImages(id);
+    //           push(context, PdfImages(name: name, id: id, imageIds: imageIds));
+    //         } catch (error, stacktrace) {
+    //           print(stacktrace);
+    //           showServerError(context, error: error);
+    //           throw error;
+    //         }
+    //       }
+    //       break;
+    //     case "docx":
+    //       push(
+    //           context,
+    //           MyDocxFileReader(
+    //             title: name,
+    //             id: id,
+    //             isDocx: true,
+    //           ));
+    //       break;
+    //     case "txt":
+    //       push(
+    //           context,
+    //           MyByteFileReader(
+    //             title: name,
+    //             bytes: bytes,
+    //           ));
+    //       break;
+    //     case "html":
+    //       push(
+    //           context,
+    //           MyDocxFileReader(
+    //             title: name,
+    //             id: id,
+    //             bytes: bytes,
+    //           ));
+    //       break;
+    //     default:
+    //       WidgetMixin.download(
+    //         context,
+    //         uri: "",
+    //         name: name,
+    //         myBytes: bytes,
+    //         token: authToken,
+    //       );
+    //       break;
+    //   }
+    // }
   }
 
   List<DataColumn> getColumns() {
