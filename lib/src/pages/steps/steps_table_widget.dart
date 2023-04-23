@@ -4,7 +4,7 @@ import 'package:http_error_handler/error_handler.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/pages/steps/add_step_widget.dart';
 import 'package:notary_admin/src/services/admin/steps_service.dart';
-import 'package:notary_admin/src/utils/widget_mixin_new.dart';
+import 'package:notary_admin/src/utils/reused_widgets.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/step_input.dart';
@@ -91,7 +91,7 @@ class _StepsTableWidgetState extends BasicState<StepsTableWidget>
   List<Subject> get subjects => [];
 
   deleteSteps(String id) {
-    WidgetMixin.confirmDelete(context)
+    ReusedWidgets.confirmDelete(context)
         .asStream()
         .where((event) => event == true)
         .listen((_) async {

@@ -17,7 +17,7 @@ import 'package:rapidoc_utils/utils/Utils.dart';
 import 'package:http/http.dart' as http;
 import 'package:universal_html/html.dart' as html;
 
-class WidgetMixin {
+class ReusedWidgets {
   static Future<T?> showDialog2<T>(BuildContext context,
       {required String label,
       required Widget content,

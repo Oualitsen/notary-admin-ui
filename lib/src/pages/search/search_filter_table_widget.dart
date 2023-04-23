@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:notary_admin/src/pages/search/date_range_picker_widget.dart';
-import 'package:notary_admin/src/utils/widget_mixin_new.dart';
+import 'package:notary_admin/src/utils/reused_widgets.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/lang.dart';
 import 'package:notary_model/model/customer.dart';
@@ -130,7 +130,7 @@ class SearchFilterTableWidget extends StatelessWidget {
             ),
           ),
           SizedBox(width: 20),
-          WidgetMixin.getParams(searchParam) != null
+          ReusedWidgets.getParams(searchParam) != null
               ? ElevatedButton.icon(
                   onPressed: (() {
                     onSearchParamsChanged(
@@ -150,7 +150,6 @@ class SearchFilterTableWidget extends StatelessWidget {
       ),
     );
   }
-
 }
 
 class SearchParams2 {

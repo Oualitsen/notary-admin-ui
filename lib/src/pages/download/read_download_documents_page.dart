@@ -9,8 +9,9 @@ import 'package:notary_admin/src/db_services/token_db_service.dart';
 import 'package:notary_admin/src/init.dart';
 import 'package:notary_admin/src/pages/download/image_widget.dart';
 import 'package:notary_admin/src/pages/download/pdf_images.dart';
+import 'package:notary_admin/src/pages/printed_docs/printed_doc_view.dart';
 import 'package:notary_admin/src/services/files/pdf_service.dart';
-import 'package:notary_admin/src/utils/widget_mixin_new.dart';
+import 'package:notary_admin/src/utils/reused_widgets.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
@@ -18,7 +19,7 @@ import 'package:rxdart/src/subjects/subject.dart';
 import 'package:webviewx/webviewx.dart';
 import 'package:rxdart/src/subjects/behavior_subject.dart';
 import 'package:http/http.dart' as http;
-import 'package:universal_html/html.dart' as html;
+import 'package:pdf/widgets.dart' as pw;
 
 class ReadAndDownloadDocumentsPage extends StatefulWidget {
   final String id;
@@ -47,7 +48,6 @@ class _ReadAndDownloadDocumentsPageState
   WebViewXController? controllerWeb;
 
   late String uri;
-  late String extension;
   late String? token;
   late Uint8List? bytes;
   var initialized = false;
@@ -58,7 +58,7 @@ class _ReadAndDownloadDocumentsPageState
     uri = "${getUrlBase()}/admin/grid/download/${widget.id}";
     getExtension();
     token = await tokenService.getToken();
-    bytes = await WidgetMixin.getBytes(token, uri);
+    bytes = await ReusedWidgets.getBytes(token, uri);
   }
 
   @override
@@ -83,7 +83,7 @@ class _ReadAndDownloadDocumentsPageState
                     body: json.encode(imageIdsStream.value),
                   );
                   Uint8List byteList = response.bodyBytes;
-                  WidgetMixin.download(
+                  ReusedWidgets.download(
                     context,
                     uri: "",
                     name: widget.name,
@@ -91,7 +91,7 @@ class _ReadAndDownloadDocumentsPageState
                     token: token,
                   );
                 } else {
-                  WidgetMixin.download(
+                  ReusedWidgets.download(
                     context,
                     uri: uri,
                     name: widget.name,
@@ -102,6 +102,10 @@ class _ReadAndDownloadDocumentsPageState
               }),
               label: Text(lang.download),
               icon: Icon(Icons.download),
+            ),
+            ElevatedButton(
+              onPressed: (() async => await printDoc(context)),
+              child: Text(lang.print.toUpperCase()),
             ),
           ],
         ),
@@ -120,13 +124,23 @@ class _ReadAndDownloadDocumentsPageState
   Widget extensionWidget(Extension extension) {
     switch (extension) {
       case Extension.IMAGE:
-        return SingleChildScrollView(
-          child: ImageWidget(
-            imageId: widget.id,
-            token: token!,
-            onAngleChanged: ((angle) => null),
-          ),
-        );
+        return StreamBuilder<List<String>>(
+            stream: imageIdsStream,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return SizedBox.shrink();
+              }
+
+              return SingleChildScrollView(
+                child: ImageWidget(
+                  imageId: widget.id,
+                  token: token!,
+                  onAngleChanged: (imageId) {
+                    imageIdsStream.add(imageIdsStream.value);
+                  },
+                ),
+              );
+            });
       case Extension.PDF:
         return PdfImages(
           name: widget.name,
@@ -147,18 +161,29 @@ class _ReadAndDownloadDocumentsPageState
         }
         final decodedContent = utf8.decode(bytes!);
         final lines = LineSplitter().convert(decodedContent);
-        return ListView.builder(
-          itemCount: lines.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Padding(
-              padding: const EdgeInsets.all(20),
-              child: Center(child: Text(lines[index])),
-            );
-          },
+        var data = lines.join('\n');
+        var myHtmlText = """
+        <html>
+            <script>
+              function display() {
+                  window.print();
+              }
+          </script>
+          <body>
+            <pre>${data}</pre>
+          </body>
+        </html>""";
+        return WebViewX(
+          ignoreAllGestures: false,
+          initialContent: myHtmlText,
+          initialSourceType: SourceType.html,
+          onWebViewCreated: (controller) => controllerWeb = controller,
+          height: double.maxFinite,
+          width: double.maxFinite,
         );
 
       default:
-        WidgetMixin.download(
+        ReusedWidgets.download(
           context,
           uri: "",
           name: widget.name,
@@ -181,11 +206,17 @@ class _ReadAndDownloadDocumentsPageState
         if (snapshot.data!.isEmpty) {
           return Center(child: CircularProgressIndicator());
         }
+        var htmlData = """<script>
+              function display() {
+                  window.print();
+              }
+          </script>""" +
+            snapshot.data!;
         return Padding(
           padding: const EdgeInsets.all(20.0),
           child: WebViewX(
             ignoreAllGestures: false,
-            initialContent: snapshot.data!,
+            initialContent: htmlData,
             initialSourceType: SourceType.html,
             onWebViewCreated: (controller) => controllerWeb = controller,
             height: double.maxFinite,
@@ -240,6 +271,34 @@ class _ReadAndDownloadDocumentsPageState
 
   @override
   List<Subject> get subjects => [];
+
+  printDoc(BuildContext context) async {
+    var extension = extensionStream.value;
+    if (extension == Extension.TXT ||
+        extension == Extension.DOCX ||
+        extension == Extension.HTML) controllerWeb?.callJsMethod("display", []);
+    if (extension == Extension.IMAGE) {
+      var uri =
+          "${getUrlBase()}/admin/pdf/image/${widget.id}date=${DateTime.now().millisecondsSinceEpoch.toString()}";
+      var htmlData = """<script>
+              function display() {
+                  window.print();
+              }
+          </script> <body>
+          <img src=${uri} alt="My Image"></body> """;
+      return Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: WebViewX(
+          ignoreAllGestures: false,
+          initialContent: htmlData,
+          initialSourceType: SourceType.html,
+          onWebViewCreated: (controller) => controllerWeb = controller,
+          height: double.maxFinite,
+          width: double.maxFinite,
+        ),
+      );
+    }
+  }
 }
 
 enum Extension {

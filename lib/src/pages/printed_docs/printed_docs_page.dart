@@ -6,7 +6,7 @@ import 'package:notary_admin/src/pages/printed_docs/html_editor_printed_doc.dart
 import 'package:notary_admin/src/pages/printed_docs/printed_doc_view.dart';
 import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
-import 'package:notary_admin/src/utils/widget_mixin_new.dart';
+import 'package:notary_admin/src/utils/reused_widgets.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
@@ -114,7 +114,7 @@ class _PrintedDocumentsPageState extends BasicState<PrintedDocumentsPage>
         push(context, PrintedDocViewHtml(text: doc.htmlData));
       }
       if (value == items[3]) {
-        WidgetMixin.confirmDelete(context)
+        ReusedWidgets.confirmDelete(context)
             .asStream()
             .where((event) => event == true)
             .listen(
@@ -142,7 +142,7 @@ class _PrintedDocumentsPageState extends BasicState<PrintedDocumentsPage>
   }
 
   Future<String?> editName(PrintedDoc file) async {
-    return WidgetMixin.showDialog2<String>(
+    return ReusedWidgets.showDialog2<String>(
       context,
       label: lang.editFileName,
       content: Form(

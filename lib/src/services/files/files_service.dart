@@ -27,8 +27,12 @@ abstract class FilesService {
   @GET("/admin/files/customer/{filesId}")
   Future<List<Customer>> getFilesCustomers(@Path("filesId") String filesId);
 
-  @GET("/admin/files/load/{filesId}")
-  Future<List<String>> loadFileDocuments(@Path("filesId") String filesId);
+  @GET("/admin/files/load/{filesId}/{partId}/{docId}")
+  Future<String> loadFileDocuments(
+    @Path("filesId") String filesId,
+    @Path("partId") String partId,
+    @Path("docId") String docId,
+  );
 
   @GET("/admin/files/printed/{filesId}")
   Future<PrintedDoc> getPrintedDoc(@Path("filesId") String filesId);

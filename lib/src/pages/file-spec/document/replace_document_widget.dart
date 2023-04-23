@@ -1,8 +1,11 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
-import 'package:notary_admin/src/utils/widget_mixin_new.dart';
+import 'package:notary_admin/src/pages/download/read_download_documents_page.dart';
+import 'package:notary_admin/src/services/files/files_service.dart';
+import 'package:notary_admin/src/utils/reused_widgets.dart';
 import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
@@ -26,8 +29,9 @@ class _ReplaceDocumentWidgetState extends BasicState<ReplaceDocumentWidget>
   final updateDocumentsStream = BehaviorSubject.seeded(<UpdateDocuments>[]);
   final allUploadedStream = BehaviorSubject.seeded(false);
   bool initialized = false;
+  final filesService = GetIt.instance.get<FilesService>();
 
-  void init() {
+  void init() async {
     if (initialized) return;
     initialized = true;
     var pathDocumentsList = widget.pathDocumentsList
@@ -101,6 +105,31 @@ class _ReplaceDocumentWidgetState extends BasicState<ReplaceDocumentWidget>
                                 ),
                         ],
                       ),
+                      onTap: () async {
+                        if (widget
+                                .pathDocumentsList[index].namePickedDocument !=
+                            null) {
+                          try {
+                            var res = await filesService.loadFileDocuments(
+                              widget.filesId,
+                              snapshot.data![index].pathDocument.idParts,
+                              snapshot.data![index].pathDocument.idDocument,
+                            );
+                            push(
+                              context,
+                              ReadAndDownloadDocumentsPage(
+                                name:
+                                    "${snapshot.data![index].pathDocument.namePickedDocument}",
+                                id: res,
+                              ),
+                            );
+                          } catch (error, stacktrace) {
+                            print(stacktrace);
+                            showServerError(context, error: error);
+                            throw error;
+                          }
+                        }
+                      },
                     );
                   },
                 ),
@@ -175,7 +204,7 @@ class _ReplaceDocumentWidgetState extends BasicState<ReplaceDocumentWidget>
     try {
       progressSubject.add(true);
       if (updateDocumentsStream.value.isNotEmpty) {
-        await WidgetMixin.uploadFiles(
+        await ReusedWidgets.uploadFiles(
           context,
           widget.filesId,
           updateDocumentsStream.value

@@ -5,7 +5,7 @@ import 'package:notary_admin/src/pages/archiving/add_archive_page.dart';
 import 'package:notary_admin/src/pages/archiving/files_archived_table_widget.dart';
 import 'package:notary_admin/src/pages/search/date_range_picker_widget.dart';
 import 'package:notary_admin/src/services/files/files_archive_service.dart';
-import 'package:notary_admin/src/utils/widget_mixin_new.dart';
+import 'package:notary_admin/src/utils/reused_widgets.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
@@ -120,7 +120,7 @@ class _ArchivePageState extends BasicState<ArchivePage> with WidgetUtilsMixin {
   }
 
   yearPicker() async {
-    WidgetMixin.showDialog2(
+    ReusedWidgets.showDialog2(
       context,
       label: lang.selectYear,
       width: 300,

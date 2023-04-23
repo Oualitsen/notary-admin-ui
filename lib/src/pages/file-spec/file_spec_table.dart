@@ -6,7 +6,7 @@ import 'package:notary_admin/src/pages/file-spec/add_file_spec.dart';
 import 'package:notary_admin/src/pages/steps/add_step_widget.dart';
 import 'package:notary_admin/src/services/admin/steps_service.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
-import 'package:notary_admin/src/utils/widget_mixin_new.dart';
+import 'package:notary_admin/src/utils/reused_widgets.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/document_spec_input.dart';
@@ -136,7 +136,7 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
   List<Subject> get subjects => [];
 
   void documentList(BuildContext context, FilesSpec data) {
-    WidgetMixin.showDialog2(
+    ReusedWidgets.showDialog2(
       context,
       label: lang.listPart,
       content: ListView.builder(
@@ -154,7 +154,7 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
   }
 
   void stepsList(BuildContext context, FilesSpec data) {
-    WidgetMixin.showDialog2(
+    ReusedWidgets.showDialog2(
       context,
       label: lang.steps,
       content: Padding(
@@ -172,7 +172,7 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
   }
 
   deleteFileSpec(FilesSpec data) {
-    WidgetMixin.confirmDelete(context)
+    ReusedWidgets.confirmDelete(context)
         .asStream()
         .where((event) => event == true)
         .listen(
@@ -190,7 +190,7 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
   }
 
   showDocuments(PartsSpec data) {
-    WidgetMixin.showDialog2(
+    ReusedWidgets.showDialog2(
       context,
       label: lang.listDocumentsFileSpec,
       content: ListView.builder(

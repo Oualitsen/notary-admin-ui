@@ -8,7 +8,7 @@ import 'package:notary_admin/src/pages/steps/step_selection_widget.dart';
 import 'package:notary_admin/src/services/admin/template_document_service.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
-import 'package:notary_admin/src/utils/widget_mixin_new.dart';
+import 'package:notary_admin/src/utils/reused_widgets.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
@@ -399,7 +399,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
   List<Subject> get subjects => [];
 
   void selectTemplate() {
-    WidgetMixin.showDialog2(
+    ReusedWidgets.showDialog2(
       context,
       label: lang.selectTemplate,
       content: InfiniteScrollListView(
