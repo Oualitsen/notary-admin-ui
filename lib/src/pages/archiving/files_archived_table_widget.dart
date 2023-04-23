@@ -1,23 +1,16 @@
-import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/db_services/token_db_service.dart';
-import 'package:notary_admin/src/init.dart';
 import 'package:notary_admin/src/pages/customer/customer_selection_dialog.dart';
-import 'package:notary_admin/src/pages/download/docx_file_reader_page.dart';
-import 'package:notary_admin/src/pages/download/pdf_images.dart';
 import 'package:notary_admin/src/pages/download/read_download_documents_page.dart';
-import 'package:notary_admin/src/pages/download/txt_file_reader_page.dart';
 import 'package:notary_admin/src/pages/search/date_range_picker_widget.dart';
 import 'package:notary_admin/src/pages/search/search_filter_table_widget.dart';
 import 'package:notary_admin/src/services/files/files_archive_service.dart';
 import 'package:notary_admin/src/services/files/pdf_service.dart';
-import 'package:notary_admin/src/utils/widget_mixin_new.dart';
+import 'package:notary_admin/src/utils/reused_widgets.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/files_archive.dart';
@@ -123,7 +116,7 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
   Future<List<FilesArchive>> getData(PageInfo page) {
     try {
       {
-        var params = WidgetMixin.getParams(searchValueStream.value);
+        var params = ReusedWidgets.getParams(searchValueStream.value);
         if (params != null) {
           return archiveService.searchFilesArchive(
             number: params.number,
@@ -147,7 +140,7 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
 
   Future<int> getTotal() {
     try {
-      var params = WidgetMixin.getParams(searchValueStream.value);
+      var params = ReusedWidgets.getParams(searchValueStream.value);
       if (params != null) {
         return archiveService.countSearchFilesArchive(
           number: params.number,
@@ -202,10 +195,10 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
 
   customerDetails(FilesArchive data) async {
     try {
-      WidgetMixin.showDialog2(
+      ReusedWidgets.showDialog2(
         context,
         label: lang.customerList,
-        content: WidgetMixin.ListCustomers(
+        content: ReusedWidgets.ListCustomers(
           context,
           listCustomers: data.customers,
         ),
@@ -217,7 +210,7 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
   }
 
   deleteFiles(FilesArchive data) {
-    WidgetMixin.confirmDelete(context)
+    ReusedWidgets.confirmDelete(context)
         .asStream()
         .where((event) => event == true)
         .listen(
@@ -236,7 +229,7 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
   }
 
   void documentList(FilesArchive data) {
-    WidgetMixin.showDialog2(
+    ReusedWidgets.showDialog2(
       context,
       label: lang.listDocumentsFileSpec,
       content: InfiniteScrollListView<String>(
@@ -247,7 +240,13 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
             trailing: element.endsWith("pdf")
                 ? Icon(Icons.picture_as_pdf)
                 : Icon(Icons.download),
-            onTap: () => downloadDocument(element, data.uploadedFiles[index]),
+            onTap: () => push(
+              context,
+              ReadAndDownloadDocumentsPage(
+                name: element,
+                id: data.uploadedFiles[index],
+              ),
+            ),
           );
         },
         pageLoader: ((index) => getDataDocuments(index, data)),
@@ -267,71 +266,6 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
       showServerError(context, error: error);
       throw error;
     }
-  }
-
-  downloadDocument(String name, String id) async {
-    push(context, ReadAndDownloadDocumentsPage(id: id, name: name));
-    // var extension = name.split('.').last;
-    // final imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
-    // if (imageExtensions.contains(extension)) {
-    //   push(
-    //       context,
-    //       ImagePage(
-    //         title: name,
-    //         token: authToken!,
-    //         imageId: id,
-    //       ));
-    // } else {
-    //   switch (extension) {
-    //     case "pdf":
-    //       {
-    //         try {
-    //           var imageIds = await pdfService.getPdfImages(id);
-    //           push(context, PdfImages(name: name, id: id, imageIds: imageIds));
-    //         } catch (error, stacktrace) {
-    //           print(stacktrace);
-    //           showServerError(context, error: error);
-    //           throw error;
-    //         }
-    //       }
-    //       break;
-    //     case "docx":
-    //       push(
-    //           context,
-    //           MyDocxFileReader(
-    //             title: name,
-    //             id: id,
-    //             isDocx: true,
-    //           ));
-    //       break;
-    //     case "txt":
-    //       push(
-    //           context,
-    //           MyByteFileReader(
-    //             title: name,
-    //             bytes: bytes,
-    //           ));
-    //       break;
-    //     case "html":
-    //       push(
-    //           context,
-    //           MyDocxFileReader(
-    //             title: name,
-    //             id: id,
-    //             bytes: bytes,
-    //           ));
-    //       break;
-    //     default:
-    //       WidgetMixin.download(
-    //         context,
-    //         uri: "",
-    //         name: name,
-    //         myBytes: bytes,
-    //         token: authToken,
-    //       );
-    //       break;
-    //   }
-    // }
   }
 
   List<DataColumn> getColumns() {

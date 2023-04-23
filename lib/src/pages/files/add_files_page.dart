@@ -13,7 +13,7 @@ import 'package:notary_admin/src/services/files/file_spec_service.dart';
 import 'package:notary_admin/src/services/files/files_service.dart';
 import 'package:notary_admin/src/services/upload_service.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
-import 'package:notary_admin/src/utils/widget_mixin_new.dart';
+import 'package:notary_admin/src/utils/reused_widgets.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
@@ -95,7 +95,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                                 return SizedBox.shrink();
                               }
                               //
-                              return WidgetMixin.ListCustomers(
+                              return ReusedWidgets.ListCustomers(
                                 context,
                                 listCustomers: customersStream.value,
                               );
@@ -348,11 +348,11 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
         var files = await serviceFiles.saveFiles(input);
 
         if (_pathDocumentsStream.value.isNotEmpty) {
-          await WidgetMixin.uploadFiles(
+          await ReusedWidgets.uploadFiles(
               context, files.id, _pathDocumentsStream.value);
         }
         if (additionalDocumentsStream.value.isNotEmpty) {
-          await WidgetMixin.uploadAdditionalData(
+          await ReusedWidgets.uploadAdditionalData(
               context, files.id, additionalDocumentsStream.value);
         }
         await showSnackBar2(context, lang.createdsuccssfully);
@@ -375,7 +375,7 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
   List<Subject> get subjects => [];
 
   void selectFileSpec() {
-    WidgetMixin.showDialog2(
+    ReusedWidgets.showDialog2(
       context,
       label: lang.selectFileSpec.toUpperCase(),
       content: InfiniteScrollListView(

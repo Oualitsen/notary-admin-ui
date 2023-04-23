@@ -1,7 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:notary_admin/src/utils/widget_mixin_new.dart';
+import 'package:notary_admin/src/utils/reused_widgets.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:rxdart/rxdart.dart';
@@ -109,7 +109,7 @@ class _UploadDocumentsWidgetState extends BasicState<UploadDocumentsWidget>
   }
 
   _delete(int index) {
-    WidgetMixin.confirmDelete(context)
+    ReusedWidgets.confirmDelete(context)
         .asStream()
         .where((event) => event == true)
         .listen(

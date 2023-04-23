@@ -1,9 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/change_notifier.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:notary_admin/src/pages/range_input_widget.dart';
 import 'package:notary_admin/src/pages/range_page.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
@@ -12,7 +7,6 @@ import 'package:notary_admin/src/widgets/range_widget.dart';
 import 'package:notary_model/model/contract_function.dart';
 import 'package:notary_model/model/range.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:rxdart/src/subjects/subject.dart';
 
 class ContractInputFunctionWidget extends StatefulWidget {
   final bool showName;

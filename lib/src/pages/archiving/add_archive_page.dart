@@ -11,7 +11,7 @@ import 'package:notary_admin/src/services/files/files_archive_service.dart';
 import 'package:notary_admin/src/services/files/files_service.dart';
 import 'package:notary_admin/src/services/upload_service.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
-import 'package:notary_admin/src/utils/widget_mixin_new.dart';
+import 'package:notary_admin/src/utils/reused_widgets.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
@@ -255,7 +255,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
   }
 
   void selectFileSpec() {
-    WidgetMixin.showDialog2(
+    ReusedWidgets.showDialog2(
       context,
       label: lang.selectFileSpec.toUpperCase(),
       content: listFilesSpecWidget(),
@@ -481,7 +481,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
                 return SizedBox.shrink();
               }
               //
-              return WidgetMixin.ListCustomers(
+              return ReusedWidgets.ListCustomers(
                 context,
                 listCustomers: customersStream.value,
               );

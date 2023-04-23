@@ -5,7 +5,7 @@ import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/pages/assistant/assistant_details_input.dart';
 import 'package:notary_admin/src/services/assistant/admin_assistant_service.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
-import 'package:notary_admin/src/utils/widget_mixin_new.dart';
+import 'package:notary_admin/src/utils/reused_widgets.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_admin/src/widgets/password_input.dart';
@@ -121,7 +121,7 @@ class AssistantTableWidgetState extends BasicState<AssistantTableWidget>
   @override
   List<Subject> get subjects => [];
   void deleteConfirmation(String assistantId) {
-    WidgetMixin.confirmDelete(context)
+    ReusedWidgets.confirmDelete(context)
         .asStream()
         .where((event) => event == true)
         .listen((_) async {
@@ -140,7 +140,7 @@ class AssistantTableWidgetState extends BasicState<AssistantTableWidget>
   }
 
   void editAssistant(BuildContext context, Admin assistant) async {
-    return WidgetMixin.showDialog2(
+    return ReusedWidgets.showDialog2(
       context,
       label: lang.addSteps,
       height: 300,
@@ -182,7 +182,7 @@ class AssistantTableWidgetState extends BasicState<AssistantTableWidget>
   }
 
   void resetPassword(Admin assistant) {
-    WidgetMixin.showDialog2(
+    ReusedWidgets.showDialog2(
       context,
       label: lang.resetPassword.toUpperCase(),
       height: 100,

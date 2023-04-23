@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
-import 'package:notary_admin/src/utils/widget_mixin_new.dart';
+import 'package:notary_admin/src/utils/reused_widgets.dart';
 import 'package:notary_admin/src/widgets/widget_roles.dart';
 import 'package:notary_admin/src/pages/templates/html_editor_template.dart';
 import 'package:notary_admin/src/pages/templates/upload_template.dart';
@@ -167,7 +167,7 @@ class _LoadTemplatePageState extends BasicState<LoadTemplatePage>
         ).then((value) => key.currentState?.reload());
       }
       if (value == items[2]) {
-        WidgetMixin.confirmDelete(context)
+        ReusedWidgets.confirmDelete(context)
             .asStream()
             .where((event) => event == true)
             .listen(

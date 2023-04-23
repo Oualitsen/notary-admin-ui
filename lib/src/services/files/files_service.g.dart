@@ -142,25 +142,28 @@ class _FilesService implements FilesService {
   }
 
   @override
-  Future<List<String>> loadFileDocuments(filesId) async {
+  Future<String> loadFileDocuments(
+    filesId,
+    partId,
+    docId,
+  ) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
-    final _result =
-        await _dio.fetch<List<dynamic>>(_setStreamType<List<String>>(Options(
+    final _result = await _dio.fetch<String>(_setStreamType<String>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
     )
-            .compose(
-              _dio.options,
-              '/admin/files/load/${filesId}',
-              queryParameters: queryParameters,
-              data: _data,
-            )
-            .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
-    final value = _result.data!.cast<String>();
+        .compose(
+          _dio.options,
+          '/admin/files/load/${filesId}/${partId}/${docId}',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = _result.data!;
     return value;
   }
 

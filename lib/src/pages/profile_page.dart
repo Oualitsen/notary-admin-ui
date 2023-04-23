@@ -1,7 +1,6 @@
 import 'package:notary_admin/src/services/admin/profile_service.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_admin/src/widgets/password_input.dart';
-import 'package:notary_model/model/admin.dart';
 import 'package:notary_model/model/basic_user.dart';
 import 'package:notary_model/model/password_change.dart';
 

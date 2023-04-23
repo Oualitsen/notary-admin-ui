@@ -12,12 +12,11 @@ import 'package:notary_admin/src/pages/search/date_range_picker_widget.dart';
 import 'package:notary_admin/src/pages/search/search_filter_table_widget.dart';
 import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
 import 'package:notary_admin/src/services/files/files_service.dart';
-import 'package:notary_admin/src/utils/widget_mixin_new.dart';
+import 'package:notary_admin/src/utils/reused_widgets.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/files.dart';
 import 'package:notary_model/model/steps.dart';
-import 'package:rapidoc_utils/utils/Utils.dart';
 import 'package:rxdart/rxdart.dart';
 
 class FilesTableWidget extends StatefulWidget {
@@ -108,7 +107,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
 
   Future<List<Files>> getData(PageInfo page) {
     try {
-      var params = WidgetMixin.getParams(subject.value);
+      var params = ReusedWidgets.getParams(subject.value);
       if (params != null) {
         return filesService.searchFiles(
           number: params.number,
@@ -128,7 +127,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   }
 
   Future<int> getTotal() {
-    var params = WidgetMixin.getParams(subject.value);
+    var params = ReusedWidgets.getParams(subject.value);
     if (params != null) {
       return filesService.countSearchFiles(
         number: params.number,
@@ -158,7 +157,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
       DataCell(
         TextButton.icon(
             label: Text(lang.listDocumentsFileSpec.toUpperCase()),
-            onPressed: () async => await updateDocumentFolderCustomer(data),
+            onPressed: () => updateDocumentFolderCustomer(data),
             icon: Icon(Icons.edit)),
       ),
       DataCell(
@@ -186,7 +185,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   List<Subject> get subjects => [];
 
   void updateCurrentStep(Files data) async {
-    WidgetMixin.showDialog2(
+    ReusedWidgets.showDialog2(
       context,
       label: lang.selectStep.toUpperCase(),
       content: InfiniteScrollListView(
@@ -271,10 +270,10 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   customerDetails(Files data) async {
     try {
       var customersList = await filesService.getFilesCustomers(data.id);
-      WidgetMixin.showDialog2(
+      ReusedWidgets.showDialog2(
         context,
         label: lang.customerList,
-        content: WidgetMixin.ListCustomers(
+        content: ReusedWidgets.ListCustomers(
           context,
           listCustomers: customersList,
         ),
@@ -298,7 +297,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   }
 
   deleteFiles(Files data) {
-    WidgetMixin.confirmDelete(context)
+    ReusedWidgets.confirmDelete(context)
         .asStream()
         .where((event) => event == true)
         .listen(
@@ -317,7 +316,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   }
 
   updateDocumentFolderCustomer(Files file) {
-    return WidgetMixin.showDialog2(
+    return ReusedWidgets.showDialog2(
       context,
       label: lang.listDocumentsFileSpec,
       content: ListView.builder(
@@ -347,7 +346,8 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
                             idDocument: e.id,
                             document: null,
                             selected: isUploaded(file, e.id),
-                            namePickedDocument: null,
+                            namePickedDocument: getSavedFileName(file,
+                                file.specification.partsSpecs[index].id, e.id),
                             path: null,
                             nameDocument: e.name,
                           ))
@@ -488,5 +488,16 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
             onTap: () => searchFilterStream.add(filter),
           );
         });
+  }
+
+  String? getSavedFileName(Files file, String partId, String docId) {
+    var res = file.uploadedFiles
+        .where((element) =>
+            element.partSpecId == partId && element.docSpecId == docId)
+        .toList();
+    if (res.isNotEmpty) {
+      return res.first.name;
+    }
+    return null;
   }
 }

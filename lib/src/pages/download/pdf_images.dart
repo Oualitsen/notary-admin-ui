@@ -87,7 +87,7 @@ class _PdfImagesState extends BasicState<PdfImages> with WidgetUtilsMixin {
                           token: token,
                           onAngleChanged: (imageId) {
                             imageIdsStream.add(imageIdsStream.value);
-                          },
+                          }
                         );
                       },
                     ).toList(),

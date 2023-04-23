@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:http_error_handler/error_handler.dart';
 import 'package:notary_admin/src/init.dart';
 import 'package:notary_admin/src/services/files/pdf_service.dart';
-import 'package:notary_admin/src/widgets/basic_state.dart';
-import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_admin/src/widgets/mixins/lang.dart';
-import 'package:rxdart/subjects.dart';
 import 'dart:math' as math;
 
 class ImageWidget extends StatelessWidget {
@@ -18,8 +14,6 @@ class ImageWidget extends StatelessWidget {
       required this.imageId,
       required this.token,
       required this.onAngleChanged});
-
-  init() {}
 
   @override
   Widget build(BuildContext context) {
@@ -64,12 +58,6 @@ class ImageWidget extends StatelessWidget {
     return "${getUrlBase()}/admin/pdf/image/${imageId}${disableCache ? ('?date=' + DateTime.now().millisecondsSinceEpoch.toString()) : ''}";
   }
 
-  @override
-  List<ChangeNotifier> get notifiers => [];
-
-  @override
-  List<Subject> get subjects => [];
-
   void rotate(bool rotateForward) async {
     var angle = rotateForward ? (math.pi / 2) : (-math.pi / 2);
 
@@ -77,7 +65,6 @@ class ImageWidget extends StatelessWidget {
       final pdfService = GetIt.instance.get<PdfService>();
 
       await pdfService.rotateImage(imageId, angle);
-      print(angle);
       onAngleChanged(imageId);
     } catch (error, stacktrace) {
       print(stacktrace);
