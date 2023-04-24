@@ -2,6 +2,7 @@ import 'package:notary_model/model/address.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:notary_admin/src/widgets/mixins/lang.dart';
+import 'package:notary_model/model/contract_function.dart';
 import 'package:notary_model/model/gender.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -117,5 +118,16 @@ extension AppLocalizationsExt on AppLocalizations {
 
   String monthName(int date) {
     return DateFormat('MMMM').format(DateTime.fromMillisecondsSinceEpoch(date));
+  }
+
+  String fuctionValue(ContractFunction function) {
+    String result = "";
+    if (function.percentage) {
+      result = "${function.value * 100}%";
+    } else {
+      result = "${function.value}";
+    }
+
+    return result;
   }
 }

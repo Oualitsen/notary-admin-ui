@@ -17,6 +17,7 @@ dependencies:
   intl: ^0.17.0
   cupertino_icons: ^1.0.2
   font_awesome_flutter: 10.1.0
+  sleek_circular_slider: ^2.0.1
   get_it: ^7.2.0
   rxdart: ^0.27.3
   dio: ^4.0.0

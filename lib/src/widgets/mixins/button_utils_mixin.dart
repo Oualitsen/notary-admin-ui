@@ -47,11 +47,12 @@ mixin WidgetUtilsMixin<T extends StatefulWidget> on BasicState<T> {
   List<Widget> getOkCancel() => [getCancelButton(), getOkButton()];
 
   InputDecoration getDecoration(String label, bool required,
-          [String? hinttext]) =>
+          [String? hinttext, Widget? suffix]) =>
       InputDecoration(
         border: const OutlineInputBorder(),
         label: getLabel(label, required),
         hintText: hinttext,
+        suffix: suffix,
       );
 
   Widget getLabel(String label, bool required) {

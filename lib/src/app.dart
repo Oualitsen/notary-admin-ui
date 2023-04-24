@@ -1,6 +1,3 @@
-import 'package:notary_admin/src/pages/templates/form_and_view_html.dart';
-
-
 import 'package:notary_admin/src/pages/home/home_page.dart';
 import 'package:notary_admin/src/pages/profile_page.dart';
 import 'package:device_preview/device_preview.dart';
@@ -8,10 +5,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:notary_admin/src/pages/login_page.dart';
 import 'package:notary_admin/src/pages/not_found_page.dart';
 import 'package:notary_admin/src/pages/templates/load_template.dart';
-import 'package:notary_admin/src/widgets/form_convert_map.dart';
 import 'package:notary_admin/src/widgets/mixins/lang.dart';
 import 'settings/settings_controller.dart';
 import 'package:month_year_picker/month_year_picker.dart';

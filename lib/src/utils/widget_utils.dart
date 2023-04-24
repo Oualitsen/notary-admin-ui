@@ -1,6 +1,6 @@
 import 'package:notary_admin/src/pages/assistant/list_assistant_page.dart';
 import 'package:notary_admin/src/pages/customer/list_customer_page.dart';
-import 'package:notary_admin/src/pages/files/download_file.dart';
+import 'package:notary_admin/src/pages/formula/contract_formula_input_page.dart';
 import 'package:notary_admin/src/pages/files/list_files_customer.dart';
 import 'package:notary_admin/src/pages/login_page.dart';
 import 'package:notary_admin/src/pages/printed_docs/printed_docs_page.dart';
@@ -9,12 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_responsive_tools/device_screen_type.dart';
 import 'package:get_it/get_it.dart';
 import 'package:notary_admin/src/db_services/token_db_service.dart';
-import 'package:notary_admin/src/pages/range_input_widget.dart';
-import 'package:notary_admin/src/pages/step_group/step_group_page.dart';
 import 'package:notary_admin/src/pages/steps/steps_page.dart';
 import 'package:notary_admin/src/pages/templates/load_template.dart';
 import 'package:notary_admin/src/pages/archiving/archive_page.dart';
-import 'package:notary_admin/src/pages/archiving/add_archive_page.dart';
 import 'package:notary_admin/src/utils/injector.dart';
 import 'package:notary_admin/src/widgets/mixins/lang.dart';
 import 'package:notary_model/model/basic_user.dart';
@@ -121,7 +118,7 @@ Widget createDrawer(BuildContext context) {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => DowloadFile()),
+            MaterialPageRoute(builder: (context) => ContractFormulaPage()),
           );
         },
       ),
