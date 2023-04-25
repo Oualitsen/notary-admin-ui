@@ -3,7 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:notary_admin/src/pages/printed_docs/html_editor_printed_doc.dart';
-import 'package:notary_admin/src/pages/printed_docs/printed_doc_view.dart';
+import 'package:notary_admin/src/pages/docs_management/data_html_view.dart';
 import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_admin/src/utils/reused_widgets.dart';
@@ -111,7 +111,7 @@ class _PrintedDocumentsPageState extends BasicState<PrintedDocumentsPage>
         editContent(doc);
       }
       if (value == items[2]) {
-        push(context, PrintedDocViewHtml(text: doc.htmlData));
+        push(context, DataHtmlView(text: doc.htmlData));
       }
       if (value == items[3]) {
         ReusedWidgets.confirmDelete(context)

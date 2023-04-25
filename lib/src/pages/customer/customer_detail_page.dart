@@ -65,13 +65,21 @@ class _CustomerDetailsPageState extends BasicState<CustomerDetailsPage>
             actions: [
               Padding(
                 padding: EdgeInsets.all(8),
-                child: ElevatedButton.icon(
+                child: TextButton.icon(
                   onPressed: (() => push(
                         context,
                         AddCustomerPage(customer: customer),
                       )),
-                  label: Text(lang.edit.toUpperCase()),
-                  icon: Icon(Icons.edit),
+                  label: Text(
+                    lang.edit.toUpperCase(),
+                    style: TextStyle(
+                      color: Theme.of(context).canvasColor,
+                    ),
+                  ),
+                  icon: Icon(
+                    Icons.edit,
+                    color: Theme.of(context).canvasColor,
+                  ),
                 ),
               ),
             ],

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:notary_admin/src/init.dart';
-import 'package:notary_admin/src/services/files/pdf_service.dart';
+import 'package:notary_admin/src/services/files/data_manager_service.dart';
 import 'package:notary_admin/src/widgets/mixins/lang.dart';
 import 'dart:math' as math;
 
@@ -24,16 +24,17 @@ class ImageWidget extends StatelessWidget {
           child: Column(
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
                     onPressed: () {
-                      rotate(false);
+                      _rotate(false);
                     },
                     child: Text(lang.rotateLeft.toUpperCase()),
                   ),
                   TextButton(
                     onPressed: () {
-                      rotate(true);
+                      _rotate(true);
                     },
                     child: Text(lang.rotateRight.toUpperCase()),
                   ),
@@ -55,14 +56,14 @@ class ImageWidget extends StatelessWidget {
   }
 
   String getImageUrl(String imageId, [bool disableCache = true]) {
-    return "${getUrlBase()}/admin/pdf/image/${imageId}${disableCache ? ('?date=' + DateTime.now().millisecondsSinceEpoch.toString()) : ''}";
+    return "${getUrlBase()}/admin/manager/image/${imageId}${disableCache ? ('?date=' + DateTime.now().millisecondsSinceEpoch.toString()) : ''}";
   }
 
-  void rotate(bool rotateForward) async {
+  void _rotate(bool rotateForward) async {
     var angle = rotateForward ? (math.pi / 2) : (-math.pi / 2);
 
     try {
-      final pdfService = GetIt.instance.get<PdfService>();
+      final pdfService = GetIt.instance.get<DataManagerService>();
 
       await pdfService.rotateImage(imageId, angle);
       onAngleChanged(imageId);

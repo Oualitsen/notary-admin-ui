@@ -7,7 +7,7 @@ import 'package:notary_admin/src/pages/archiving/add_archive_page.dart';
 import 'package:notary_admin/src/pages/customer/customer_selection_dialog.dart';
 import 'package:notary_admin/src/pages/file-spec/document/replace_document_widget.dart';
 import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget.dart';
-import 'package:notary_admin/src/pages/printed_docs/printed_doc_view.dart';
+import 'package:notary_admin/src/pages/docs_management/data_html_view.dart';
 import 'package:notary_admin/src/pages/search/date_range_picker_widget.dart';
 import 'package:notary_admin/src/pages/search/search_filter_table_widget.dart';
 import 'package:notary_admin/src/services/admin/printed_docs_service.dart';
@@ -260,7 +260,7 @@ class _FilesTableWidgetState extends BasicState<FilesTableWidget>
   void onPrint(String docId) async {
     try {
       var doc = await servicePrintDocument.getPrintedDocsById(docId);
-      push(context, PrintedDocViewHtml(title: doc.name, text: doc.htmlData));
+      push(context, DataHtmlView(title: doc.name, text: doc.htmlData));
     } catch (error, stacktrace) {
       showServerError(context, error: error);
       print(stacktrace);

@@ -187,7 +187,8 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                                     onPressed: () {
                                       deleteStep(index);
                                     },
-                                    icon: Icon(Icons.delete),
+                                    icon: Icon(Icons.delete, 
+                                    color: Theme.of(context).canvasColor,),
                                     label: Text(lang.delete.toUpperCase())),
                               );
                             }).toList()),

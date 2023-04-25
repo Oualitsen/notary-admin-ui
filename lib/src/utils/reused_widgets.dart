@@ -209,17 +209,17 @@ class ReusedWidgets {
     BuildContext context, {
     required String uri,
     required String name,
-    Uint8List? myBytes = null,
+    String? base64Data = null,
     String? token = null,
   }) async {
     Map<String, String> headers = <String, String>{};
-    var bytes = myBytes;
-
+    String? content;
     if (kIsWeb) {
-      if (bytes == null) {
-        bytes = await getBytes(token, uri);
+      if (base64Data == null) {
+        var bytes = await getBytes(token, uri);
+        content = base64Encode(bytes);
       }
-      final content = base64Encode(bytes);
+      content = base64Data;
       html.AnchorElement(
           href:
               "data:application/octet-stream;charset=utf-16le;base64,$content")
