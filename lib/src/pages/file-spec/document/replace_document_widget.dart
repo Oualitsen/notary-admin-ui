@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
-import 'package:notary_admin/src/pages/download/read_download_documents_page.dart';
+import 'package:notary_admin/src/pages/docs_management/document_manager.dart';
 import 'package:notary_admin/src/services/files/files_service.dart';
 import 'package:notary_admin/src/utils/reused_widgets.dart';
 import 'package:notary_admin/src/pages/file-spec/document/upload_document_widget.dart';
@@ -117,7 +117,7 @@ class _ReplaceDocumentWidgetState extends BasicState<ReplaceDocumentWidget>
                             );
                             push(
                               context,
-                              ReadAndDownloadDocumentsPage(
+                              DocumentManagerPage(
                                 name:
                                     "${snapshot.data![index].pathDocument.namePickedDocument}",
                                 id: res,

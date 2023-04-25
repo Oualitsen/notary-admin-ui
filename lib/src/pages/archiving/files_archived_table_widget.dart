@@ -5,18 +5,16 @@ import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/db_services/token_db_service.dart';
 import 'package:notary_admin/src/pages/customer/customer_selection_dialog.dart';
-import 'package:notary_admin/src/pages/download/read_download_documents_page.dart';
+import 'package:notary_admin/src/pages/docs_management/document_manager.dart';
 import 'package:notary_admin/src/pages/search/date_range_picker_widget.dart';
 import 'package:notary_admin/src/pages/search/search_filter_table_widget.dart';
 import 'package:notary_admin/src/services/files/files_archive_service.dart';
-import 'package:notary_admin/src/services/files/pdf_service.dart';
+import 'package:notary_admin/src/services/files/data_manager_service.dart';
 import 'package:notary_admin/src/utils/reused_widgets.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/files_archive.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:http/http.dart' as http;
-import 'package:universal_html/html.dart' as html;
 
 class FilesArchiveTableWidget extends StatefulWidget {
   final DateRange initialRange;
@@ -37,7 +35,7 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
   //services
   final tokenService = GetIt.instance.get<TokenDbService>();
   final archiveService = GetIt.instance.get<FilesArchiveService>();
-  final pdfService = GetIt.instance.get<PdfService>();
+  final pdfService = GetIt.instance.get<DataManagerService>();
   //key
   final fileNameKey = GlobalKey<FormState>();
   //stream
@@ -242,7 +240,7 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
                 : Icon(Icons.download),
             onTap: () => push(
               context,
-              ReadAndDownloadDocumentsPage(
+              DocumentManagerPage(
                 name: element,
                 id: data.uploadedFiles[index],
               ),

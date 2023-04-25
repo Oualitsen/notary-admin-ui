@@ -86,7 +86,7 @@ class _ArchivePageState extends BasicState<ArchivePage> with WidgetUtilsMixin {
               },
             ),
             SizedBox(width: 5),
-            ElevatedButton(
+            TextButton(
               onPressed: (() => push<FilesArchive?>(
                     context,
                     AddArchivePage(
@@ -97,8 +97,13 @@ class _ArchivePageState extends BasicState<ArchivePage> with WidgetUtilsMixin {
                       tableKey.currentState?.refreshPage();
                     }
                   })),
-              child: Text(lang.addArchive.toUpperCase()),
-            )
+              child: Text(
+                lang.addArchive.toUpperCase(),
+                style: TextStyle(
+                  color: Theme.of(context).canvasColor,
+                ),
+              ),
+            ),
           ],
         ),
         body: StreamBuilder<int>(

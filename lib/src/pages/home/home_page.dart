@@ -47,22 +47,36 @@ class HomePageState extends BasicState<HomePage>
                 searchValueStream.add(searchValue);
               }),
               moreActions: [
-                ElevatedButton.icon(
+                TextButton.icon(
                   onPressed: reload,
-                  label: Text(lang.reload.toUpperCase()),
-                  icon: Icon(Icons.refresh),
+                  label: Text(
+                    lang.reload.toUpperCase(),
+                    style: TextStyle(
+                      color: Theme.of(context).canvasColor,
+                    ),
+                  ),
+                  icon: Icon(
+                    Icons.refresh,
+                    color: Theme.of(context).canvasColor,
+                  ),
                 ),
-
                 SizedBox(width: 8),
-                ElevatedButton.icon(
+                TextButton.icon(
                   onPressed: (() =>
                       push(context, AddCustomerPage()).listen((event) {
                         reload();
                       })),
-                  label: Text(lang.addCustomer.toUpperCase()),
-                  icon: Icon(Icons.add),
+                  label: Text(
+                    lang.addCustomer.toUpperCase(),
+                    style: TextStyle(
+                      color: Theme.of(context).canvasColor,
+                    ),
+                  ),
+                  icon: Icon(
+                    Icons.add,
+                    color: Theme.of(context).canvasColor,
+                  ),
                 ),
-
               ],
             ),
           ],

@@ -20,9 +20,8 @@ class HtmlEditorPrintedDoc extends StatefulWidget {
 
 class _HtmlEditorPrintedDocState extends BasicState<HtmlEditorPrintedDoc>
     with WidgetUtilsMixin {
-  String result = '';
   final service = GetIt.instance.get<PrintedDocService>();
-  final HtmlEditorController controller = HtmlEditorController();
+  final controller = HtmlEditorController();
   @override
   Widget build(BuildContext context) {
     return GestureDetector(

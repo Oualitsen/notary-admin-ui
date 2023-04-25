@@ -87,8 +87,9 @@ class SearchWidgetState extends BasicState<SearchWidget> with WidgetUtilsMixin {
 
   Widget searchWidget() {
     return Container(
+      padding: EdgeInsets.all(3),
       width: double.minPositive,
-      height: 50,
+      height: 55,
       decoration: BoxDecoration(
         color: Theme.of(context).canvasColor,
       ),

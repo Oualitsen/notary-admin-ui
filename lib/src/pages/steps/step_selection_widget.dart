@@ -31,7 +31,7 @@ class _StepsSelectionState extends BasicState<StepsSelection>
       appBar: AppBar(
         title: Text(lang.steps),
         actions: [
-          ElevatedButton(
+          TextButton(
               onPressed: () {
                 showDialog(
                   context: context,
@@ -42,7 +42,12 @@ class _StepsSelectionState extends BasicState<StepsSelection>
                   ),
                 );
               },
-              child: Text(lang.addSteps.toUpperCase()))
+              child: Text(
+                lang.addSteps.toUpperCase(),
+                style: TextStyle(
+                  color: Theme.of(context).canvasColor,
+                ),
+              ))
         ],
       ),
       floatingActionButton: ElevatedButton(
