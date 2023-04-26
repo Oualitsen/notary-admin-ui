@@ -39,6 +39,7 @@ class _DocumentManagerPageState extends BasicState<DocumentManagerPage>
   final imageIdsStream = BehaviorSubject.seeded(<String>[]);
   final base64DataStream = BehaviorSubject.seeded("");
   WebViewXController? controllerWeb;
+  WebViewXController? controllerWeb2;
 
   late String? token;
   var initialized = false;
@@ -54,6 +55,11 @@ class _DocumentManagerPageState extends BasicState<DocumentManagerPage>
       getHtmlData();
     });
     initialized = true;
+    _htmlDocument
+        .where((event) => controllerWeb2 != null && event.isNotEmpty)
+        .listen((event) {
+      controllerWeb2!.loadContent(event, SourceType.html);
+    });
   }
 
   @override
@@ -90,14 +96,32 @@ class _DocumentManagerPageState extends BasicState<DocumentManagerPage>
             SizedBox(width: 5),
           ],
         ),
-        body: StreamBuilder<String>(
-            stream: base64DataStream,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return SizedBox.shrink();
-              }
-              return extensionWidget();
-            }),
+        body: Column(
+          children: [
+            Container(
+              height: 0,
+              child: WebViewX(
+                ignoreAllGestures: false,
+                onWebViewCreated: (controller) {
+                  controllerWeb2 = controller;
+                },
+                height: 0,
+                width: 0,
+              ),
+            ),
+            Expanded(
+              child: StreamBuilder<String>(
+                  stream: base64DataStream,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return SizedBox.shrink();
+                    }
+
+                    return extensionWidget();
+                  }),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -262,13 +286,7 @@ class _DocumentManagerPageState extends BasicState<DocumentManagerPage>
       controllerWeb?.callJsMethod("display", []);
     }
     if (extension == Extension.IMAGE || extension == Extension.PDF) {
-      push(
-        context,
-        DataHtmlView(
-          text: _htmlDocument.value,
-          title: widget.name,
-        ),
-      );
+      controllerWeb2?.callJsMethod("display", []);
     }
   }
 

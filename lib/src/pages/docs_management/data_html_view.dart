@@ -20,6 +20,34 @@ class _DataHtmlViewState extends BasicState<DataHtmlView>
 
   @override
   Widget build(BuildContext context) {
+    return Column(
+      children: [
+        TextButton(
+            onPressed: () {
+              print("controllerWeb = $controllerWeb");
+              controllerWeb?.callJsMethod("display", []);
+            },
+            child: Text("print2")),
+        SizedBox(
+          height: 1,
+          width: 1,
+          child: WebViewX(
+            ignoreAllGestures: false,
+            initialContent: widget.text,
+            initialSourceType: SourceType.html,
+            onWebViewCreated: (controller) {
+              print("on webview created called");
+              controllerWeb = controller;
+            },
+            onPageFinished: (src) {
+              controllerWeb?.callJsMethod("display", []);
+            },
+            height: double.maxFinite,
+            width: double.maxFinite,
+          ),
+        ),
+      ],
+    );
     return WidgetUtils.wrapRoute(
       (context, type) => Scaffold(
         appBar: AppBar(
