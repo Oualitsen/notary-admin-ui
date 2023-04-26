@@ -104,6 +104,7 @@ class _ArchivePageState extends BasicState<ArchivePage> with WidgetUtilsMixin {
                 ),
               ),
             ),
+            SizedBox(width: 5),
           ],
         ),
         body: StreamBuilder<int>(

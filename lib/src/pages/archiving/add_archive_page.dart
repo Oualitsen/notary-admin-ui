@@ -165,7 +165,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
                         ),
                       ],
                     ),
-                    content: selectCustomersWidget(),
+                    content: selectedCustomersWidget(),
                     isActive: widget.files != null
                         ? activeState == 3
                         : activeState == 2,
@@ -390,6 +390,9 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
   }
 
   Widget getDocuments() {
+    if (widget.files!.uploadedFiles.isEmpty) {
+      return Text(lang.noDocumentUploaded);
+    }
     documentsInfolist = [];
     for (var part in widget.files!.specification.partsSpecs) {
       for (var doc in part.documentSpec) {
@@ -471,7 +474,7 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
         ));
   }
 
-  Widget selectCustomersWidget() {
+  Widget selectedCustomersWidget() {
     return Column(
       children: [
         StreamBuilder<List<Customer>>(
@@ -480,7 +483,15 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
               if (!snapshot.hasData) {
                 return SizedBox.shrink();
               }
-              //
+              if (snapshot.data!.isEmpty) {
+          return Row(
+            children: [
+              Icon(Icons.warning_outlined),
+              SizedBox(width: 16),
+              Text(lang.noSelectedCustomers.toUpperCase()),
+            ],
+          );
+        }
               return ReusedWidgets.ListCustomers(
                 context,
                 listCustomers: customersStream.value,
@@ -505,6 +516,15 @@ class _AddArchivePageState extends BasicState<AddArchivePage>
           return SizedBox.shrink();
         }
         var index = -1;
+        if (snapshot.data!.isEmpty) {
+          return Row(
+            children: [
+              Icon(Icons.warning_outlined),
+              SizedBox(width: 16),
+              Text(lang.noScannedDocuments.toUpperCase()),
+            ],
+          );
+        }
         return Column(
           children: [
             Column(

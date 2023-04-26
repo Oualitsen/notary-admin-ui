@@ -41,8 +41,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
   final templateIdStream = BehaviorSubject.seeded('');
   final stepsStream = BehaviorSubject.seeded(<Steps>[]);
   //key
-  final GlobalKey<FormState> fileSpecNameKey = GlobalKey<FormState>();
-  final GlobalKey<FormState> templateFileSpecKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> inputKey = GlobalKey<FormState>();
   //controller
   final fileSpecNameCtrl = TextEditingController();
   final fileSpecTemplateCtrl = TextEditingController();
@@ -97,7 +96,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                   content: Column(
                     children: [
                       Form(
-                        key: fileSpecNameKey,
+                        key: inputKey,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
@@ -109,6 +108,18 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                                 return ValidationUtils.requiredField(
                                     text, context);
                               },
+                            ),
+                            SizedBox(height: 16),
+                            wrapInIgnorePointer(
+                              child: TextFormField(
+                                  controller: fileSpecTemplateCtrl,
+                                  decoration: getDecoration(lang.selectTemplate,
+                                      true, lang.selectTemplate),
+                                  validator: (text) {
+                                    return ValidationUtils.requiredField(
+                                        text, context);
+                                  }),
+                              onTap: selectTemplate,
                             ),
                           ],
                         ),
@@ -124,36 +135,6 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                   state: getState(0),
                 ),
                 Step(
-                  title: Text(lang.templates.toUpperCase()),
-                  content: Column(
-                    children: [
-                      Form(
-                        key: templateFileSpecKey,
-                        child: wrapInIgnorePointer(
-                          child: TextFormField(
-                              controller: fileSpecTemplateCtrl,
-                              decoration: getDecoration(lang.selectTemplate,
-                                  true, lang.selectTemplate),
-                              validator: (text) {
-                                return ValidationUtils.requiredField(
-                                    text, context);
-                              }),
-                          onTap: selectTemplate,
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      getButtons(
-                        onSave: continued,
-                        onCancel: previous,
-                        saveLabel: lang.next.toUpperCase(),
-                        cancelLabel: lang.previous.toUpperCase(),
-                      ),
-                    ],
-                  ),
-                  isActive: activeState == 1,
-                  state: getState(1),
-                ),
-                Step(
                   title: Row(
                     children: [
                       Text(lang.steps.toUpperCase()),
@@ -161,7 +142,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                         width: 40,
                       ),
                       ElevatedButton(
-                        onPressed: snapshot.data == 2 ? selectCustomers : null,
+                        onPressed: snapshot.data == 1 ? selectCustomers : null,
                         child: Icon(Icons.add),
                       ),
                     ],
@@ -172,6 +153,15 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                       builder: (context, snapshot) {
                         if (snapshot.hasData == false) {
                           return SizedBox.shrink();
+                        }
+                        if (snapshot.data!.isEmpty) {
+                          return Row(
+                            children: [
+                              Icon(Icons.warning_outlined),
+                              SizedBox(width: 16),
+                              Text(lang.noStepsSelected.toUpperCase()),
+                            ],
+                          );
                         }
                         var index = -1;
                         return Column(
@@ -187,8 +177,10 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                                     onPressed: () {
                                       deleteStep(index);
                                     },
-                                    icon: Icon(Icons.delete, 
-                                    color: Theme.of(context).canvasColor,),
+                                    icon: Icon(
+                                      Icons.delete,
+                                      color: Theme.of(context).canvasColor,
+                                    ),
                                     label: Text(lang.delete.toUpperCase())),
                               );
                             }).toList()),
@@ -212,8 +204,8 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                           ],
                         );
                       }),
-                  isActive: activeState == 2,
-                  state: getState(2),
+                  isActive: activeState == 1,
+                  state: getState(1),
                 ),
                 Step(
                   title: Row(
@@ -224,7 +216,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                       ),
                       SizedBox(width: 20),
                       ElevatedButton(
-                        onPressed: snapshot.data == 3
+                        onPressed: snapshot.data == 2
                             ? () {
                                 Navigator.push<PartsSpecInput>(
                                   context,
@@ -249,6 +241,15 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
                           return SizedBox.shrink();
+                        }
+                        if (snapshot.data!.isEmpty) {
+                          return Row(
+                            children: [
+                              Icon(Icons.warning_outlined),
+                              SizedBox(width: 16),
+                              Text(lang.noSelectedParts.toUpperCase()),
+                            ],
+                          );
                         }
                         var index = -1;
                         return Column(
@@ -291,8 +292,8 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                           ],
                         );
                       }),
-                  isActive: activeState == 3,
-                  state: getState(3),
+                  isActive: activeState == 2,
+                  state: getState(2),
                 ),
               ],
             );
@@ -317,21 +318,17 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
 
     switch (value) {
       case 0:
-        if (fileSpecNameKey.currentState?.validate() ?? false) {
+        if (inputKey.currentState?.validate() ?? false) {
           currentStepStream.add(currentStepStream.value + 1);
         }
         break;
+
       case 1:
-        if (templateFileSpecKey.currentState?.validate() ?? false) {
-          currentStepStream.add(currentStepStream.value + 1);
-        }
-        break;
-      case 2:
         if (stepsStream.value.isNotEmpty) {
           currentStepStream.add(currentStepStream.value + 1);
         }
         break;
-      case 3:
+      case 2:
         save();
         break;
     }

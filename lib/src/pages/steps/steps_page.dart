@@ -63,13 +63,13 @@ class _StepsPageState extends BasicState<StepsPage> with WidgetUtilsMixin {
   }
 
   void saveStep() async {
-    Navigator.pop(context);
     StepInput? value = stepKey.currentState?.read();
     if (value != null) {
       try {
         progressSubject.add(true);
         var res = await service.saveStep(value);
         tableKey.currentState?.add(res);
+        Navigator.of(context).pop();
         await showSnackBar2(context, lang.savedSuccessfully);
       } catch (error, stacktrace) {
         showServerError(context, error: error);

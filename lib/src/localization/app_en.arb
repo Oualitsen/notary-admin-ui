@@ -332,13 +332,10 @@
   "isNotDoubleSided": "Front-side only",
   "addArchive": "Add an archive",
   "completeTemplate": "Complete template",
-  "noTemplateInstance": "No Document Generated",
+  "noTemplateInstance": "No Document Generated, Please select and fill a template first",
   "additionalDocuments": "Additional documents",
   "lowerBound": "Lower Bound",
   "upperBound": "Upper bound",
-  "name": "Name",
-  "value": "Value",
-  "percentage": "Percentage",
   "addDocumentsSpec": "Add documents",
   "part": "Part",
   "listPart": "Parts",
@@ -357,5 +354,12 @@
   "selectDateRange": "Select a date range",
   "scannedDocuments": "Scanned documents",
   "pleaseWait": "Please wait",
-  "noDataFound": "No Data Found"
+  "noDataFound": "No Data Found",
+  "noDocumentUploaded": "No document uploaded",
+  "noScannedDocuments": "Please join the necessary documents first",
+  "noStepsSelected": "Please select and in order the necessary steps first",
+  "noSelectedParts": "Please create the necessary parts and their corresponding documents to submit",
+  "noSelectedCustomers": "No Customer selected",
+  "selectCustomersFirst": "Please select the involved customers first",
+  "noAdditionalDocument": "No addictional documents are selected"
 }

@@ -77,6 +77,7 @@ class HomePageState extends BasicState<HomePage>
                     color: Theme.of(context).canvasColor,
                   ),
                 ),
+                SizedBox(width: 5),
               ],
             ),
           ],
