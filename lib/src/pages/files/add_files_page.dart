@@ -94,7 +94,16 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                               if (!snapshot.hasData) {
                                 return SizedBox.shrink();
                               }
-                              //
+                              if (snapshot.data!.isEmpty) {
+                                return Row(
+                                  children: [
+                                    Icon(Icons.warning_outlined),
+                                    SizedBox(width: 16),
+                                    Text(lang.selectCustomersFirst
+                                        .toUpperCase()),
+                                  ],
+                                );
+                              }
                               return ReusedWidgets.ListCustomers(
                                 context,
                                 listCustomers: customersStream.value,
@@ -174,8 +183,13 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                             stream: printedDocInputStream,
                             builder: (context, snapshot) {
                               if (snapshot.hasData == false) {
-                                return Text(
-                                    lang.noTemplateInstance.toUpperCase());
+                                return Row(
+                                  children: [
+                                    Icon(Icons.warning_outlined),
+                                    SizedBox(width: 16),
+                                    Text(lang.noTemplateInstance.toUpperCase()),
+                                  ],
+                                );
                               }
 
                               return ListTile(
@@ -232,6 +246,18 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
                             builder: (context, snapshot) {
                               if (snapshot.hasData == false) {
                                 return SizedBox.shrink();
+                              }
+                              if (snapshot.data!.isEmpty) {
+                                if (snapshot.data!.isEmpty) {
+                                  return Row(
+                                    children: [
+                                      Icon(Icons.warning_outlined),
+                                      SizedBox(width: 16),
+                                      Text(lang.noAdditionalDocument
+                                          .toUpperCase()),
+                                    ],
+                                  );
+                                }
                               }
                               var index = -1;
                               return Column(
@@ -296,8 +322,6 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
         {
           if (customersStream.value.isNotEmpty) {
             currentStepStream.add(currentStepStream.value + 1);
-          } else {
-            await showSnackBar2(context, lang.noCustomer);
           }
         }
 
@@ -525,9 +549,6 @@ class _AddFilesCustomerState extends BasicState<AddFilesCustomer>
         initialCustomers: customersStream.value,
         onSave: (selectedCustomer) {
           customersStream.add(selectedCustomer);
-          if (customersStream.value.isEmpty) {
-            showSnackBar2(context, lang.noCustomer);
-          }
         },
       ),
     );

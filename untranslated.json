@@ -94,7 +94,14 @@
     "selectDateRange",
     "scannedDocuments",
     "pleaseWait",
-    "noDataFound"
+    "noDataFound",
+    "noDocumentUploaded",
+    "noScannedDocuments",
+    "noStepsSelected",
+    "noSelectedParts",
+    "noSelectedCustomers",
+    "selectCustomersFirst",
+    "noAdditionalDocument"
   ],
 
   "fr": [
@@ -193,6 +200,13 @@
     "selectDateRange",
     "scannedDocuments",
     "pleaseWait",
-    "noDataFound"
+    "noDataFound",
+    "noDocumentUploaded",
+    "noScannedDocuments",
+    "noStepsSelected",
+    "noSelectedParts",
+    "noSelectedCustomers",
+    "selectCustomersFirst",
+    "noAdditionalDocument"
   ]
 }

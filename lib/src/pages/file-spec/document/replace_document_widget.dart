@@ -201,8 +201,8 @@ class _ReplaceDocumentWidgetState extends BasicState<ReplaceDocumentWidget>
   List<Subject> get subjects => [];
 
   void submitFiles() async {
+    progressSubject.add(true);
     try {
-      progressSubject.add(true);
       if (updateDocumentsStream.value.isNotEmpty) {
         await ReusedWidgets.uploadFiles(
           context,
@@ -212,7 +212,7 @@ class _ReplaceDocumentWidgetState extends BasicState<ReplaceDocumentWidget>
               .map((e) => e.pathDocument)
               .toList(),
         );
-        showSnackBar2(context, lang.savedSuccessfully);
+       await showSnackBar2(context, lang.savedSuccessfully);
         Navigator.of(context).pop();
       }
     } catch (error, stackTrace) {

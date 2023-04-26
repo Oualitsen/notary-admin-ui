@@ -77,6 +77,7 @@ class _DocumentManagerPageState extends BasicState<DocumentManagerPage>
                 color: Theme.of(context).canvasColor,
               ),
             ),
+            SizedBox(width: 5),
             TextButton(
               onPressed: printDoc,
               child: Text(
@@ -86,6 +87,7 @@ class _DocumentManagerPageState extends BasicState<DocumentManagerPage>
                 ),
               ),
             ),
+            SizedBox(width: 5),
           ],
         ),
         body: StreamBuilder<String>(

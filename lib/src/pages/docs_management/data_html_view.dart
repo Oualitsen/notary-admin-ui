@@ -27,21 +27,24 @@ class _DataHtmlViewState extends BasicState<DataHtmlView>
               ? Text(widget.title!.toUpperCase())
               : Text(lang.print),
           actions: [
-            Tooltip(
-              message: lang.print,
-              child: TextButton.icon(
-                label: Text(
-                  lang.print.toUpperCase(),
-                  style: TextStyle(
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Tooltip(
+                message: lang.print,
+                child: TextButton.icon(
+                  label: Text(
+                    lang.print.toUpperCase(),
+                    style: TextStyle(
+                      color: Theme.of(context).canvasColor,
+                    ),
+                  ),
+                  onPressed: () {
+                    controllerWeb?.callJsMethod("display", []);
+                  },
+                  icon: Icon(
+                    Icons.print,
                     color: Theme.of(context).canvasColor,
                   ),
-                ),
-                onPressed: () {
-                  controllerWeb?.callJsMethod("display", []);
-                },
-                icon: Icon(
-                  Icons.print,
-                  color: Theme.of(context).canvasColor,
                 ),
               ),
             ),
@@ -54,6 +57,9 @@ class _DataHtmlViewState extends BasicState<DataHtmlView>
             initialSourceType: SourceType.html,
             onWebViewCreated: (controller) {
               return controllerWeb = controller;
+            },
+            onPageFinished: (src) {
+              controllerWeb?.callJsMethod("display", []);
             },
             height: double.maxFinite,
             width: double.maxFinite,

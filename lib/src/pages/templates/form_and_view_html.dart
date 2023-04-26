@@ -75,6 +75,7 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
                 icon: Icon(Icons.print, color: Theme.of(context).canvasColor),
               ),
             ),
+            SizedBox(width: 5),
             Tooltip(
               message: lang.save,
               child: TextButton.icon(
@@ -87,7 +88,8 @@ class _FormAndViewHtmlState extends BasicState<FormAndViewHtml>
                 }),
                 icon: Icon(Icons.save),
               ),
-            )
+            ),
+            SizedBox(width: 5),
           ],
         ),
         body: Row(

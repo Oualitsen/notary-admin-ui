@@ -31,23 +31,26 @@ class _StepsSelectionState extends BasicState<StepsSelection>
       appBar: AppBar(
         title: Text(lang.steps),
         actions: [
-          TextButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: Text(lang.addSteps),
-                    content: AddStepWidget(key: stepsKey),
-                    actions: [getButtons(onSave: onSave)],
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text(lang.addSteps),
+                      content: AddStepWidget(key: stepsKey),
+                      actions: [getButtons(onSave: onSave)],
+                    ),
+                  );
+                },
+                child: Text(
+                  lang.addSteps.toUpperCase(),
+                  style: TextStyle(
+                    color: Theme.of(context).canvasColor,
                   ),
-                );
-              },
-              child: Text(
-                lang.addSteps.toUpperCase(),
-                style: TextStyle(
-                  color: Theme.of(context).canvasColor,
-                ),
-              ))
+                )),
+          )
         ],
       ),
       floatingActionButton: ElevatedButton(
