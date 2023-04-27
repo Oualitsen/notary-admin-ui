@@ -23,8 +23,6 @@ abstract class FileSpecService {
   @DELETE("/admin/files-spec/{id}")
   Future<void> deleteFileSpec(@Path("id") String id);
 
-  @GET("/admin/files-spec/name")
-  Future<FilesSpec> getByName(@Path("id") String id);
 
   @GET("/admin/files-spec/search")
   Future<List<FilesSpec>> searchFilesSpec({
