@@ -6,7 +6,6 @@ import 'package:http_error_handler/error_handler.dart';
 import 'package:notary_admin/src/db_services/token_db_service.dart';
 import 'package:notary_admin/src/pages/docs_management/image_widget.dart';
 import 'package:notary_admin/src/pages/docs_management/pdf_images.dart';
-import 'package:notary_admin/src/pages/docs_management/data_html_view.dart';
 import 'package:notary_admin/src/services/files/data_manager_service.dart';
 import 'package:notary_admin/src/utils/reused_widgets.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
