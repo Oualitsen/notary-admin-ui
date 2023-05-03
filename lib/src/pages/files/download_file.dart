@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:notary_admin/src/pages/contract_function_input_widget.dart';
+import 'package:notary_admin/src/pages/formula/contract_function_input_widget.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
@@ -18,7 +18,7 @@ class _DowloadFileState extends BasicState<DowloadFile> with WidgetUtilsMixin {
   @override
   Widget build(BuildContext context) {
     return WidgetUtils.wrapRoute(
-      (context, type) => Scaffold(body: ContractInputFunctionWidget()),
+      (context, type) => Scaffold(body: ContractFunctionInputWidget(onRead: (ContractFunction ) {  },)),
     );
   }
 

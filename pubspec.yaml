@@ -27,6 +27,7 @@ dependencies:
   cookie_jar: ^3.0.0
   html_editor_enhanced: ^2.5.1
   flutter_downloader: ^1.10.2
+  infinite_scroll_list_view: ^1.0.0
 
   notary_model:
     path: ../notary_model
@@ -51,6 +52,7 @@ dev_dependencies:
   retrofit: ^3.0.1
   retrofit_generator: ^4.0.1
   byte_util: ^0.3.0
+  
 
   #flutter_lints: ^1.0.4
 

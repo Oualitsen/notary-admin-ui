@@ -1,3 +1,4 @@
+import 'package:notary_model/model/contract_formula_input.dart';
 import 'package:notary_model/model/files_spec.dart';
 import 'package:notary_model/model/files_spec_input.dart';
 import 'package:retrofit/retrofit.dart';
@@ -35,4 +36,9 @@ abstract class FileSpecService {
 
   @GET("/admin/files-spec/search/count")
   Future<int> searchCount({@Query("name") required String name});
+
+   @POST("/admin/files-spec/contract/{fileSpecId}")
+  Future<FilesSpec> addContractFormulaToFileSpec(
+      @Path("fileSpecId") String fileSpecId,
+      @Body() ContractFormulaInput contractFormulaInput);
 }

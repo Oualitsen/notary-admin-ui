@@ -194,6 +194,33 @@ class _FileSpecService implements FileSpecService {
     return value;
   }
 
+  @override
+  Future<FilesSpec> addContractFormulaToFileSpec(
+    fileSpecId,
+    contractFormulaInput,
+  ) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(contractFormulaInput.toJson());
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<FilesSpec>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/admin/files-spec/contract/${fileSpecId}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = FilesSpec.fromJson(_result.data!);
+    return value;
+  }
+
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {
     if (T != dynamic &&
         !(requestOptions.responseType == ResponseType.bytes ||

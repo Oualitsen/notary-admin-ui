@@ -3,6 +3,8 @@ import 'package:notary_admin/src/pages/assistant/assistant_page.dart';
 import 'package:notary_admin/src/pages/customer/customer_page.dart';
 import 'package:notary_admin/src/pages/file-spec/file_spec_page.dart';
 import 'package:notary_admin/src/pages/files/files_page.dart';
+import 'package:notary_admin/src/pages/formula/calulator/contract_calculator_page.dart';
+import 'package:notary_admin/src/pages/formula/contract_formula_input_page.dart';
 import 'package:notary_admin/src/pages/login_page.dart';
 import 'package:notary_admin/src/pages/printed_docs/printed_docs_page.dart';
 import 'package:notary_admin/src/pages/profile_page.dart';
@@ -117,8 +119,18 @@ Widget createDrawer(BuildContext context) {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => DowloadFile()),
+            MaterialPageRoute(builder: (context) => ContractFormulaPage()),
           );
+        },
+      ),
+      DrawerMenuItem(
+        title: (lang.contractCalculator),
+        icon: Icons.calculate,
+        onTap: () => {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ContractCalculator()),
+          )
         },
       ),
       DrawerMenuItem(
