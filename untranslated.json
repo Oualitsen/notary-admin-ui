@@ -124,6 +124,14 @@
     "selectAformula",
     "pageNumber",
     "copyNumber"
+    "noDocumentUploaded",
+    "noScannedDocuments",
+    "noStepsSelected",
+    "noSelectedParts",
+    "noSelectedCustomers",
+    "selectCustomersFirst",
+    "noAdditionalDocument"
+
   ],
 
   "fr": [

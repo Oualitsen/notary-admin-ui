@@ -42,25 +42,26 @@ class AddStepWidgetState extends BasicState<AddStepWidget>
         padding: const EdgeInsets.all(10),
         child: Form(
           key: key,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          child: ListView(
+            shrinkWrap: true,
             children: [
               TextFormField(
-                  autofocus: true,
-                  textInputAction: TextInputAction.next,
-                  validator: (text) {
-                    return ValidationUtils.requiredField(text, context);
-                  },
-                  controller: nameController,
-                  decoration: (getDecoration(lang.name, true, lang.name))),
+                autofocus: true,
+                textInputAction: TextInputAction.next,
+                validator: (text) {
+                  return ValidationUtils.requiredField(text, context);
+                },
+                controller: nameController,
+                decoration: getDecoration(lang.name, true, lang.name),
+              ),
               const SizedBox(height: 16),
               TextFormField(
                 validator: (text) {
                   return ValidationUtils.requiredField(text, context);
                 },
                 controller: estimatedTimeController,
-                decoration: (getDecoration(
-                    lang.estimationTime, true, lang.estimationTime)),
+                decoration: getDecoration(
+                    lang.estimationTime, true, lang.estimationTime),
               ),
             ],
           ),

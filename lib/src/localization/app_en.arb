@@ -332,7 +332,7 @@
   "isNotDoubleSided": "Front-side only",
   "addArchive": "Add an archive",
   "completeTemplate": "Complete template",
-  "noTemplateInstance": "No Document Generated",
+  "noTemplateInstance": "No Document Generated, Please select and fill a template first",
   "additionalDocuments": "Additional documents",
   "lowerBound": "Lower Bound",
   "upperBound": "Upper bound",
@@ -384,4 +384,5 @@
   "selectAformula": "Select a formula",
   "pageNumber": "page number",
   "copyNumber": "copy number"
+
 }

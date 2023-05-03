@@ -6,7 +6,6 @@ import 'package:http_error_handler/error_handler.dart';
 import 'package:notary_admin/src/db_services/token_db_service.dart';
 import 'package:notary_admin/src/pages/docs_management/image_widget.dart';
 import 'package:notary_admin/src/pages/docs_management/pdf_images.dart';
-import 'package:notary_admin/src/pages/docs_management/data_html_view.dart';
 import 'package:notary_admin/src/services/files/data_manager_service.dart';
 import 'package:notary_admin/src/utils/reused_widgets.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
@@ -39,6 +38,7 @@ class _DocumentManagerPageState extends BasicState<DocumentManagerPage>
   final imageIdsStream = BehaviorSubject.seeded(<String>[]);
   final base64DataStream = BehaviorSubject.seeded("");
   WebViewXController? controllerWeb;
+  WebViewXController? controllerWeb2;
 
   late String? token;
   var initialized = false;
@@ -54,6 +54,11 @@ class _DocumentManagerPageState extends BasicState<DocumentManagerPage>
       getHtmlData();
     });
     initialized = true;
+    _htmlDocument
+        .where((event) => controllerWeb2 != null && event.isNotEmpty)
+        .listen((event) {
+      controllerWeb2!.loadContent(event, SourceType.html);
+    });
   }
 
   @override
@@ -77,6 +82,7 @@ class _DocumentManagerPageState extends BasicState<DocumentManagerPage>
                 color: Theme.of(context).canvasColor,
               ),
             ),
+            SizedBox(width: 5),
             TextButton(
               onPressed: printDoc,
               child: Text(
@@ -86,16 +92,35 @@ class _DocumentManagerPageState extends BasicState<DocumentManagerPage>
                 ),
               ),
             ),
+            SizedBox(width: 5),
           ],
         ),
-        body: StreamBuilder<String>(
-            stream: base64DataStream,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return SizedBox.shrink();
-              }
-              return extensionWidget();
-            }),
+        body: Column(
+          children: [
+            Container(
+              height: 0,
+              child: WebViewX(
+                ignoreAllGestures: false,
+                onWebViewCreated: (controller) {
+                  controllerWeb2 = controller;
+                },
+                height: 0,
+                width: 0,
+              ),
+            ),
+            Expanded(
+              child: StreamBuilder<String>(
+                  stream: base64DataStream,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return SizedBox.shrink();
+                    }
+
+                    return extensionWidget();
+                  }),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -260,13 +285,7 @@ class _DocumentManagerPageState extends BasicState<DocumentManagerPage>
       controllerWeb?.callJsMethod("display", []);
     }
     if (extension == Extension.IMAGE || extension == Extension.PDF) {
-      push(
-        context,
-        DataHtmlView(
-          text: _htmlDocument.value,
-          title: widget.name,
-        ),
-      );
+      controllerWeb2?.callJsMethod("display", []);
     }
   }
 

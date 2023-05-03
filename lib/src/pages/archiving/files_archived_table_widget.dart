@@ -235,9 +235,7 @@ class _FilesArchiveTableWidgetState extends BasicState<FilesArchiveTableWidget>
           return ListTile(
             leading: CircleAvatar(child: Text("${(index + 1)}")),
             title: Text("$element"),
-            trailing: element.endsWith("pdf")
-                ? Icon(Icons.picture_as_pdf)
-                : Icon(Icons.download),
+            trailing: Icon(Icons.arrow_forward),
             onTap: () => push(
               context,
               DocumentManagerPage(
