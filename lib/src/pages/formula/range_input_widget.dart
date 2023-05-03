@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:notary_admin/src/pages/contract_function_input_widget.dart';
+import 'package:notary_admin/src/pages/formula/contract_function_input_widget.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
@@ -22,7 +22,7 @@ class RangeInputWidgetState extends BasicState<RangeInputWidget>
   final lowerBoundCrl = TextEditingController();
   final upperBoundCtl = TextEditingController();
   final key = GlobalKey<FormState>();
-  final cifKey = GlobalKey<ContractInputFunctionWidgetState>();
+  final cifKey = GlobalKey<ContractFunctionInputWidgetState>();
   @override
   void initState() {
     final r = widget.range;
@@ -49,7 +49,8 @@ class RangeInputWidgetState extends BasicState<RangeInputWidget>
                     controller: lowerBoundCrl,
                     decoration: getDecoration(lang.lowerBound, true),
                     validator: (text) {
-                      return ValidationUtils.doubleValidator(text, context);
+                      return ValidationUtils.doubleValidator(text, context,
+                          required: true);
                     },
                   ),
                 ),
@@ -62,7 +63,8 @@ class RangeInputWidgetState extends BasicState<RangeInputWidget>
                     controller: upperBoundCtl,
                     decoration: getDecoration(lang.upperBound, true),
                     validator: (text) {
-                      return ValidationUtils.doubleValidator(text, context);
+                      return ValidationUtils.doubleValidator(text, context,
+                          required: true);
                     },
                   ),
                 )
@@ -71,11 +73,13 @@ class RangeInputWidgetState extends BasicState<RangeInputWidget>
             SizedBox(
               height: 16,
             ),
-            ContractInputFunctionWidget(
+            ContractFunctionInputWidget(
               range: widget.range,
               showName: false,
               canAddRanges: false,
               key: cifKey,
+              hideSave: true,
+              onRead: (p0) {},
             )
           ],
         ),
@@ -87,20 +91,17 @@ class RangeInputWidgetState extends BasicState<RangeInputWidget>
   Range? range() {
     var state = key.currentState!;
     var function = cifKey.currentState?.read();
-    var lowerBound = double.parse(lowerBoundCrl.text);
-    var upperBound = double.parse(upperBoundCtl.text);
+
     if (state.validate() && function != null) {
+      var lowerBound = double.parse(lowerBoundCrl.text);
+      var upperBound = double.parse(upperBoundCtl.text);
       if (compare(lowerBound, upperBound) == true) {
-        var range = Range(
+        return Range(
             lowerBound: lowerBound,
             upperBound: upperBound,
             contractFunction: function);
-        return range;
       } else {
-        print("lower bound must be ");
-        showAlertDialog(
-            context: context,
-            message: "Lower bound must be lower than pper bound");
+        showAlertDialog(context: context, message: lang.lowerBound);
       }
     }
     return null;
