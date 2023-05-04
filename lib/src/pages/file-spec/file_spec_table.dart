@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
 import 'package:lazy_paginated_data_table/lazy_paginated_data_table.dart';
 import 'package:notary_admin/src/pages/file-spec/add_file_spec.dart';
+import 'package:notary_admin/src/pages/formula/contract_formula_input_page.dart';
 import 'package:notary_admin/src/pages/steps/add_step_widget.dart';
 import 'package:notary_admin/src/services/admin/steps_service.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
@@ -43,6 +44,7 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
       DataColumn(label: Text(lang.name)),
       DataColumn(label: Text(lang.listDocumentsFileSpec)),
       DataColumn(label: Text(lang.steps)),
+      DataColumn(label: Text(lang.formula)),
       DataColumn(label: Text(lang.edit)),
       DataColumn(label: Text(lang.delete)),
     ];
@@ -98,6 +100,23 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
         TextButton(
           onPressed: () => stepsList(context, data),
           child: Text(lang.steps.toUpperCase()),
+        ),
+      ),
+      DataCell(
+        TextButton(
+          onPressed: () => push<FilesSpec?>(
+            context,
+            ContractFormulaPage(
+              fileSpec: data,
+            ),
+          ).where((event) => event != null).listen((event) {
+            widget.tableKey?.currentState?.refreshPage();
+          }),
+          child: Text(
+            data.formula == null
+                ? lang.addFormula.toUpperCase()
+                : lang.editFormula.toUpperCase(),
+          ),
         ),
       ),
       DataCell(

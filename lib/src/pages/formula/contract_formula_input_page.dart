@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:http_error_handler/error_handler.dart';
 import 'package:notary_admin/src/pages/formula/contract_function_input_page.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
@@ -8,11 +9,13 @@ import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/contract_formula_input.dart';
 import 'package:notary_model/model/contract_function.dart';
+import 'package:notary_model/model/files_spec.dart';
 import 'package:rapidoc_utils/utils/Utils.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ContractFormulaPage extends StatefulWidget {
-  const ContractFormulaPage({super.key});
+  final FilesSpec fileSpec;
+  const ContractFormulaPage({super.key, required this.fileSpec});
 
   @override
   State<ContractFormulaPage> createState() => _ContractFormulaPageState();
@@ -63,6 +66,19 @@ class _ContractFormulaPageState extends BasicState<ContractFormulaPage>
       functionMap[name] = noOp;
     });
 
+    var f = widget.fileSpec.formula;
+    if (f != null) {
+      pageNumberCtrl.text = f.pageNumber.toString();
+      assetPriceCtrl.text = f.assetPrice.toString();
+      copyNumberCtrl.text = f.copyNumber.toString();
+      copyPriceCtrl.text = f.copyPrice.toString();
+      stampCtrl.text = f.stamp.toString();
+      vatCtrl.text = f.vat.toString();
+
+      f.functions.forEach((e) => functionMap[e.name ?? ""] = e);
+      //functionSubject.add(functionMap);
+    }
+
     functionSubject.add(functionMap);
   }
 
@@ -97,7 +113,7 @@ class _ContractFormulaPageState extends BasicState<ContractFormulaPage>
                           ),
                           SizedBox(height: 16),
                           TextFormField(
-                            keyboardType: TextInputType.number, 
+                            keyboardType: TextInputType.number,
                             controller: assetPriceCtrl,
                             validator: (text) {
                               return ValidationUtils.doubleValidator(
@@ -233,25 +249,7 @@ class _ContractFormulaPageState extends BasicState<ContractFormulaPage>
                       },
                       child: Text(lang.addContractFunction.toUpperCase())),
                   Expanded(
-                    child: getButtons(
-                      onSave: () async {
-                        if (key.currentState!.validate()) {
-                          ContractFormulaInput contractFormulaInput =
-                              new ContractFormulaInput(
-                                  id: id,
-                                  copyPrice: double.parse(copyPriceCtrl.text),
-                                  pageNumber: double.parse(pageNumberCtrl.text),
-                                  copyNumber: double.parse(copyNumberCtrl.text),
-                                  assetPrice: double.parse(assetPriceCtrl.text),
-                                  stamp: double.parse(stampCtrl.text),
-                                  vat: double.parse(vatCtrl.text),
-                                  functions:
-                                      functionSubject.value.values.toList());
-                          await service.addContractFormulaToFileSpec(
-                              "6449097d32ff6677d27849f3", contractFormulaInput);
-                        }
-                      },
-                    ),
+                    child: getButtons(onSave: save),
                   ),
                 ],
               ),
@@ -260,6 +258,44 @@ class _ContractFormulaPageState extends BasicState<ContractFormulaPage>
         ),
       ),
     );
+  }
+
+  ContractFormulaInput? readContractFormulaInput() {
+    var state = key.currentState!;
+    if (state.validate()) {
+      print(copyPriceCtrl.text);
+      ContractFormulaInput contractFormulaInput = new ContractFormulaInput(
+          id: id,
+          copyPrice: double.parse(copyPriceCtrl.text),
+          pageNumber: double.parse(pageNumberCtrl.text),
+          copyNumber: double.parse(copyNumberCtrl.text),
+          assetPrice: double.parse(assetPriceCtrl.text),
+          stamp: double.parse(stampCtrl.text),
+          vat: double.parse(vatCtrl.text),
+          functions: functionSubject.value.values.toList());
+      return contractFormulaInput;
+    }
+    return null;
+  }
+
+  save() async {
+    final contractFormulaInput = readContractFormulaInput();
+    if (contractFormulaInput != null) {
+      try {
+        progressSubject.add(true);
+
+        var fileSpec = await service.addContractFormulaToFileSpec(
+            widget.fileSpec.id, contractFormulaInput);
+        await showSnackBar2(context, lang.savedSuccessfully);
+        Navigator.of(context).pop(fileSpec);
+      } catch (error, stackTrace) {
+        showServerError(context, error: error);
+        print(stackTrace);
+        throw error;
+      } finally {
+        progressSubject.add(false);
+      }
+    }
   }
 
   @override

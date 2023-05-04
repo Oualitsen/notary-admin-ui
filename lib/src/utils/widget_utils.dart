@@ -18,6 +18,7 @@ import 'package:notary_admin/src/pages/archiving/archive_page.dart';
 import 'package:notary_admin/src/utils/injector.dart';
 import 'package:notary_admin/src/widgets/mixins/lang.dart';
 import 'package:notary_model/model/basic_user.dart';
+import 'package:notary_model/model/files_spec.dart';
 import 'package:rapidoc_utils/widgets/image_utils.dart';
 import 'package:rapidoc_utils/widgets/menu_drawer.dart';
 import 'package:rapidoc_utils/widgets/route_guard_widget.dart';
@@ -113,16 +114,6 @@ Widget createDrawer(BuildContext context) {
   final lang = getLang(context);
   return MenuDrawer(
     items: [
-      DrawerMenuItem(
-        title: (lang.search),
-        icon: Icons.search,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ContractFormulaPage()),
-          );
-        },
-      ),
       DrawerMenuItem(
         title: (lang.contractCalculator),
         icon: Icons.calculate,
