@@ -355,6 +355,13 @@
   "scannedDocuments": "Scanned documents",
   "pleaseWait": "Please wait",
   "noDataFound": "No Data Found",
+  "noDocumentUploaded": "No document uploaded",
+  "noScannedDocuments": "Please join the necessary documents first",
+  "noStepsSelected": "Please select and in order the necessary steps first",
+  "noSelectedParts": "Please create the necessary parts and their corresponding documents to submit",
+  "noSelectedCustomers": "No Customer selected",
+  "selectCustomersFirst": "Please select the involved customers first",
+  "noAdditionalDocument": "No addictional documents are selected",
   "lowerBoundLower": "Lower bound must be lower than upper bound",
   "addRange": "Add range",
   "copyPrice": "Copy price",
@@ -383,6 +390,8 @@
   "contractCalculator": "Contract calculator",
   "selectAformula": "Select a formula",
   "pageNumber": "page number",
-  "copyNumber": "copy number"
-
+  "copyNumber": "copy number",
+  "addFormula": "Add formula",
+  "formula": "Formula",
+  "editFormula": "Edit formula"
 }

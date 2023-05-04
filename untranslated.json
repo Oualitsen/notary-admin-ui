@@ -95,6 +95,13 @@
     "scannedDocuments",
     "pleaseWait",
     "noDataFound",
+    "noDocumentUploaded",
+    "noScannedDocuments",
+    "noStepsSelected",
+    "noSelectedParts",
+    "noSelectedCustomers",
+    "selectCustomersFirst",
+    "noAdditionalDocument",
     "lowerBoundLower",
     "addRange",
     "copyPrice",
@@ -123,15 +130,10 @@
     "contractCalculator",
     "selectAformula",
     "pageNumber",
-    "copyNumber"
-    "noDocumentUploaded",
-    "noScannedDocuments",
-    "noStepsSelected",
-    "noSelectedParts",
-    "noSelectedCustomers",
-    "selectCustomersFirst",
-    "noAdditionalDocument"
-
+    "copyNumber",
+    "addFormula",
+    "formula",
+    "editFormula"
   ],
 
   "fr": [
@@ -231,6 +233,13 @@
     "scannedDocuments",
     "pleaseWait",
     "noDataFound",
+    "noDocumentUploaded",
+    "noScannedDocuments",
+    "noStepsSelected",
+    "noSelectedParts",
+    "noSelectedCustomers",
+    "selectCustomersFirst",
+    "noAdditionalDocument",
     "lowerBoundLower",
     "addRange",
     "copyPrice",
@@ -259,6 +268,9 @@
     "contractCalculator",
     "selectAformula",
     "pageNumber",
-    "copyNumber"
+    "copyNumber",
+    "addFormula",
+    "formula",
+    "editFormula"
   ]
 }
