@@ -10,9 +10,6 @@ abstract class AdminAssistantService {
   @POST("/admin/assistant")
   Future<Admin> saveAssistant(@Body() AssistantInput input);
 
-  @GET("/admin/assistant/by-username")
-  Future<Admin> getByUsername(@Body() String text);
-
   @GET("/admin/assistant")
   Future<List<Admin>> getAssistants(
       {@Query("index") required int index, @Query("size") required int size});
