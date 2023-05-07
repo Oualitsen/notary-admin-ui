@@ -91,7 +91,7 @@ class _FileSpecTableState extends BasicState<FileSpecTable>
       DataCell(
         TextButton(
           onPressed: () => documentList(context, data),
-          child: Text(lang.listPart),
+          child: Text(lang.listPart.toUpperCase()),
         ),
       ),
       DataCell(
