@@ -88,13 +88,11 @@ class _ContractCalculatorState extends BasicState<ContractCalculator>
                         return SizedBox.shrink();
                       }
                       var list = snapshot.data!;
-                      return Expanded(
-                        child: FormulaSelectWidget(
-                          list,
-                          onSelect: (ContractFormula formula) {
-                            selectedFormula.add(formula);
-                          },
-                        ),
+                      return FormulaSelectWidget(
+                        list,
+                        onSelect: (ContractFormula formula) {
+                          selectedFormula.add(formula);
+                        },
                       );
                     },
                   ),

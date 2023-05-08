@@ -263,7 +263,6 @@ class _ContractFormulaPageState extends BasicState<ContractFormulaPage>
   ContractFormulaInput? readContractFormulaInput() {
     var state = key.currentState!;
     if (state.validate()) {
-      print(copyPriceCtrl.text);
       ContractFormulaInput contractFormulaInput = new ContractFormulaInput(
           id: id,
           copyPrice: double.parse(copyPriceCtrl.text),

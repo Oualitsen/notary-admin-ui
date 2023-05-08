@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
@@ -11,7 +12,9 @@ import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_admin/src/utils/reused_widgets.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
+import 'package:notary_admin/src/widgets/contractc_category_list_widget.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
+import 'package:notary_model/model/contract_category.dart';
 import 'package:notary_model/model/files_spec.dart';
 import 'package:notary_model/model/files_spec_input.dart';
 import 'package:notary_model/model/parts_spec_input.dart';
@@ -45,6 +48,9 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
   //controller
   final fileSpecNameCtrl = TextEditingController();
   final fileSpecTemplateCtrl = TextEditingController();
+  //late final List<ContractCategory> contractCategories = [];
+  final contractCategories = BehaviorSubject<ContractCategory>();
+
   //variables
   List<PartsSpecInput> listPartsSpecInput = [];
   late FilesSpec fileSpec;
@@ -56,7 +62,6 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
     if (fileSpec != null) {
       stepsStream.add(fileSpec.steps);
       fileSpecNameCtrl.text = fileSpec.name;
-
       listPartsSpecInput = fileSpec.partsSpecs
           .map((e) =>
               PartsSpecInput(id: e.id, name: e.name, documentSpecInputs: []))
@@ -82,7 +87,6 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
           initialData: currentStepStream.value,
           builder: (context, snapshot) {
             int activeState = snapshot.data ?? 0;
-
             return Stepper(
               physics: ScrollPhysics(),
               currentStep: activeState,
@@ -208,6 +212,48 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                   state: getState(1),
                 ),
                 Step(
+                  title: Text(lang.selecteContractCategory.toUpperCase()),
+                  content: Column(
+                    children: [
+                      SizedBox(height: 50),
+                      SizedBox(
+                        height: 250,
+                        child: Container(
+                          alignment: Alignment.topLeft,
+                          child: ContractCategoryListWidget(
+                            selectContractCategory: (contractCategory) {
+                              contractCategories.add(contractCategory);
+                            },
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      ButtonBar(
+                        alignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                              onPressed: previous,
+                              child: Text(lang.previous.toUpperCase())),
+                          SizedBox(
+                            width: 20,
+                          ),
+                          StreamBuilder<ContractCategory?>(
+                              stream: contractCategories,
+                              builder: (context, snapshot) {
+                                return ElevatedButton(
+                                    onPressed: snapshot.data != null
+                                        ? continued
+                                        : null,
+                                    child: Text(lang.next.toUpperCase()));
+                              }),
+                        ],
+                      ),
+                    ],
+                  ),
+                  isActive: activeState == 2,
+                  state: getState(2),
+                ),
+                Step(
                   title: Row(
                     children: [
                       Text(lang.listPart.toUpperCase()),
@@ -216,7 +262,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                       ),
                       SizedBox(width: 20),
                       ElevatedButton(
-                        onPressed: snapshot.data == 2
+                        onPressed: snapshot.data == 3
                             ? () {
                                 Navigator.push<PartsSpecInput>(
                                   context,
@@ -292,8 +338,8 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                           ],
                         );
                       }),
-                  isActive: activeState == 2,
-                  state: getState(2),
+                  isActive: activeState == 3,
+                  state: getState(3),
                 ),
               ],
             );
@@ -315,7 +361,6 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
 
   continued() async {
     var value = currentStepStream.value;
-
     switch (value) {
       case 0:
         if (inputKey.currentState?.validate() ?? false) {
@@ -329,6 +374,12 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
         }
         break;
       case 2:
+        if (contractCategories.valueOrNull != null) {
+          currentStepStream.add(currentStepStream.value + 1);
+        }
+
+        break;
+      case 3:
         save();
         break;
     }
@@ -347,6 +398,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
     try {
       if (widget.fileSpec == null) {
         var input = FilesSpecInput(
+            contractCategoryId: contractCategories.value.id,
             steps: stepsStream.value,
             name: fileSpecNameCtrl.text,
             partsSpecInput: partsSpecInputStream.value,
@@ -358,6 +410,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
             context, MaterialPageRoute(builder: (context) => FileSpecPage()));
       } else {
         var update = FilesSpecInput(
+            contractCategoryId: null,
             steps: stepsStream.value,
             name: fileSpecNameCtrl.text,
             partsSpecInput: partsSpecInputStream.value,
