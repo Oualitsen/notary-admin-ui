@@ -1,3 +1,4 @@
+import 'package:notary_model/model/contract_category.dart';
 import 'package:notary_model/model/contract_formula_input.dart';
 import 'package:notary_model/model/files_spec.dart';
 import 'package:notary_model/model/files_spec_input.dart';
@@ -24,7 +25,6 @@ abstract class FileSpecService {
   @DELETE("/admin/files-spec/{id}")
   Future<void> deleteFileSpec(@Path("id") String id);
 
-
   @GET("/admin/files-spec/search")
   Future<List<FilesSpec>> searchFilesSpec({
     @Query("name") required String name,
@@ -35,8 +35,14 @@ abstract class FileSpecService {
   @GET("/admin/files-spec/search/count")
   Future<int> searchCount({@Query("name") required String name});
 
-   @POST("/admin/files-spec/contract/{fileSpecId}")
+  @POST("/admin/files-spec/contract/{fileSpecId}")
   Future<FilesSpec> addContractFormulaToFileSpec(
       @Path("fileSpecId") String fileSpecId,
       @Body() ContractFormulaInput contractFormulaInput);
+
+  @GET("/admin/files-spec/contract-category")
+  Future<List<ContractCategory>> getContractCategory({
+    @Query("size") int pageSize: 20,
+    @Query("index") int pageIndex: 0,
+  });
 }

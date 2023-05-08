@@ -133,7 +133,10 @@
     "copyNumber",
     "addFormula",
     "formula",
-    "editFormula"
+    "editFormula",
+    "addContractCategory",
+    "contractCategory",
+    "selecteContractCategory"
   ],
 
   "fr": [
@@ -271,6 +274,9 @@
     "copyNumber",
     "addFormula",
     "formula",
-    "editFormula"
+    "editFormula",
+    "addContractCategory",
+    "contractCategory",
+    "selecteContractCategory"
   ]
 }

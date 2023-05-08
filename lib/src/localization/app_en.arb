@@ -393,5 +393,9 @@
   "copyNumber": "copy number",
   "addFormula": "Add formula",
   "formula": "Formula",
-  "editFormula": "Edit formula"
+  "editFormula": "Edit formula",
+  "addContractCategory": "Add contract category",
+  "contractCategory":"Contract category",
+  "selecteContractCategory":"Select contract category"
+ 
 }

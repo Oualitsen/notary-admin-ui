@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
@@ -21,16 +19,20 @@ class _FormulaSelectWidgetState extends BasicState<FormulaSelectWidget>
   final fileSpecsList = <FilesSpec>[];
   final key = GlobalKey<InfiniteScrollListViewState<FilesSpec>>();
   final filterStream = BehaviorSubject<String>.seeded("");
+  final selectedFormula = BehaviorSubject<ContractFormula>();
   @override
   void initState() {
     var _list =
         widget.list.where((element) => element.formula != null).toList();
     if (_list.isNotEmpty) {
-      widget.onSelect(_list.first.formula!);
+      selectedFormula.add(_list.first.formula!);
     }
     fileSpecsList.addAll(_list);
     filterStream.where((event) => key.currentState != null).listen((value) {
       key.currentState!.reload();
+    });
+    selectedFormula.listen((value) {
+      widget.onSelect(value);
     });
     super.initState();
   }
@@ -52,18 +54,28 @@ class _FormulaSelectWidgetState extends BasicState<FormulaSelectWidget>
               itemLoadingWidget: SizedBox.shrink(),
               endOfResultWidget: SizedBox.shrink(),
               key: key,
-              elementBuilder: (context, e, index, animation) => ListTile(
-                title: Text(
-                  e.name,
-                ),
-               
-                onTap: () {
-                  widget.onSelect(e.formula!);
-                  
+              elementBuilder: (context, e, index, animation) =>
+                  StreamBuilder<ContractFormula>(
+                      stream: selectedFormula,
+                      builder: (context, snapshot) {
+                        bool selected = snapshot.data == e.formula;
+                        return ListTile(
+                          title: Text(
+                            e.name,
+                            style: selected
+                                ? TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    fontWeight: FontWeight.bold,
+                                  )
+                                : null,
+                          ),
+                          onTap: () {
+                            selectedFormula.add(e.formula!);
 
-                  //////////////////////////////////////////////////////////////////////
-                },
-              ),
+                            //////////////////////////////////////////////////////////////////////
+                          },
+                        );
+                      }),
               pageLoader: (index) async {
                 if (index == 0) {
                   return getFilteredData();
@@ -87,8 +99,6 @@ class _FormulaSelectWidgetState extends BasicState<FormulaSelectWidget>
             element.name.toLowerCase().contains(filterString.toLowerCase()))
         .toList();
   }
-
-
 
   @override
   List<ChangeNotifier> get notifiers => [];

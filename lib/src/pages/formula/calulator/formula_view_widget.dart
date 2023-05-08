@@ -10,8 +10,9 @@ class FormulaViewWidget extends StatelessWidget {
     return Card(
       child: ListView(
         children: formula.functions
+            .where((element) => element.name != null)
             .map((e) => ListTile(
-                  title: Text(e.name ?? "noName"),
+                  title: Text(e.name!),
                   trailing: Text("${e.value}"),
                 ))
             .toList(),
