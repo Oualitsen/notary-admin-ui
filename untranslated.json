@@ -136,7 +136,9 @@
     "editFormula",
     "addContractCategory",
     "contractCategory",
-    "selecteContractCategory"
+    "selecteContractCategory",
+    "nameAr",
+    "nameFr"
   ],
 
   "fr": [
@@ -277,6 +279,8 @@
     "editFormula",
     "addContractCategory",
     "contractCategory",
-    "selecteContractCategory"
+    "selecteContractCategory",
+    "nameAr",
+    "nameFr"
   ]
 }

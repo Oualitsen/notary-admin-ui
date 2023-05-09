@@ -1,3 +1,5 @@
+import 'package:notary_admin/src/pages/contract/add_contract_category_page.dart';
+import 'package:notary_admin/src/pages/contract/view_contract_category_page.dart';
 import 'package:notary_admin/src/pages/files/download_file.dart';
 import 'package:notary_admin/src/pages/assistant/assistant_page.dart';
 import 'package:notary_admin/src/pages/customer/customer_page.dart';
@@ -121,6 +123,26 @@ Widget createDrawer(BuildContext context) {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => ContractCalculator()),
+          )
+        },
+      ),
+      DrawerMenuItem(
+        title: (lang.addContractCategory),
+        icon: Icons.abc_outlined,
+        onTap: () => {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AddContractCategoryPage()),
+          )
+        },
+      ),
+      DrawerMenuItem(
+        title: (lang.contractCategory),
+        icon: Icons.abc_outlined,
+        onTap: () => {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ViewContractCategoryPage()),
           )
         },
       ),
