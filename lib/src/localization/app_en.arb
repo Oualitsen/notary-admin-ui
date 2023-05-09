@@ -395,7 +395,8 @@
   "formula": "Formula",
   "editFormula": "Edit formula",
   "addContractCategory": "Add contract category",
-  "contractCategory":"Contract category",
-  "selecteContractCategory":"Select contract category"
- 
+  "contractCategory": "Contract category",
+  "selecteContractCategory": "Select contract category",
+  "nameAr": "name ar",
+  "nameFr": "name fr"
 }

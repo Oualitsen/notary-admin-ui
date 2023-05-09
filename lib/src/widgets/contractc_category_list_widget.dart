@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
-import 'package:notary_admin/src/services/files/file_spec_service.dart';
+import 'package:notary_admin/src/services/contract_category_service.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/contract_category.dart';
@@ -18,7 +18,7 @@ class ContractCategoryListWidget extends StatefulWidget {
 
 class _ContractCategoryListWidgetState
     extends BasicState<ContractCategoryListWidget> with WidgetUtilsMixin {
-  final service = GetIt.instance.get<FileSpecService>();
+  final service = GetIt.instance.get<ContractCategoryService>();
   final selectedContractCategorySubject = BehaviorSubject<ContractCategory>();
 
   @override

@@ -40,9 +40,5 @@ abstract class FileSpecService {
       @Path("fileSpecId") String fileSpecId,
       @Body() ContractFormulaInput contractFormulaInput);
 
-  @GET("/admin/files-spec/contract-category")
-  Future<List<ContractCategory>> getContractCategory({
-    @Query("size") int pageSize: 20,
-    @Query("index") int pageIndex: 0,
-  });
+ 
 }
