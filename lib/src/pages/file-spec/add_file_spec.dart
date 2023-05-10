@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_error_handler/error_handler.dart';
@@ -7,12 +6,12 @@ import 'package:notary_admin/src/pages/file-spec/document/add_parts_spec.dart';
 import 'package:notary_admin/src/pages/file-spec/file_spec_page.dart';
 import 'package:notary_admin/src/pages/steps/step_selection_widget.dart';
 import 'package:notary_admin/src/services/admin/template_document_service.dart';
+import 'package:notary_admin/src/services/contract_category_service.dart';
 import 'package:notary_admin/src/services/files/file_spec_service.dart';
 import 'package:notary_admin/src/utils/validation_utils.dart';
 import 'package:notary_admin/src/utils/reused_widgets.dart';
 import 'package:notary_admin/src/utils/widget_utils.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
-import 'package:notary_admin/src/widgets/contractc_category_list_widget.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/contract_category.dart';
 import 'package:notary_model/model/files_spec.dart';
@@ -38,17 +37,19 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
   //service
   final fileSpecService = GetIt.instance.get<FileSpecService>();
   final templateService = GetIt.instance.get<TemplateDocumentService>();
-  //stream
+  final contractCategoryService = GetIt.instance.get<ContractCategoryService>();
   final currentStepStream = BehaviorSubject.seeded(0);
   final partsSpecInputStream = BehaviorSubject.seeded(<PartsSpecInput>[]);
   final templateIdStream = BehaviorSubject.seeded('');
+  final contractCategoryIdStream = BehaviorSubject.seeded('');
+
   final stepsStream = BehaviorSubject.seeded(<Steps>[]);
   //key
   final GlobalKey<FormState> inputKey = GlobalKey<FormState>();
   //controller
   final fileSpecNameCtrl = TextEditingController();
   final fileSpecTemplateCtrl = TextEditingController();
-  //late final List<ContractCategory> contractCategories = [];
+  final contractCategoryCtrl = TextEditingController();
   final contractCategories = BehaviorSubject<ContractCategory>();
 
   //variables
@@ -215,39 +216,24 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                   title: Text(lang.selecteContractCategory.toUpperCase()),
                   content: Column(
                     children: [
-                      SizedBox(height: 50),
-                      SizedBox(
-                        height: 250,
-                        child: Container(
-                          alignment: Alignment.topLeft,
-                          child: ContractCategoryListWidget(
-                            selectContractCategory: (contractCategory) {
-                              contractCategories.add(contractCategory);
-                            },
-                          ),
-                        ),
+                      wrapInIgnorePointer(
+                        child: TextFormField(
+                            controller: contractCategoryCtrl,
+                            decoration: getDecoration(
+                                lang.selecteContractCategory,
+                                true,
+                                lang.selecteContractCategory),
+                            validator: (text) {
+                              return ValidationUtils.requiredField(
+                                  text, context);
+                            }),
+                        onTap: selectContractCategory,
                       ),
-                      SizedBox(height: 16),
-                      ButtonBar(
-                        alignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(
-                              onPressed: previous,
-                              child: Text(lang.previous.toUpperCase())),
-                          SizedBox(
-                            width: 20,
-                          ),
-                          StreamBuilder<ContractCategory?>(
-                              stream: contractCategories,
-                              builder: (context, snapshot) {
-                                return ElevatedButton(
-                                    onPressed: snapshot.data != null
-                                        ? continued
-                                        : null,
-                                    child: Text(lang.next.toUpperCase()));
-                              }),
-                        ],
-                      ),
+                      getButtons(
+                          onSave: continued,
+                          onCancel: previous,
+                          cancelLabel: lang.previous.toUpperCase(),
+                          saveLabel: lang.next.toUpperCase()),
                     ],
                   ),
                   isActive: activeState == 2,
@@ -282,27 +268,28 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                     ],
                   ),
                   content: StreamBuilder<List<PartsSpecInput>>(
-                      stream: partsSpecInputStream,
-                      initialData: partsSpecInputStream.value,
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return SizedBox.shrink();
-                        }
-                        if (snapshot.data!.isEmpty) {
-                          return Row(
-                            children: [
-                              Icon(Icons.warning_outlined),
-                              SizedBox(width: 16),
-                              Text(lang.noSelectedParts.toUpperCase()),
-                            ],
-                          );
-                        }
-                        var index = -1;
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
+                    stream: partsSpecInputStream,
+                    initialData: partsSpecInputStream.value,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return SizedBox.shrink();
+                      }
+                      if (snapshot.data!.isEmpty) {
+                        return Row(
                           children: [
-                            Column(
-                              children: partsSpecInputStream.value.map((part) {
+                            Icon(Icons.warning_outlined),
+                            SizedBox(width: 16),
+                            Text(lang.noSelectedParts.toUpperCase()),
+                          ],
+                        );
+                      }
+                      var index = -1;
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Column(
+                            children: partsSpecInputStream.value.map(
+                              (part) {
                                 index++;
                                 return ListTile(
                                   leading: CircleAvatar(
@@ -317,27 +304,29 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                                     },
                                   ),
                                 );
-                              }).toList(),
-                            ),
-                            SizedBox(height: 16),
-                            ButtonBar(
-                              alignment: MainAxisAlignment.end,
-                              children: [
-                                TextButton(
-                                    onPressed: previous,
-                                    child: Text(lang.previous.toUpperCase())),
-                                SizedBox(
-                                  width: 20,
-                                ),
-                                ElevatedButton(
-                                    onPressed:
-                                        snapshot.data!.isNotEmpty ? save : null,
-                                    child: Text(lang.submit.toUpperCase())),
-                              ],
-                            ),
-                          ],
-                        );
-                      }),
+                              },
+                            ).toList(),
+                          ),
+                          SizedBox(height: 16),
+                          ButtonBar(
+                            alignment: MainAxisAlignment.end,
+                            children: [
+                              TextButton(
+                                  onPressed: previous,
+                                  child: Text(lang.previous.toUpperCase())),
+                              SizedBox(
+                                width: 20,
+                              ),
+                              ElevatedButton(
+                                  onPressed:
+                                      snapshot.data!.isNotEmpty ? save : null,
+                                  child: Text(lang.submit.toUpperCase())),
+                            ],
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                   isActive: activeState == 3,
                   state: getState(3),
                 ),
@@ -374,7 +363,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
         }
         break;
       case 2:
-        if (contractCategories.valueOrNull != null) {
+        if (contractCategoryIdStream.value.isNotEmpty) {
           currentStepStream.add(currentStepStream.value + 1);
         }
 
@@ -398,7 +387,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
     try {
       if (widget.fileSpec == null) {
         var input = FilesSpecInput(
-            contractCategoryId: contractCategories.value.id,
+            contractCategoryId: contractCategoryIdStream.value,
             steps: stepsStream.value,
             name: fileSpecNameCtrl.text,
             partsSpecInput: partsSpecInputStream.value,
@@ -443,6 +432,16 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
     return Future.value([]);
   }
 
+  Future<List<ContractCategory>> getContractCategory(int index) {
+    if (index == 0) {
+      var result = contractCategoryService.getContractCategory(
+          pageIndex: index, pageSize: 10);
+
+      return result;
+    }
+    return Future.value([]);
+  }
+
   @override
   List<ChangeNotifier> get notifiers => [];
 
@@ -466,6 +465,26 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
           }),
           refreshable: true,
           pageLoader: getTemplates),
+    );
+  }
+
+  void selectContractCategory() {
+    ReusedWidgets.showDialog2(
+      context,
+      label: lang.selecteContractCategory,
+      content: InfiniteScrollListView(
+          elementBuilder: ((context, element, index, animation) {
+            return ListTile(
+              title: Text(element.name),
+              onTap: () {
+                contractCategoryCtrl.text = element.name;
+                contractCategoryIdStream.add(element.id);
+                Navigator.of(context).pop(true);
+              },
+            );
+          }),
+          refreshable: true,
+          pageLoader: getContractCategory),
     );
   }
 

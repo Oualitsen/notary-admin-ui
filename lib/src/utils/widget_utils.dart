@@ -127,16 +127,6 @@ Widget createDrawer(BuildContext context) {
         },
       ),
       DrawerMenuItem(
-        title: (lang.addContractCategory),
-        icon: Icons.abc_outlined,
-        onTap: () => {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => AddContractCategoryPage()),
-          )
-        },
-      ),
-      DrawerMenuItem(
         title: (lang.contractCategory),
         icon: Icons.abc_outlined,
         onTap: () => {
