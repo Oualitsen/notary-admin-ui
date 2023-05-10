@@ -126,6 +126,20 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                                   }),
                               onTap: selectTemplate,
                             ),
+                            SizedBox(height: 16),
+                            wrapInIgnorePointer(
+                              child: TextFormField(
+                                  controller: contractCategoryCtrl,
+                                  decoration: getDecoration(
+                                      lang.selecteContractCategory,
+                                      true,
+                                      lang.selecteContractCategory),
+                                  validator: (text) {
+                                    return ValidationUtils.requiredField(
+                                        text, context);
+                                  }),
+                              onTap: selectContractCategory,
+                            ),
                           ],
                         ),
                       ),
@@ -213,33 +227,6 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                   state: getState(1),
                 ),
                 Step(
-                  title: Text(lang.selecteContractCategory.toUpperCase()),
-                  content: Column(
-                    children: [
-                      wrapInIgnorePointer(
-                        child: TextFormField(
-                            controller: contractCategoryCtrl,
-                            decoration: getDecoration(
-                                lang.selecteContractCategory,
-                                true,
-                                lang.selecteContractCategory),
-                            validator: (text) {
-                              return ValidationUtils.requiredField(
-                                  text, context);
-                            }),
-                        onTap: selectContractCategory,
-                      ),
-                      getButtons(
-                          onSave: continued,
-                          onCancel: previous,
-                          cancelLabel: lang.previous.toUpperCase(),
-                          saveLabel: lang.next.toUpperCase()),
-                    ],
-                  ),
-                  isActive: activeState == 2,
-                  state: getState(2),
-                ),
-                Step(
                   title: Row(
                     children: [
                       Text(lang.listPart.toUpperCase()),
@@ -248,7 +235,7 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                       ),
                       SizedBox(width: 20),
                       ElevatedButton(
-                        onPressed: snapshot.data == 3
+                        onPressed: snapshot.data == 2
                             ? () {
                                 Navigator.push<PartsSpecInput>(
                                   context,
@@ -327,8 +314,8 @@ class _AddFileSpecState extends BasicState<AddFileSpec> with WidgetUtilsMixin {
                       );
                     },
                   ),
-                  isActive: activeState == 3,
-                  state: getState(3),
+                  isActive: activeState == 2,
+                  state: getState(2),
                 ),
               ],
             );

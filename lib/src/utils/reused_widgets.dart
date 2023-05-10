@@ -51,7 +51,7 @@ class ReusedWidgets {
                 ),
               ),
               content: SizedBox(
-                height: height != null ? height : 600,
+                height: height != null ? height : 500,
                 width: width != null ? width : 600,
                 child: content,
               ),
