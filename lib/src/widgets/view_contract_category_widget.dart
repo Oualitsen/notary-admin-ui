@@ -62,26 +62,25 @@ class ViewContractCategoryWidgetState
                           icon: Icon(Icons.delete),
                           onPressed: () {
                             showAlertDialog(
-                                context: context,
-                                title: lang.confirm,
-                                message: lang.confirmDeleteItem,
-                                actions: [
-                                  TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop(false);
-                                      },
-                                      child: Text(lang.cancel.toUpperCase())),
-                                  TextButton(
-                                      onPressed: () {
-                                        deleteContractCategory(element.id).then(
-                                            (value) =>
-                                                listKey.currentState?.reload());
-                                        Navigator.of(context).pop(true);
-                                      },
-                                      child: Text(lang.ok.toUpperCase()))
-                                ]);
-                            // deleteContractCategory(element.id).then(
-                            //     (value) => listKey.currentState?.reload());
+                              context: context,
+                              title: lang.confirm,
+                              message: lang.confirmDeleteItem,
+                              actions: [
+                                TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(false);
+                                    },
+                                    child: Text(lang.cancel.toUpperCase())),
+                                TextButton(
+                                    onPressed: () {
+                                      deleteContractCategory(element.id).then(
+                                          (value) =>
+                                              listKey.currentState?.reload());
+                                      Navigator.of(context).pop(true);
+                                    },
+                                    child: Text(lang.ok.toUpperCase()))
+                              ],
+                            );
                           },
                         ),
                       ],

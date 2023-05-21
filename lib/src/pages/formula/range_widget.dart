@@ -4,13 +4,17 @@ import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
 import 'package:notary_model/model/range.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:rxdart/src/subjects/subject.dart';
 
 class RangeWidget extends StatefulWidget {
   final Range range;
   final Function(Range range) onDelete;
+  final Function(Range range) onEdit;
 
-  RangeWidget({super.key, required this.range, required this.onDelete});
+  RangeWidget(
+      {super.key,
+      required this.range,
+      required this.onDelete,
+      required this.onEdit});
 
   @override
   State<RangeWidget> createState() => _RangeWidgetState();
@@ -22,6 +26,7 @@ class _RangeWidgetState extends BasicState<RangeWidget> with WidgetUtilsMixin {
   @override
   void initState() {
     streamRange.add(widget.range);
+
     super.initState();
   }
 
@@ -44,6 +49,7 @@ class _RangeWidgetState extends BasicState<RangeWidget> with WidgetUtilsMixin {
                     range: range,
                   )).first;
               print(_range.upperBound);
+              widget.onEdit(_range);
               streamRange.add(_range);
             },
             title: Text("${range.lowerBound} - ${range.upperBound} "),
