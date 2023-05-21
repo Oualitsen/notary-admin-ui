@@ -75,7 +75,7 @@ class _FormulaComponentWidgetState extends BasicState<FormulaComponentWidget>
             decoration: getDecoration(lang.copyPrice, false),
             controller: copyPriceCtrl,
           ),
-        )
+        ),
       ]),
     );
   }

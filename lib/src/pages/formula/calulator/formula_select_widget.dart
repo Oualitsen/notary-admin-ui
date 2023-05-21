@@ -2,37 +2,39 @@ import 'package:flutter/material.dart';
 import 'package:infinite_scroll_list_view/infinite_scroll_list_view.dart';
 import 'package:notary_admin/src/widgets/basic_state.dart';
 import 'package:notary_admin/src/widgets/mixins/button_utils_mixin.dart';
+import 'package:notary_model/model/contract_category.dart';
 import 'package:notary_model/model/contract_formula.dart';
 import 'package:notary_model/model/files_spec.dart';
 import 'package:rxdart/rxdart.dart';
 
 class FormulaSelectWidget extends StatefulWidget {
   final List<FilesSpec> list;
-  final void Function(ContractFormula) onSelect;
-  FormulaSelectWidget(this.list, {required this.onSelect, super.key});
+  final void Function(FilesSpec fileSpec) onfileSpecChange;
+  FormulaSelectWidget(this.list, {required this.onfileSpecChange, super.key});
   @override
-  State<FormulaSelectWidget> createState() => _FormulaSelectWidgetState();
+  State<FormulaSelectWidget> createState() => FormulaSelectWidgetState();
 }
 
-class _FormulaSelectWidgetState extends BasicState<FormulaSelectWidget>
+class FormulaSelectWidgetState extends BasicState<FormulaSelectWidget>
     with WidgetUtilsMixin {
   final fileSpecsList = <FilesSpec>[];
   final key = GlobalKey<InfiniteScrollListViewState<FilesSpec>>();
   final filterStream = BehaviorSubject<String>.seeded("");
-  final selectedFormula = BehaviorSubject<ContractFormula>();
+  final selectedFileSpec = BehaviorSubject<FilesSpec>();
+
   @override
   void initState() {
     var _list =
         widget.list.where((element) => element.formula != null).toList();
     if (_list.isNotEmpty) {
-      selectedFormula.add(_list.first.formula!);
+      selectedFileSpec.add(_list.first);
     }
     fileSpecsList.addAll(_list);
     filterStream.where((event) => key.currentState != null).listen((value) {
       key.currentState!.reload();
     });
-    selectedFormula.listen((value) {
-      widget.onSelect(value);
+    selectedFileSpec.listen((value) {
+      widget.onfileSpecChange(value);
     });
     super.initState();
   }
@@ -55,10 +57,10 @@ class _FormulaSelectWidgetState extends BasicState<FormulaSelectWidget>
               endOfResultWidget: SizedBox.shrink(),
               key: key,
               elementBuilder: (context, e, index, animation) =>
-                  StreamBuilder<ContractFormula>(
-                      stream: selectedFormula,
+                  StreamBuilder<FilesSpec>(
+                      stream: selectedFileSpec,
                       builder: (context, snapshot) {
-                        bool selected = snapshot.data == e.formula;
+                        bool selected = snapshot.data == e;
                         return ListTile(
                           title: Text(
                             e.name,
@@ -70,9 +72,8 @@ class _FormulaSelectWidgetState extends BasicState<FormulaSelectWidget>
                                 : null,
                           ),
                           onTap: () {
-                            selectedFormula.add(e.formula!);
-
-                            //////////////////////////////////////////////////////////////////////
+                            widget.onfileSpecChange(e);
+                            selectedFileSpec.add(e);
                           },
                         );
                       }),

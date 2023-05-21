@@ -138,7 +138,11 @@
     "contractCategory",
     "selecteContractCategory",
     "nameAr",
-    "nameFr"
+    "nameFr",
+    "addContractCategoryInput",
+    "nameContractCategoryInput",
+    "contractCategoryNumber",
+    "amountDue"
   ],
 
   "fr": [
@@ -281,6 +285,10 @@
     "contractCategory",
     "selecteContractCategory",
     "nameAr",
-    "nameFr"
+    "nameFr",
+    "addContractCategoryInput",
+    "nameContractCategoryInput",
+    "contractCategoryNumber",
+    "amountDue"
   ]
 }

@@ -139,6 +139,11 @@ class ContractFunctionInputWidgetState
                               ranges.remove(range);
                               rangeStream.add(ranges);
                             },
+                            onEdit: (range) {
+                              ranges.remove(e);
+                              ranges.add(range);
+                              rangeStream.add(ranges);
+                            },
                           ))
                       .toList(),
                 );
@@ -162,7 +167,7 @@ class ContractFunctionInputWidgetState
                   SizedBox(
                     width: 10,
                   ),
-                  getButtons( 
+                  getButtons(
                       onSave: () {
                         //create a contract function and call widget.onRead()
                         //
