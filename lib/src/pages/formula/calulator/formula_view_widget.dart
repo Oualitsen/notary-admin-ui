@@ -27,16 +27,15 @@ class _FormulaViewWidgetState extends BasicState<FormulaViewWidget>
   void init() {
     notarisationTax = widget.formula.functions
         .firstWhere((element) => element.name == lang.notarizationTax)
-        .eval(widget.valueInput);
+        .getTax(widget.valueInput);
 
     registrationTax = (widget.formula.functions
-            .firstWhere((element) => element.name == lang.registrationTax)
-            .value) *
-        (widget.valueInput);
+            .firstWhere((element) => element.name == lang.registrationTax))
+        .getTax(widget.valueInput);
 
     publicityTax = widget.formula.functions
         .firstWhere((element) => element.name == lang.publicityTax)
-        .eval(widget.valueInput);
+        .getTax(widget.valueInput);
 
     stamp = (widget.formula.pageNumber) *
         (widget.formula.copyNumber + 1) *
@@ -57,32 +56,32 @@ class _FormulaViewWidgetState extends BasicState<FormulaViewWidget>
           ),
           ListTile(
             title: Text(lang.vat),
-            trailing: Text("${vat}"),
+            trailing: Text("${vat.round()}"),
           ),
           ...widget.formula.functions
               .where((element) => element.name != null)
               .map((e) {
             if (e.name == lang.notarizationTax) {
               return ListTile(
-                title: Text(e.name!),
-                trailing: Text("${notarisationTax}"),
+                title: Text(e.name),
+                trailing: Text("${notarisationTax.round()}"),
               );
             }
             if (e.name == lang.registrationTax) {
               return ListTile(
-                title: Text(e.name!),
+                title: Text(e.name),
                 trailing: Text("${registrationTax}"),
               );
             }
             if (e.name == lang.publicityTax) {
               return ListTile(
-                title: Text(e.name!),
+                title: Text(e.name),
                 trailing: Text("${publicityTax}"),
               );
             }
             return ListTile(
-              title: Text(e.name!),
-              trailing: Text("${e.value}"),
+              title: Text(e.name),
+              trailing: Text("${e.minValue}"),
             );
           }).toList(),
         ],
@@ -96,11 +95,11 @@ class _FormulaViewWidgetState extends BasicState<FormulaViewWidget>
   @override
   List<Subject> get subjects => [];
   sum() {
-    var a = notarisationTax +
+    var a = notarisationTax.round() +
         registrationTax +
         publicityTax +
         stamp +
-        vat +
+        vat.round() +
         widget.formula.assetPrice +
         widget.formula.copyPrice;
     widget.callBackCal(a);

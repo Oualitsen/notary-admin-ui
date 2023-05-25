@@ -116,7 +116,7 @@ class _ContractCalculatorState extends BasicState<ContractCalculator>
                                           trailing: Text("${snapshot.data}"),
                                         );
                                       }),
-                                )
+                                ),
                               ],
                             );
                           });

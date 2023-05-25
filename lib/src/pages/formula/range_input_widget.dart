@@ -21,6 +21,7 @@ class RangeInputWidgetState extends BasicState<RangeInputWidget>
     with WidgetUtilsMixin {
   final lowerBoundCrl = TextEditingController();
   final upperBoundCtl = TextEditingController();
+  final percentageCtrl = TextEditingController();
   final key = GlobalKey<FormState>();
   final cifKey = GlobalKey<ContractFunctionInputWidgetState>();
   @override
@@ -29,6 +30,7 @@ class RangeInputWidgetState extends BasicState<RangeInputWidget>
     if (r != null) {
       lowerBoundCrl.text = r.lowerBound.toString();
       upperBoundCtl.text = r.upperBound.toString();
+      percentageCtrl.text = r.percentage.toString();
     }
     super.initState();
   }
@@ -73,13 +75,14 @@ class RangeInputWidgetState extends BasicState<RangeInputWidget>
             SizedBox(
               height: 16,
             ),
-            ContractFunctionInputWidget(
-              range: widget.range,
-              showName: false,
-              canAddRanges: false,
-              key: cifKey,
-              hideSave: true,
-              onRead: (p0) {},
+            TextFormField(
+              keyboardType: TextInputType.number,
+              controller: percentageCtrl,
+              decoration: getDecoration(lang.percentage, true),
+              validator: (text) {
+                return ValidationUtils.doubleValidator(text, context,
+                    required: true);
+              },
             )
           ],
         ),
@@ -87,19 +90,19 @@ class RangeInputWidgetState extends BasicState<RangeInputWidget>
     );
   }
 
-  // must have a method that returns a nullable range.
   Range? range() {
     var state = key.currentState!;
     var function = cifKey.currentState?.read();
-
-    if (state.validate() && function != null) {
+    if (state.validate()) {
       var lowerBound = double.parse(lowerBoundCrl.text);
       var upperBound = double.parse(upperBoundCtl.text);
+      var percentage = double.parse(percentageCtrl.text);
       if (compare(lowerBound, upperBound) == true) {
         return Range(
             lowerBound: lowerBound,
             upperBound: upperBound,
-            contractFunction: function);
+            percentage: percentage,
+            percentageCheck: true);
       } else {
         showAlertDialog(context: context, message: lang.lowerBound);
       }
@@ -108,7 +111,7 @@ class RangeInputWidgetState extends BasicState<RangeInputWidget>
   }
 
   bool compare(double lower, double upper) {
-    if (lower < upper)
+    if (lower < upper || upper == -1)
       return true;
     else
       return false;
