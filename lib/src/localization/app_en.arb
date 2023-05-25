@@ -402,5 +402,7 @@
   "addContractCategoryInput": "Add contract category input",
   "nameContractCategoryInput": "Name of contract category input",
   "contractCategoryNumber": "Contract category input must be 0, 1 or 3",
-  "amountDue":"Amount due"
+  "amountDue": "Amount due",
+  "minValueTax": "Min value"
+
 }

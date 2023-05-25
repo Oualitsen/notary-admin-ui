@@ -142,7 +142,8 @@
     "addContractCategoryInput",
     "nameContractCategoryInput",
     "contractCategoryNumber",
-    "amountDue"
+    "amountDue",
+    "minValueTax"
   ],
 
   "fr": [
@@ -289,6 +290,7 @@
     "addContractCategoryInput",
     "nameContractCategoryInput",
     "contractCategoryNumber",
-    "amountDue"
+    "amountDue",
+    "minValueTax"
   ]
 }

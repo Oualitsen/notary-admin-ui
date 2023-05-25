@@ -53,7 +53,7 @@ class _RangeWidgetState extends BasicState<RangeWidget> with WidgetUtilsMixin {
               streamRange.add(_range);
             },
             title: Text("${range.lowerBound} - ${range.upperBound} "),
-            subtitle: Text("${range.contractFunction.value}"),
+            subtitle: Text("${range.percentage}"),
             trailing: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,

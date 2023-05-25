@@ -119,14 +119,14 @@ extension AppLocalizationsExt on AppLocalizations {
   String monthName(int date) {
     return DateFormat('MMMM').format(DateTime.fromMillisecondsSinceEpoch(date));
   }
-   String fuctionValue(ContractFunction function) {
-    String result = "";
-    if (function.percentage) {
-      result = "${function.value * 100}%";
-    } else {
-      result = "${function.value}";
-    }
+  //  String fuctionValue(ContractFunction function) {
+  //   String result = "";
+  //   if (function.percentage) {
+  //     result = "${function.value * 100}%";
+  //   } else {
+  //     result = "${function.value}";
+  //   }
 
-    return result;
-  }
+  //   return result;
+  // }
 }

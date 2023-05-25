@@ -1,6 +1,5 @@
 import 'package:notary_admin/src/pages/contract/add_contract_category_page.dart';
 import 'package:notary_admin/src/pages/contract/view_contract_category_page.dart';
-import 'package:notary_admin/src/pages/files/download_file.dart';
 import 'package:notary_admin/src/pages/assistant/assistant_page.dart';
 import 'package:notary_admin/src/pages/customer/customer_page.dart';
 import 'package:notary_admin/src/pages/file-spec/file_spec_page.dart';

@@ -40,7 +40,9 @@ class _ContractFormulaPageState extends BasicState<ContractFormulaPage>
   final functionSubject = BehaviorSubject<Map<String, ContractFunction>>();
 
   final service = GetIt.instance.get<FileSpecService>();
-  static final noOp = ContractFunction(percentage: false, value: 0);
+
+  //static final noOp = ContractFunction(percentage: false, value: 0);
+  static final noOp = ContractFunction(minValue: 0, name: "", ranngeList: []);
   bool inited = false;
   void init() {
     if (inited) {
@@ -48,7 +50,6 @@ class _ContractFormulaPageState extends BasicState<ContractFormulaPage>
     }
     inited = true;
     final functionMap = <String, ContractFunction>{};
-
     contractFunctionList = [
       lang.notarizationTax,
       lang.publishingAndAdvertisingArticle5,
@@ -63,7 +64,8 @@ class _ContractFormulaPageState extends BasicState<ContractFormulaPage>
       lang.registrationOrDeletion
     ];
     contractFunctionList.forEach((name) {
-      functionMap[name] = noOp;
+      functionMap[name] =
+          ContractFunction(name: name, minValue: 0, ranngeList: []);
     });
 
     var f = widget.fileSpec.formula;
@@ -75,8 +77,8 @@ class _ContractFormulaPageState extends BasicState<ContractFormulaPage>
       stampCtrl.text = f.stamp.toString();
       vatCtrl.text = f.vat.toString();
 
-      f.functions.forEach((e) => functionMap[e.name ?? ""] = e);
-      //functionSubject.add(functionMap);
+      f.functions.forEach((e) => functionMap[e.name] = e);
+      functionSubject.add(functionMap);
     }
 
     functionSubject.add(functionMap);
@@ -168,9 +170,7 @@ class _ContractFormulaPageState extends BasicState<ContractFormulaPage>
 
                             return ListTile(
                               title: Text(name),
-                              subtitle: fn != noOp
-                                  ? Text("${lang.fuctionValue(fn!)}")
-                                  : Text(lang.na),
+                              subtitle: fn != noOp ? Text("") : Text(lang.na),
                               onTap: () {
                                 if (fn == noOp) {
                                   push<ContractFunction>(
@@ -233,21 +233,20 @@ class _ContractFormulaPageState extends BasicState<ContractFormulaPage>
               Row(
                 children: [
                   OutlinedButton(
-                      onPressed: () {
-                        push<ContractFunction?>(
-                                context,
-                                ContactFunctionInputPage(
-                                  title: lang.newContractFunction.toUpperCase(),
-                                  showName: true,
-                                ))
-                            .where((event) => event != null)
-                            .listen((contract) {
-                          var map = functionSubject.value;
-                          map[contract!.name!] = contract;
-                          functionSubject.add(map);
-                        });
-                      },
-                      child: Text(lang.addContractFunction.toUpperCase())),
+                    child: Text(lang.addContractFunction.toUpperCase()),
+                    onPressed: () {
+                      push<ContractFunction?>(
+                          context,
+                          ContactFunctionInputPage(
+                            title: lang.newContractFunction.toUpperCase(),
+                            showName: true,
+                          )).where((event) => event != null).listen((contract) {
+                        var map = functionSubject.value;
+                        map[contract!.name] = contract;
+                        functionSubject.add(map);
+                      });
+                    },
+                  ),
                   Expanded(
                     child: getButtons(onSave: save),
                   ),
@@ -272,6 +271,7 @@ class _ContractFormulaPageState extends BasicState<ContractFormulaPage>
           stamp: double.parse(stampCtrl.text),
           vat: double.parse(vatCtrl.text),
           functions: functionSubject.value.values.toList());
+
       return contractFormulaInput;
     }
     return null;
@@ -282,9 +282,9 @@ class _ContractFormulaPageState extends BasicState<ContractFormulaPage>
     if (contractFormulaInput != null) {
       try {
         progressSubject.add(true);
-
         var fileSpec = await service.addContractFormulaToFileSpec(
             widget.fileSpec.id, contractFormulaInput);
+
         await showSnackBar2(context, lang.savedSuccessfully);
         Navigator.of(context).pop(fileSpec);
       } catch (error, stackTrace) {
